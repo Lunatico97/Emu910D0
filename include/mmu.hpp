@@ -6,6 +6,11 @@
 
 #define SP_INDEX 0x0100
 
+enum ADR
+{
+    ABS = 0, ABX, ABY, IND, IXI, REL, ZER, ZEX, ZEY
+};
+
 class MMU
 {
     public:
@@ -41,6 +46,9 @@ class MMU
         // Indirect Indexed Transfers
         void ldix(REG des, REG off, u16 addr);
         void stix(REG des, REG off, u16 addr);
+
+        // Addressing
+        u16 get_addr(ADR mode, u16 addr, u8 off);
 
         // Taps
         u8 tapREG(REG r);

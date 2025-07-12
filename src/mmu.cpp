@@ -77,26 +77,46 @@ void MMU::sto(REG src, REG off, u16 addr)
 
 void MMU::ldi(REG des, REG off, u16 addr)
 {
-    u8 act_addr = ((rb.fetchREG(off) + addr) & 0x00FF) | (mem.retreive(addr+1) & 0xFF00);
+    u8 act_addr = get_addr(ADR::IXI, addr, rb.fetchREG(off));
     rb.loadREG(des, mem.retreive(act_addr));
 }
 
 void MMU::sti(REG src, REG off, u16 addr)
 {
-    u8 act_addr = ((rb.fetchREG(off) + addr) & 0x00FF) | (mem.retreive(addr+1) & 0xFF00);
+    u8 act_addr = get_addr(ADR::IXI, addr, rb.fetchREG(off));
     mem.store(act_addr, rb.fetchREG(src));
 }
 
 void MMU::ldix(REG des, REG off, u16 addr)
 {
-    u16 base_addr = (mem.retreive(addr) & 0x00FF) | (mem.retreive(addr+1) & 0xFF00);
+    u16 base_addr = get_addr(ADR::IND, addr, 0x00);
     rb.loadREG(des, mem.retreive(base_addr + rb.fetchREG(off)));
 }
 
 void MMU::stix(REG src, REG off, u16 addr)
 {
-    u16 base_addr = (mem.retreive(addr) & 0x00FF) | (mem.retreive(addr+1) & 0xFF00);
+    u16 base_addr = get_addr(ADR::IND, addr, 0x00);
     mem.store(base_addr + rb.fetchREG(off), rb.fetchREG(src));
+}
+
+u16 MMU::get_addr(ADR mode, u16 addr, u8 off)
+{
+    u16 res_addr = addr;
+
+    switch(mode)
+    {
+        case ADR::ABS: break;
+        case ADR::ABX: res_addr = addr + tapREG(X); break;
+        case ADR::ABY: res_addr = addr + tapREG(Y); break;
+        case ADR::IND: res_addr = (mem.retreive(addr) & 0x00FF) | (mem.retreive(addr+1) & 0xFF00); break;
+        case ADR::IXI: res_addr = ((mem.retreive(addr) + off) & 0x00FF) | (mem.retreive(addr+1) & 0xFF00); break;
+        case ADR::ZER: res_addr = static_cast<u16>(off); break;
+        case ADR::ZEX: res_addr = static_cast<u16>(tapREG(X) + off); break;
+        case ADR::ZEY: res_addr = static_cast<u16>(tapREG(Y) + off); break;
+        default: break;
+    }
+
+    return res_addr;
 }
 
 u8 MMU::tapREG(REG r)

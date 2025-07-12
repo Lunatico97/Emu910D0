@@ -1,6 +1,15 @@
 #ifndef _TYPES_H_
 #define _TYPES_H_
 
+#define D7 0b10000000
+#define D6 0b01000000
+#define D5 0b00100000
+#define D4 0b00010000
+#define D3 0b00001000
+#define D2 0b00000100
+#define D1 0b00000010
+#define D0 0b00000001
+
 typedef unsigned char u8;
 typedef unsigned short u16;
 
