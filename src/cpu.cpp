@@ -99,6 +99,19 @@ void CPU::decode(const HEX& hex)
         case 0x68: mmu.pop(A); break;
         case 0x08: mmu.push(ST); break;
         case 0x28: mmu.pop(ST); break;
+        
+        case 0x90: bcc(h16); break;
+        case 0xB0: bcs(h16); break;
+        case 0xF0: beq(h16); break;
+        case 0x30: bmi(h16); break;
+        case 0xD0: bne(h16); break;
+        case 0x10: bpl(h16); break;
+        case 0x50: bvc(h16); break;
+        case 0x70: bvs(h16); break;
+        case 0x4C: jmp(h16); break;
+        
+        case 0x20: jsr(h16); break;
+        case 0x60: rts(); break;
 
         default: break;
     }
@@ -115,25 +128,49 @@ void CPU::bcc(u16 address)
     else return;
 }
 
-void CPU::jnc(u16 address)
+void CPU::bcs(u16 address)
 {
-    if(mmu.tapREG(ST) & HX_CARY != HX_CARY) mmu.init_pc(address);
+    if(mmu.tapREG(ST) & HX_CARY == HX_CARY) mmu.init_pc(address);
     else return;
 }
 
-void CPU::jz(u16 address)
+void CPU::beq(u16 address)
 {
     if(mmu.tapREG(ST) & HX_ZERO == HX_ZERO) mmu.init_pc(address);
     else return;
 }
 
-void CPU::jnz(u16 address)
+void CPU::bmi(u16 address)
+{
+    if(mmu.tapREG(ST) & HX_SIGN == HX_SIGN) mmu.init_pc(address);
+    else return;
+}
+
+void CPU::bne(u16 address)
 {
     if(mmu.tapREG(ST) & HX_ZERO != HX_ZERO) mmu.init_pc(address);
     else return;
 }
 
-void CPU::call(u16 address)
+void CPU::bpl(u16 address)
+{
+    if(mmu.tapREG(ST) & HX_SIGN != HX_SIGN) mmu.init_pc(address);
+    else return;
+}
+
+void CPU::bvc(u16 address)
+{
+    if(mmu.tapREG(ST) & HX_OVFW != HX_OVFW) mmu.init_pc(address);
+    else return;
+}
+
+void CPU::bvs(u16 address)
+{
+    if(mmu.tapREG(ST) & HX_OVFW == HX_OVFW) mmu.init_pc(address);
+    else return;
+}
+
+void CPU::jsr(u16 address)
 {
     mmu.push(PCL);
     mmu.push(PCH);

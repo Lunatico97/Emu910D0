@@ -4,133 +4,99 @@ ALU::ALU(MMU& mmui): mmu(mmui) {}
 
 void ALU::update_flags()
 {
-    u8 bit;
-    bool parity = false;
-    for(u8 i=0x00; i<0x08; i++)
-    {
-        bit = (ACC & (0x01 << i)) >> i;
-        if(i == 0x07 && bit == 0x01) SF |= HX_SIGN; 
-        if(bit == 0x01) parity = !parity;
-    }
-
-    if(ACC == 0x00) SF |= HX_ZERO;
-    if(parity) SF |= HX_PARY;
+    if(TEMP & 0x80 == 0x80) SF |= HX_SIGN;
+    if(TEMP == 0x00) SF |= HX_ZERO;
 }
 
-void ALU::add(REG r)
+void ALU::adc(u8 value)
 {
-    fetch(r);
-    ACC += TEMP;
-    update_flags();
-    load();
+    TEMP += value;
 }
 
-void ALU::adi(u8 value)
+void ALU::sbc(u8 value)
 {
-    fetch(value);
-    ACC += TEMP;
-    update_flags();
-    load();
+    TEMP -= value;
 }
 
-void ALU::sub(REG r)
+void ALU::ana(u8 value)
 {
-    fetch(r);
-    ACC -= TEMP;
-    update_flags();
-    load();
+    TEMP &= value;
 }
 
-void ALU::sui(u8 value)
+void ALU::eor(u8 value)
 {
-    fetch(value);
-    ACC -= TEMP;
-    update_flags();
-    load();
+    TEMP ^= value;
 }
 
-void ALU::ana(REG r)
+void ALU::ora(u8 value)
 {
-    fetch(r);
-    ACC &= TEMP;
-    update_flags();
-    load();
+    TEMP |= value;
 }
 
-void ALU::ani(u8 value)
+void ALU::cmp(u8 value)
 {
-    fetch(value);
-    ACC &= TEMP;
-    update_flags();
-    load();
+    if(TEMP >= value) { SF |= HX_CARY; /* A >= M => C = 1 */ }
+    if(TEMP == value) { SF |= HX_ZERO; /* A == M => Z = 1 */ }
 }
 
-void ALU::ora(REG r)
+void ALU::asl(u8 value)
 {
-    fetch(r);
-    ACC |= TEMP;
-    update_flags();
-    load();
+    TEMP = value << 1;
+    SF |= (value & D7) >> 7;
 }
 
-void ALU::ori(u8 value)
+void ALU::lsr(u8 value)
 {
-    fetch(value);
-    ACC |= TEMP;
-    update_flags();
-    load();
+    TEMP = value >> 1;
+    SF |= (value & D0);
 }
 
-void ALU::xra(REG r)
+void ALU::rol(u8 value)
 {
-    fetch(r);
-    ACC ^= TEMP;
-    update_flags();
-    load();
+    TEMP = value << 1;
+    TEMP |= (SF & HX_CARY);
+    SF |= (value & D7) >> 7;
 }
 
-void ALU::xri(u8 value)
+void ALU::ror(u8 value)
 {
-    fetch(value);
-    ACC ^= TEMP;
-    update_flags();
-    load();
+    TEMP = value >> 1;
+    TEMP |= (SF & HX_CARY) << 7;
+    SF |= (value & 0x01);
 }
 
-void ALU::cmp(REG r)
+void ALU::inc(u8 value)
 {
-    fetch(r);
-    if(ACC < TEMP) { SF |= HX_CARY; SF &= ~HX_ZERO; /* A < R => CY = 1, Z = 0 */ }
-    else if(ACC == TEMP) { SF &= ~HX_CARY; SF |= HX_ZERO; /* A = R => CY = 0, Z = 1 */ }
-    else { SF &= ~(HX_CARY | HX_ZERO); /* A > R => CY = 0, Z = 0 */ }
-    load();
+    TEMP += 0x01;
 }
 
-void ALU::cpi(u8 value)
+void ALU::dec(u8 value)
 {
-    fetch(value);
-    if(ACC < TEMP) { SF |= HX_CARY; SF &= ~HX_ZERO; /* A < R => CY = 1, Z = 0 */ }
-    else if(ACC == TEMP) { SF &= ~HX_CARY; SF |= HX_ZERO; /* A = R => CY = 0, Z = 1 */ }
-    else { SF &= ~(HX_CARY | HX_ZERO); /* A > R => CY = 0, Z = 0 */ }
-    load();
+    TEMP -= 0x01;
 }
 
-void ALU::fetch(u8 value)
+void ALU::set_flag(u8 mask)
 {
-    ACC = mmu.tapREG(A);
     SF = mmu.tapREG(ST);
-    TEMP = value;
+    SF |= mask;
+    mmu.ld(ST, SF);
 }
 
-void ALU::fetch(REG r)
+void ALU::clear_flag(u8 mask)
 {
-    ACC = mmu.tapREG(A);
     SF = mmu.tapREG(ST);
-    TEMP = mmu.tapREG(r); 
+    SF &= ~mask;
+    mmu.ld(ST, SF);
 }
 
-void ALU::load()
+void ALU::fetch(ADR mode, REG r, u16 value)
 {
-    mmu.ld(A, ACC);
+
+}
+
+void ALU::load(REG r)
+{
+    update_flags();
+    mmu.ld(r, TEMP);
     mmu.ld(ST, SF);
 }
