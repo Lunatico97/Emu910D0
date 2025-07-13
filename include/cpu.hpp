@@ -14,7 +14,7 @@ class CPU
     private:
         void decode(const HEX& hex);
 
-        // Branching (Jumps)
+        // Branching
         void jmp(u16 address);
         void bcc(u16 address);
         void bcs(u16 address);
@@ -25,11 +25,13 @@ class CPU
         void bvc(u16 address);
         void bvs(u16 address);
 
-        // Branching (Calls)
+        // Routines & Interrupts
         void jsr(u16 address);
+        void brk();
 
-        // Branching (Returns)
+        // Returns
         void rts();
+        void rti();
 
         MMU mmu;
         ALU alu;

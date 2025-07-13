@@ -21,38 +21,42 @@ class ALU
         void update_flags();
 
         // Arithmetic Operations
-        void adc(u8 value);
-        void sbc(u8 value);
+        void adc(ADR mode, u16 addr, u8 off);
+        void sbc(ADR mode, u16 addr, u8 off);
 
         // Logical Operations
-        void ana(u8 value); // can't use 'and' as it is a keyword ;)
-        void eor(u8 value);
-        void ora(u8 value);
-        void cmp(u8 value);
+        void ana(ADR mode, u16 addr, u8 off); // can't use 'and' as it is a keyword ;)
+        void eor(ADR mode, u16 addr, u8 off);
+        void ora(ADR mode, u16 addr, u8 off);
+        void cmp(REG r, ADR mode, u16 addr, u8 off);
 
         // Shift Operations
-        void asl(u8 value);
-        void lsr(u8 value);
+        void asl(ADR mode, u16 addr, u8 off);
+        void lsr(ADR mode, u16 addr, u8 off);
 
         // Rotate Operations
-        void rol(u8 value);
-        void ror(u8 value);
+        void rol(ADR mode, u16 addr, u8 off);
+        void ror(ADR mode, u16 addr, u8 off);
 
         // Incrementors / Decrementors
-        void dec(u8 value);
-        void inc(u8 value);
+        void dec(REG r);
+        void inc(REG r);
+        void dec(ADR mode, u16 addr, u8 off);
+        void inc(ADR mode, u16 addr, u8 off);
 
         // Flags
         void set_flag(u8 mask);
-        void clear_flag(u8 mask);
+        void clr_flag(u8 mask);
 
     private:
-        u8 TEMP, SF; // [S V x B D I Z C]
+        u8 TEMP1, TEMP2, SF; // [S V x B D I Z C]
         MMU& mmu;
 
         // Registers
-        void fetch(ADR mode, REG r, u16 value);
-        void load(REG r);
+        void fetchMEM(ADR mode, u16 addr, u8 off);
+        void loadMEM(ADR mode, u16 addr, u8 off);
+        void fetchREG(REG r);
+        void loadREG(REG r);
 };
 
 #endif

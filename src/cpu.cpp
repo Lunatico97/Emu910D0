@@ -4,8 +4,13 @@ CPU::CPU(): mmu(), alu(mmu) {}
 
 void CPU::create_machine_code(const char* filename)
 {
-    u8 hexes[] = {0xA9, 0xAB, 0xAA, 0x48, 0x9A, 0xFF};
-    for(u16 i=0x0000; i<6; i++)
+    u8 hexes[] = {
+        0xA9, 0x00, 0x85, 0x00, 0xA9, 0x01, 0x85, 0x01, 0xA9, 0x06, 0x85, 0x02,
+        0xA5, 0x00, 0x18, 0x65, 0x01, 0x48, 0xA5, 0x01, 0x85, 0x00, 0x68, 0x85,
+        0x01, 0xC6, 0x02, 0xD0, 0xEF, 0x00
+    };
+
+    for(u16 i=0x0000; i<sizeof(hexes)/sizeof(u8); i++)
     {
         mmu.load_mem(i, hexes[i]);
     }
@@ -50,6 +55,7 @@ void CPU::decode(const HEX& hex)
     u16 h16 = (static_cast<u16>(hex.h8[1]) | (static_cast<u16>(hex.h8[2]) << 8));
     switch(hex.h8[0])
     {
+        case 0xEA: break;
         case 0xFF: exit(0); break;
         case 0xA9: mmu.ld(A, hex.h8[1]); break;
         case 0xA5: mmu.ldo(A, NON, h16); break;
@@ -99,6 +105,120 @@ void CPU::decode(const HEX& hex)
         case 0x68: mmu.pop(A); break;
         case 0x08: mmu.push(ST); break;
         case 0x28: mmu.pop(ST); break;
+
+        case 0x69: alu.adc((ADR)-1, 0x0000, hex.h8[1]); break;
+        case 0x65: alu.adc(ADR::ZER, 0x0000, hex.h8[1]); break;
+        case 0x75: alu.adc(ADR::ZEX, 0x0000, hex.h8[1]); break;
+        case 0x6D: alu.adc(ADR::ABS, h16, 0x00); break;
+        case 0x7D: alu.adc(ADR::ABX, h16, 0x00); break;
+        case 0x79: alu.adc(ADR::ABY, h16, 0x00); break;
+        case 0x61: alu.adc(ADR::IXI, h16, mmu.tapREG(X)); break;
+        case 0x71: alu.adc(ADR::IIX, h16, mmu.tapREG(Y)); break;
+
+        case 0xE9: alu.sbc((ADR)-1, 0x0000, hex.h8[1]); break;
+        case 0xE5: alu.sbc(ADR::ZER, 0x0000, hex.h8[1]); break;
+        case 0xF5: alu.sbc(ADR::ZEX, 0x0000, hex.h8[1]); break;
+        case 0xED: alu.sbc(ADR::ABS, h16, 0x00); break;
+        case 0xFD: alu.sbc(ADR::ABX, h16, 0x00); break;
+        case 0xF9: alu.sbc(ADR::ABY, h16, 0x00); break;
+        case 0xE1: alu.sbc(ADR::IXI, h16, mmu.tapREG(X)); break;
+        case 0xF1: alu.sbc(ADR::IIX, h16, mmu.tapREG(Y)); break;
+
+        case 0x29: alu.ana((ADR)-1, 0x0000, hex.h8[1]); break;
+        case 0x25: alu.ana(ADR::ZER, 0x0000, hex.h8[1]); break;
+        case 0x35: alu.ana(ADR::ZEX, 0x0000, hex.h8[1]); break;
+        case 0x2D: alu.ana(ADR::ABS, h16, 0x00); break;
+        case 0x3D: alu.ana(ADR::ABX, h16, 0x00); break;
+        case 0x39: alu.ana(ADR::ABY, h16, 0x00); break;
+        case 0x21: alu.ana(ADR::IXI, h16, mmu.tapREG(X)); break;
+        case 0x31: alu.ana(ADR::IIX, h16, mmu.tapREG(Y)); break;
+
+        case 0x49: alu.eor((ADR)-1, 0x0000, hex.h8[1]); break;
+        case 0x45: alu.eor(ADR::ZER, 0x0000, hex.h8[1]); break;
+        case 0x55: alu.eor(ADR::ZEX, 0x0000, hex.h8[1]); break;
+        case 0x4D: alu.eor(ADR::ABS, h16, 0x00); break;
+        case 0x5D: alu.eor(ADR::ABX, h16, 0x00); break;
+        case 0x59: alu.eor(ADR::ABY, h16, 0x00); break;
+        case 0x41: alu.eor(ADR::IXI, h16, mmu.tapREG(X)); break;
+        case 0x51: alu.eor(ADR::IIX, h16, mmu.tapREG(Y)); break;
+
+        case 0x09: alu.ora((ADR)-1, 0x0000, hex.h8[1]); break;
+        case 0x05: alu.ora(ADR::ZER, 0x0000, hex.h8[1]); break;
+        case 0x15: alu.ora(ADR::ZEX, 0x0000, hex.h8[1]); break;
+        case 0x0D: alu.ora(ADR::ABS, h16, 0x00); break;
+        case 0x1D: alu.ora(ADR::ABX, h16, 0x00); break;
+        case 0x19: alu.ora(ADR::ABY, h16, 0x00); break;
+        case 0x01: alu.ora(ADR::IXI, h16, mmu.tapREG(X)); break;
+        case 0x11: alu.ora(ADR::IIX, h16, mmu.tapREG(Y)); break;
+
+        case 0xC9: alu.cmp(A, (ADR)-1, 0x0000, hex.h8[1]); break;
+        case 0xC5: alu.cmp(A, ADR::ZER, 0x0000, hex.h8[1]); break;
+        case 0xD5: alu.cmp(A, ADR::ZEX, 0x0000, hex.h8[1]); break;
+        case 0xCD: alu.cmp(A, ADR::ABS, h16, 0x00); break;
+        case 0xDD: alu.cmp(A, ADR::ABX, h16, 0x00); break;
+        case 0xD9: alu.cmp(A, ADR::ABY, h16, 0x00); break;
+        case 0xC1: alu.cmp(A, ADR::IXI, h16, mmu.tapREG(X)); break;
+        case 0xD1: alu.cmp(A, ADR::IIX, h16, mmu.tapREG(Y)); break;
+
+        case 0xE0: alu.cmp(X, (ADR)-1, 0x0000, hex.h8[1]); break;
+        case 0xE4: alu.cmp(X, ADR::ZER, 0x0000, hex.h8[1]); break;
+        case 0xEC: alu.cmp(X, ADR::ABS, h16, 0x00); break;
+
+        case 0xC0: alu.cmp(Y, (ADR)-1, 0x0000, hex.h8[1]); break;
+        case 0xC4: alu.cmp(Y, ADR::ZER, 0x0000, hex.h8[1]); break;
+        case 0xCC: alu.cmp(Y, ADR::ABS, h16, 0x00); break;
+
+        case 0x0A: alu.asl((ADR)-1, 0x0000, hex.h8[1]); break;
+        case 0x06: alu.asl(ADR::ZER, 0x0000, hex.h8[1]); break;
+        case 0x16: alu.asl(ADR::ZEX, 0x0000, hex.h8[1]); break;
+        case 0x0E: alu.asl(ADR::ABS, h16, 0x00); break;
+        case 0x1E: alu.asl(ADR::ABX, h16, 0x00); break;
+
+        case 0x4A: alu.lsr((ADR)-1, 0x0000, hex.h8[1]); break;
+        case 0x46: alu.lsr(ADR::ZER, 0x0000, hex.h8[1]); break;
+        case 0x56: alu.lsr(ADR::ZEX, 0x0000, hex.h8[1]); break;
+        case 0x4E: alu.lsr(ADR::ABS, h16, 0x00); break;
+        case 0x5E: alu.lsr(ADR::ABX, h16, 0x00); break;
+
+        case 0x2A: alu.rol((ADR)-1, 0x0000, hex.h8[1]); break;
+        case 0x26: alu.rol(ADR::ZER, 0x0000, hex.h8[1]); break;
+        case 0x36: alu.rol(ADR::ZEX, 0x0000, hex.h8[1]); break;
+        case 0x2E: alu.rol(ADR::ABS, h16, 0x00); break;
+        case 0x3E: alu.rol(ADR::ABX, h16, 0x00); break;
+
+        case 0x6A: alu.ror((ADR)-1, 0x0000, hex.h8[1]); break;
+        case 0x66: alu.ror(ADR::ZER, 0x0000, hex.h8[1]); break;
+        case 0x76: alu.ror(ADR::ZEX, 0x0000, hex.h8[1]); break;
+        case 0x6E: alu.ror(ADR::ABS, h16, 0x00); break;
+        case 0x7E: alu.ror(ADR::ABX, h16, 0x00); break;
+
+        case 0xC6: alu.dec(ADR::ZER, 0x0000, hex.h8[1]); break;
+        case 0xD6: alu.dec(ADR::ZEX, 0x0000, hex.h8[1]); break;
+        case 0xCE: alu.dec(ADR::ABS, h16, 0x00); break;
+        case 0xDE: alu.dec(ADR::ABX, h16, 0x00); break;
+
+        case 0xE6: alu.inc(ADR::ZER, 0x0000, hex.h8[1]); break;
+        case 0xF6: alu.inc(ADR::ZEX, 0x0000, hex.h8[1]); break;
+        case 0xEE: alu.inc(ADR::ABS, h16, 0x00); break;
+        case 0xFE: alu.inc(ADR::ABX, h16, 0x00); break;
+
+        case 0xCA: alu.dec(X);
+        case 0x88: alu.dec(Y);
+
+        case 0xE8: alu.inc(X);
+        case 0xC8: alu.inc(Y);
+
+        case 0x38: alu.set_flag(HX_CARY); break;
+        case 0xF8: alu.set_flag(HX_DECM); break;
+        case 0x78: alu.set_flag(HX_INTD); break;
+
+        case 0x18: alu.clr_flag(HX_CARY); break;
+        case 0xD8: alu.clr_flag(HX_DECM); break;
+        case 0x58: alu.clr_flag(HX_INTD); break;
+        case 0xB8: alu.clr_flag(HX_OVFW); break;
+
+        case 0x24: alu.set_flag(mmu.fetch_mem(static_cast<u16>(hex.h8[1]))); break;
+        case 0x2C: alu.set_flag(mmu.fetch_mem(h16)); break;
         
         case 0x90: bcc(h16); break;
         case 0xB0: bcs(h16); break;
@@ -112,6 +232,9 @@ void CPU::decode(const HEX& hex)
         
         case 0x20: jsr(h16); break;
         case 0x60: rts(); break;
+
+        case 0x00: brk(); break;
+        case 0x40: rti(); break;
 
         default: break;
     }
@@ -179,6 +302,23 @@ void CPU::jsr(u16 address)
 
 void CPU::rts()
 {
+    mmu.pop(PCH);
+    mmu.pop(PCL);
+}
+
+void CPU::brk()
+{
+    mmu.ld(ST, mmu.tapREG(ST) | HX_BREK | HX_INTD);
+    mmu.push(PCL);
+    mmu.push(PCH);
+    mmu.push(ST);
+    mmu.ld(PCL, 0xFE);
+    mmu.ld(PCH, 0xFF);
+}
+
+void CPU::rti()
+{
+    mmu.pop(ST);
     mmu.pop(PCH);
     mmu.pop(PCL);
 }
