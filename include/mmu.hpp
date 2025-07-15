@@ -8,7 +8,7 @@
 
 enum ADR
 {
-    ABS = 0, ABX, ABY, IND, IXI, REL, ZER, ZEX, ZEY
+    ABS = 0, ABX, ABY, IND, IIX, IXI, REL, ZER, ZEX, ZEY
 };
 
 class MMU
