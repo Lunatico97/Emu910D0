@@ -53,6 +53,7 @@ class ALU
         MMU& mmu;
 
         // Registers
+        void fetchIMD(u8 off);
         void fetchMEM(ADR mode, u16 addr, u8 off);
         void loadMEM(ADR mode, u16 addr, u8 off);
         void fetchREG(REG r);

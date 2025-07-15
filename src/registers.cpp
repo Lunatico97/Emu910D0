@@ -17,7 +17,7 @@ u8 Registers::fetchREG(REG r)
 
 u16 Registers::fetchPC()
 {
-    return (*(BANK+PCH) & 0xFF00) | (*(BANK+PCL) & 0x00FF);
+    return (static_cast<u16>(*(BANK+PCH)) << 8) | static_cast<u16>(*(BANK+PCL));
 }
 
 void Registers::loadREG(REG r, u8 value)

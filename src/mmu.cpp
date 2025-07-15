@@ -111,6 +111,7 @@ u16 MMU::get_addr(ADR mode, u16 addr, u8 off)
         case ADR::IND: res_addr = (mem.retreive(addr) & 0x00FF) | (mem.retreive(addr+1) & 0xFF00); break;
         case ADR::IIX: res_addr = (mem.retreive(addr) & 0x00FF) | (mem.retreive(addr+1) & 0xFF00) + static_cast<u16>(off); break;
         case ADR::IXI: res_addr = ((mem.retreive(addr) + off) & 0x00FF) | (mem.retreive(addr+1) & 0xFF00); break;
+        case ADR::REL: res_addr = (tapREG(PCH) << 8) | (tapREG(PCL) + off); break;
         case ADR::ZER: res_addr = static_cast<u16>(off); break;
         case ADR::ZEX: res_addr = static_cast<u16>(tapREG(X) + off); break;
         case ADR::ZEY: res_addr = static_cast<u16>(tapREG(Y) + off); break;
