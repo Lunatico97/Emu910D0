@@ -5,9 +5,7 @@ CPU::CPU(): mmu(), alu(mmu) {}
 void CPU::create_machine_code(const char* filename)
 {
     u8 hexes[] = {
-        0xA9, 0x00, 0x85, 0x00, 0xA9, 0x01, 0x85, 0x01, 0xA9, 0x06, 0x85, 0x02,
-        0xA5, 0x00, 0x18, 0x65, 0x01, 0x48, 0xA5, 0x01, 0x85, 0x00, 0x68, 0x85,
-        0x01, 0xC6, 0x02, 0xD0, 0xEF, 0x00
+        0xA9, 0x00, 0x69, 0x01, 0xC9, 0x0A, 0xD0, 0xFA, 0xFF
     };
 
     for(u16 i=0x0000; i<sizeof(hexes)/sizeof(u8); i++)
@@ -202,11 +200,11 @@ void CPU::decode(const HEX& hex)
         case 0xEE: alu.inc(ADR::ABS, h16, 0x00); break;
         case 0xFE: alu.inc(ADR::ABX, h16, 0x00); break;
 
-        case 0xCA: alu.dec(X);
-        case 0x88: alu.dec(Y);
+        case 0xCA: alu.dec(X); break;
+        case 0x88: alu.dec(Y); break;
 
-        case 0xE8: alu.inc(X);
-        case 0xC8: alu.inc(Y);
+        case 0xE8: alu.inc(X); break;
+        case 0xC8: alu.inc(Y); break;
 
         case 0x38: alu.set_flag(HX_CARY); break;
         case 0xF8: alu.set_flag(HX_DECM); break;
@@ -220,16 +218,17 @@ void CPU::decode(const HEX& hex)
         case 0x24: alu.set_flag(mmu.fetch_mem(static_cast<u16>(hex.h8[1]))); break;
         case 0x2C: alu.set_flag(mmu.fetch_mem(h16)); break;
         
-        case 0x90: bcc(h16); break;
-        case 0xB0: bcs(h16); break;
-        case 0xF0: beq(h16); break;
-        case 0x30: bmi(h16); break;
-        case 0xD0: bne(h16); break;
-        case 0x10: bpl(h16); break;
-        case 0x50: bvc(h16); break;
-        case 0x70: bvs(h16); break;
-        case 0x4C: jmp(h16); break;
-        
+        case 0x90: bcc(hex.h8[1]); break;
+        case 0xB0: bcs(hex.h8[1]); break;
+        case 0xF0: beq(hex.h8[1]); break;
+        case 0x30: bmi(hex.h8[1]); break;
+        case 0xD0: bne(hex.h8[1]); break;
+        case 0x10: bpl(hex.h8[1]); break;
+        case 0x50: bvc(hex.h8[1]); break;
+        case 0x70: bvs(hex.h8[1]); break;
+
+        case 0x4C: jmp(h16); break; 
+               
         case 0x20: jsr(h16); break;
         case 0x60: rts(); break;
 
@@ -245,51 +244,51 @@ void CPU::jmp(u16 address)
     mmu.init_pc(address);
 }
 
-void CPU::bcc(u16 address)
+void CPU::bcc(u8 rel_addr)
 {
-    if(mmu.tapREG(ST) & HX_CARY != HX_CARY) mmu.init_pc(address);
+    if((mmu.tapREG(ST) & HX_CARY) != HX_CARY) mmu.init_pc(mmu.get_addr(ADR::REL, 0x0000, rel_addr));
     else return;
 }
 
-void CPU::bcs(u16 address)
+void CPU::bcs(u8 rel_addr)
 {
-    if(mmu.tapREG(ST) & HX_CARY == HX_CARY) mmu.init_pc(address);
+    if((mmu.tapREG(ST) & HX_CARY) == HX_CARY) mmu.init_pc(mmu.get_addr(ADR::REL, 0x0000, rel_addr));
     else return;
 }
 
-void CPU::beq(u16 address)
+void CPU::beq(u8 rel_addr)
 {
-    if(mmu.tapREG(ST) & HX_ZERO == HX_ZERO) mmu.init_pc(address);
+    if((mmu.tapREG(ST) & HX_ZERO) == HX_ZERO) mmu.init_pc(mmu.get_addr(ADR::REL, 0x0000, rel_addr));
     else return;
 }
 
-void CPU::bmi(u16 address)
+void CPU::bmi(u8 rel_addr)
 {
-    if(mmu.tapREG(ST) & HX_SIGN == HX_SIGN) mmu.init_pc(address);
+    if((mmu.tapREG(ST) & HX_SIGN) == HX_SIGN) mmu.init_pc(mmu.get_addr(ADR::REL, 0x0000, rel_addr));
     else return;
 }
 
-void CPU::bne(u16 address)
+void CPU::bne(u8 rel_addr)
 {
-    if(mmu.tapREG(ST) & HX_ZERO != HX_ZERO) mmu.init_pc(address);
+    if((mmu.tapREG(ST) & HX_ZERO) != HX_ZERO) mmu.init_pc(mmu.get_addr(ADR::REL, 0x0000, rel_addr));
     else return;
 }
 
-void CPU::bpl(u16 address)
+void CPU::bpl(u8 rel_addr)
 {
-    if(mmu.tapREG(ST) & HX_SIGN != HX_SIGN) mmu.init_pc(address);
+    if((mmu.tapREG(ST) & HX_SIGN) != HX_SIGN) mmu.init_pc(mmu.get_addr(ADR::REL, 0x0000, rel_addr));
     else return;
 }
 
-void CPU::bvc(u16 address)
+void CPU::bvc(u8 rel_addr)
 {
-    if(mmu.tapREG(ST) & HX_OVFW != HX_OVFW) mmu.init_pc(address);
+    if((mmu.tapREG(ST) & HX_OVFW) != HX_OVFW) mmu.init_pc(mmu.get_addr(ADR::REL, 0x0000, rel_addr));
     else return;
 }
 
-void CPU::bvs(u16 address)
+void CPU::bvs(u8 rel_addr)
 {
-    if(mmu.tapREG(ST) & HX_OVFW == HX_OVFW) mmu.init_pc(address);
+    if((mmu.tapREG(ST) & HX_OVFW) == HX_OVFW) mmu.init_pc(mmu.get_addr(ADR::REL, 0x0000, rel_addr));
     else return;
 }
 

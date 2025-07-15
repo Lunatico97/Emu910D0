@@ -15,17 +15,17 @@ class CPU
         void decode(const HEX& hex);
 
         // Branching
-        void jmp(u16 address);
-        void bcc(u16 address);
-        void bcs(u16 address);
-        void beq(u16 address);
-        void bmi(u16 address);
-        void bne(u16 address);
-        void bpl(u16 address);
-        void bvc(u16 address);
-        void bvs(u16 address);
+        void bcc(u8 rel_addr);
+        void bcs(u8 rel_addr);
+        void beq(u8 rel_addr);
+        void bmi(u8 rel_addr);
+        void bne(u8 rel_addr);
+        void bpl(u8 rel_addr);
+        void bvc(u8 rel_addr);
+        void bvs(u8 rel_addr);
 
         // Routines & Interrupts
+        void jmp(u16 address);
         void jsr(u16 address);
         void brk();
 

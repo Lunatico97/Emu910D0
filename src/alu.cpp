@@ -1,16 +1,16 @@
 #include <alu.hpp>
 
-ALU::ALU(MMU& mmui): mmu(mmui) {}
+ALU::ALU(MMU& mmui): mmu(mmui){}
 
 void ALU::update_flags()
 {
-    if(TEMP1 & 0x80 == 0x80) SF |= HX_SIGN;
+    if((TEMP1 & D7) == D7) SF |= HX_SIGN;
     if(TEMP1 == 0x00) SF |= HX_ZERO;
 }
 
 void ALU::adc(ADR mode, u16 addr, u8 off)
 {
-    if(mode == -1) TEMP1 = off;
+    if(mode == -1) fetchIMD(off);
     else fetchMEM(mode, addr, off);
     TEMP1 = mmu.tapREG(A);   
     u16 TEMP = TEMP1 + TEMP2;
@@ -22,7 +22,7 @@ void ALU::adc(ADR mode, u16 addr, u8 off)
 
 void ALU::sbc(ADR mode, u16 addr, u8 off)
 {
-    if(mode == -1) TEMP2 = off;
+    if(mode == -1) fetchIMD(off);
     else fetchMEM(mode, addr, off);
     TEMP1 = mmu.tapREG(A);
     u16 TEMP = TEMP1 - TEMP2;
@@ -34,7 +34,7 @@ void ALU::sbc(ADR mode, u16 addr, u8 off)
 
 void ALU::ana(ADR mode, u16 addr, u8 off)
 {
-    if(mode == -1) TEMP2 = off;
+    if(mode == -1) fetchIMD(off);
     else fetchMEM(mode, addr, off);
     TEMP1 = mmu.tapREG(A);
     TEMP1 &= TEMP2;
@@ -43,7 +43,7 @@ void ALU::ana(ADR mode, u16 addr, u8 off)
 
 void ALU::eor(ADR mode, u16 addr, u8 off)
 {
-    if(mode == -1) TEMP2 = off;
+    if(mode == -1) fetchIMD(off);
     else fetchMEM(mode, addr, off);
     TEMP1 = mmu.tapREG(A);
     TEMP1 ^= TEMP2;
@@ -52,7 +52,7 @@ void ALU::eor(ADR mode, u16 addr, u8 off)
 
 void ALU::ora(ADR mode, u16 addr, u8 off)
 {
-    if(mode == -1) TEMP2 = off;
+    if(mode == -1) fetchIMD(off);
     else fetchMEM(mode, addr, off);
     TEMP1 = mmu.tapREG(A);
     TEMP1 |= TEMP2;
@@ -61,7 +61,7 @@ void ALU::ora(ADR mode, u16 addr, u8 off)
 
 void ALU::cmp(REG r, ADR mode, u16 addr, u8 off)
 {
-    if(mode == -1) TEMP2 = off;
+    if(mode == -1) fetchIMD(off);
     else fetchMEM(mode, addr, off);
     TEMP1 = mmu.tapREG(r);
     if(TEMP1 >= TEMP2) { SF |= HX_CARY; /* A >= M => C = 1 */ }
@@ -106,7 +106,7 @@ void ALU::ror(ADR mode, u16 addr, u8 off)
     else fetchMEM(mode, addr, off);
     TEMP1 = TEMP2 >> 1;
     TEMP1 |= (SF & HX_CARY) << 7;
-    SF |= (TEMP2 & 0x01);
+    SF |= (TEMP2 & D0);
     if(mode == -1) loadREG(A);
     else loadMEM(mode, addr, off);
 }
@@ -131,7 +131,7 @@ void ALU::inc(ADR mode, u16 addr, u8 off)
 {
     fetchMEM(mode, addr, off);
     TEMP1 = TEMP2;
-    TEMP2 += 0x01;
+    TEMP1 += 0x01;
     loadMEM(mode, addr, off);
 }
 
@@ -139,7 +139,7 @@ void ALU::dec(ADR mode, u16 addr, u8 off)
 {
     fetchMEM(mode, addr, off);
     TEMP1 = TEMP2;
-    TEMP2 -= 0x01;
+    TEMP1 -= 0x01;
     loadMEM(mode, addr, off);
 }
 
@@ -155,6 +155,12 @@ void ALU::clr_flag(u8 mask)
     SF = mmu.tapREG(ST);
     SF &= ~mask;
     mmu.ld(ST, SF);
+}
+
+void ALU::fetchIMD(u8 off)
+{
+    TEMP2 = off;
+    SF = mmu.tapREG(ST);
 }
 
 void ALU::fetchMEM(ADR mode, u16 addr, u8 off)
