@@ -4,7 +4,6 @@
 #include <sstream>
 #include <fstream>
 #include <stdexcept>
-#include <unistd.h>
 #include <map>
 #include <types.hpp>
 #include <SDL2/SDL.h>
@@ -55,23 +54,25 @@ namespace Utils
         return str.substr(first, (last - first + 1));
     }
 
-    static void logU8(const char* r, u8 value)
+    static std::string logU8(const char* r, u8 value)
     {
-        std::cout << std::uppercase << r << "[" << std::hex << std::setfill('0') << std::setw(2) << (value & 0xFF) << "] ";
+        std::stringstream ss;
+        ss << std::uppercase << r << " [" << std::hex << std::setfill('0') << std::setw(2) << (value & 0xFF) << "] ";
+        return ss.str();
     }
 
-    static void logU16(const char* r, u16 value)
+    static std::string logU16(const char* r, u16 value)
     {
-        std::cout << std::uppercase << r << "[" << std::hex << std::setfill('0') << std::setw(4) << (value & 0xFFFF) << "] ";
+        std::stringstream ss;
+        ss << std::uppercase << r << " [" << std::hex << std::setfill('0') << std::setw(4) << (value & 0xFFFF) << "] ";
+        return ss.str();
     }
 
-    static void logHEX(HEX value)
+    static std::string logHEX(HEX value)
     {
-        std::cout << "< ";
-        logU8("OP", value.h8[0]);
-        logU8("LN8", value.h8[1]);
-        logU8("HN8", value.h8[2]);
-        std::cout << ">" << std::endl;
+        std::stringstream ss;
+        ss << "< OP8: " << value.h8[0] << " | LN8: " << value.h8[1] << " | HN8: " << value.h8[2] << ">";
+        return ss.str();
     }
 };
 

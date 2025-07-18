@@ -1,5 +1,6 @@
 #include <apu.hpp>
 #include <SDL2/SDL_audio.h>
+#include <unistd.h>
 
 #define FREQ 44100
 #define SAMPLES 8192 

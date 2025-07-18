@@ -1,15 +1,14 @@
 #include <apu.hpp>
-#include <cpu.hpp>
+#include <gui.hpp>
 
 int main(int argc, char* argv[]) {
-    CPU *cpu = new CPU();
-    cpu->create_machine_code("");
-    cpu->load_program();
+    GUI* gui = new GUI();
+    gui->run_gui();
     
     // APU *apu = new APU();
     // apu->generate_pwm(0xDC, 0x0A, APU::GENERATOR::SINE);
     // delete apu;
     
-    delete cpu;
+    delete gui;
     return 0;
 }
