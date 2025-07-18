@@ -2,6 +2,11 @@
 
 CPU::CPU(): mmu(), alu(mmu) {}
 
+MMU& CPU::get_mmu()
+{
+    return mmu;
+}
+
 void CPU::create_machine_code(const char* filename)
 {
     u8 hexes[] = {
@@ -16,27 +21,21 @@ void CPU::create_machine_code(const char* filename)
     IREG = 0x0000;
 }
 
-void CPU::load_program()
+void CPU::step()
 {   
-    HEX current;
-    // Tap origin
-    Utils::logU16("ORG", IREG);
-    std::cout << "\n";
-
-    while(1)
-    {
+        HEX current;
         u8 l = IL_MAP[mmu.fetch_mem(IREG)];
         mmu.init_pc(mmu.tapPC()+l);
 
         // Tap registers stepwise
-        Utils::logU16("IR", IREG);
-        Utils::logU16("PC", mmu.tapPC());
-        Utils::logU8("SP", mmu.tapREG(SP));
-        Utils::logU8("ST", mmu.tapREG(ST));
-        Utils::logU8("A", mmu.tapREG(A));
-        Utils::logU8("X", mmu.tapREG(X));
-        Utils::logU8("Y", mmu.tapREG(Y));
-        Utils::logHEX(current);
+        // std::cout << Utils::logU16("IR", IREG);
+        // std::cout << Utils::logU16("PC", mmu.tapPC());
+        // std::cout << Utils::logU8("SP", mmu.tapREG(SP));
+        // std::cout << Utils::logU8("ST", mmu.tapREG(ST));
+        // std::cout << Utils::logU8("A", mmu.tapREG(A));
+        // std::cout << Utils::logU8("X", mmu.tapREG(X));
+        // std::cout << Utils::logU8("Y", mmu.tapREG(Y));
+        // std::cout << Utils::logHEX(current);
 
         for(int i=0; i<l; i++)
         {
@@ -44,8 +43,7 @@ void CPU::load_program()
         }
 
         decode(current);
-        IREG = mmu.tapPC();
-    }    
+        IREG = mmu.tapPC();    
 }
 
 void CPU::decode(const HEX& hex)
@@ -307,12 +305,15 @@ void CPU::rts()
 
 void CPU::brk()
 {
-    mmu.ld(ST, mmu.tapREG(ST) | HX_BREK | HX_INTD);
-    mmu.push(PCL);
-    mmu.push(PCH);
-    mmu.push(ST);
-    mmu.ld(PCL, 0xFE);
-    mmu.ld(PCH, 0xFF);
+    if(mmu.tapREG(ST) & HX_INTD == HX_INTD)
+    {
+        mmu.ld(ST, mmu.tapREG(ST) | HX_BREK | HX_INTD);
+        mmu.push(PCL);
+        mmu.push(PCH);
+        mmu.push(ST);
+        mmu.ld(PCL, IRQ_VECTOR);
+        mmu.ld(PCH, 0xFF);
+    }
 }
 
 void CPU::rti()
@@ -320,4 +321,27 @@ void CPU::rti()
     mmu.pop(ST);
     mmu.pop(PCH);
     mmu.pop(PCL);
+}
+
+void CPU::rst()
+{
+    if(mmu.tapREG(ST) & HX_INTD == HX_INTD)
+    {
+        mmu.ld(ST, mmu.tapREG(ST) | HX_BREK | HX_INTD);
+        mmu.push(PCL);
+        mmu.push(PCH);  
+        mmu.push(ST);
+        mmu.ld(PCL, RST_VECTOR);
+        mmu.ld(PCH, 0xFF);
+    }
+}
+
+void CPU::nmi()
+{
+    mmu.ld(ST, mmu.tapREG(ST) | HX_BREK | HX_INTD);
+    mmu.push(PCL);
+    mmu.push(PCH);
+    mmu.push(ST);
+    mmu.ld(PCL, NMI_VECTOR);
+    mmu.ld(PCH, 0xFF);
 }

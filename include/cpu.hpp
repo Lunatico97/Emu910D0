@@ -4,12 +4,18 @@
 #ifndef _CPU_H_
 #define _CPU_H_
 
+#define RST_VECTOR 0xFC
+#define NMI_VECTOR 0xFA
+#define IRQ_VECTOR 0xFE
+
 class CPU
 {
     public:
         CPU();
+
         void create_machine_code(const char* filename);
-        void load_program();
+        MMU& get_mmu();
+        void step();
 
     private:
         void decode(const HEX& hex);
@@ -32,6 +38,11 @@ class CPU
         // Returns
         void rts();
         void rti();
+
+        // System Interrupts
+        void rst();
+        void nmi();
+        void irq();
 
         MMU mmu;
         ALU alu;
