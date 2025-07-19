@@ -3,10 +3,10 @@
 GUI::GUI()
 {
     cpu = new CPU();
-    cpu->create_machine_code("");
+    cpu->load_machine_code("");
     rndr = new Renderer("E910D0", SCRW, SCRH);
     sys_font = rndr->loadFont("rsrc/font.ttf", FTPT);
-    sys_text = rndr->loadText("E910D0 Zero Page", sys_font, CLR_CYAN);
+    sys_text = rndr->loadText("E910D0 [ Commands: STEP(7) | IRQ (8) | NMI (9) | RST (0) ]", sys_font, CLR_CYAN);
     flag_text = rndr->loadText(" N   V   x   B   D   I   Z   C ", sys_font, CLR_GREEN);
     mmu = cpu->get_mmu(); 
     _active = true;    
@@ -25,11 +25,23 @@ void GUI::cleanup()
 void GUI::draw_mem()
 {
     std::string text;
-    for(u16 i=0; i<256; i++)
+    for(u16 i=0x0000; i<0x0100; i++)
     {
         text = Utils::logU8("", mmu.fetch_mem(i));
         reg_text = rndr->loadText(text.c_str(), sys_font, CLR_WHITE);
-        rndr->render(50+(i%16)*20, 50+(i/16)*FTPT, reg_text);
+        rndr->render(5+(i%16)*25, 50+(i/16)*FTPT, reg_text);
+        rndr->freeTex(reg_text);
+    }
+}
+
+void GUI::draw_stack()
+{
+    std::string text;
+    for(u16 i=0x01F0; i<=0x01FF; i++)
+    {
+        text = Utils::logU8("", mmu.fetch_mem(i));
+        reg_text = rndr->loadText(text.c_str(), sys_font, CLR_BLUE);
+        rndr->render(425, 50+(i-0x01F0)*FTPT, reg_text);
         rndr->freeTex(reg_text);
     }
 }
@@ -48,7 +60,7 @@ void GUI::draw_psw()
     }
 }
 
-void GUI::draw_reg_stack()
+void GUI::draw_reg_bank()
 {
     std::string text;
     const char* registers[] = { "A", "X", "Y", "ST", "SP", "PCH", "PCL" };
@@ -79,17 +91,19 @@ void GUI::run_gui()
         while(SDL_PollEvent(&event))
         {
             if(event.type == SDL_QUIT) _active = false;
-            if(event.type == SDL_KEYDOWN)
+            if(event.type == SDL_KEYUP)
             {
                 switch(event.key.keysym.sym)
                 {
-                    case SDLK_SPACE: 
-                        cpu->step(); 
-                        mmu = cpu->get_mmu(); 
-                        break;
+                    case SDLK_7: cpu->step(); break;
+                    case SDLK_8: cpu->irq(); break;
+                    case SDLK_9: cpu->nmi(); break;
+                    case SDLK_0: cpu->rst(); break;
                     
                     default: break;
                 }
+
+                mmu = cpu->get_mmu();
             }
         }
 
@@ -97,7 +111,8 @@ void GUI::run_gui()
         rndr->clear();
         rndr->render(5, 5, sys_text);
         draw_psw();
-        draw_reg_stack();
+        draw_reg_bank();
+        draw_stack();
         draw_mem();
         rndr->display();
     }

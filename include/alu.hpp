@@ -5,6 +5,7 @@
 
 #define HX_SIGN 0x80
 #define HX_OVFW 0x40
+#define HX_NUSE 0x20
 #define HX_BREK 0x10
 #define HX_DECM 0x08
 #define HX_INTD 0x04
