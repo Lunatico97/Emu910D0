@@ -7,10 +7,14 @@ MMU& CPU::get_mmu()
     return mmu;
 }
 
-void CPU::create_machine_code(const char* filename)
+void CPU::load_machine_code(const char* filename)
 {
+    // u8 hexes[] = {
+    //     0xA9, 0x00, 0x69, 0x01, 0xC9, 0x0A, 0xD0, 0xFA, 0x00
+    // };
+
     u8 hexes[] = {
-        0xA9, 0x00, 0x69, 0x01, 0xC9, 0x0A, 0xD0, 0xFA, 0xFF
+        0xA9, 0x00, 0xA2, 0x01, 0x69, 0x01, 0xE8, 0x9D, 0xF0, 0x00, 0xE0, 0x0A, 0xD0, 0xF6, 0x00
     };
 
     for(u16 i=0x0000; i<sizeof(hexes)/sizeof(u8); i++)
@@ -52,7 +56,6 @@ void CPU::decode(const HEX& hex)
     switch(hex.h8[0])
     {
         case 0xEA: break;
-        case 0xFF: exit(0); break;
         case 0xA9: mmu.ld(A, hex.h8[1]); break;
         case 0xA5: mmu.ldo(A, NON, h16); break;
         case 0xB5: mmu.ldo(A, X, h16); break;
@@ -305,43 +308,54 @@ void CPU::rts()
 
 void CPU::brk()
 {
-    if(mmu.tapREG(ST) & HX_INTD == HX_INTD)
+    if((mmu.tapREG(ST) & HX_INTD) != HX_INTD)
     {
-        mmu.ld(ST, mmu.tapREG(ST) | HX_BREK | HX_INTD);
+        mmu.ld(ST, mmu.tapREG(ST) | HX_BREK | HX_INTD | HX_NUSE);
         mmu.push(PCL);
         mmu.push(PCH);
         mmu.push(ST);
-        mmu.ld(PCL, IRQ_VECTOR);
-        mmu.ld(PCH, 0xFF);
+        mmu.ld(PCL, NON, IRQ_VECTOR);
+        mmu.ld(PCH, NON, IRQ_VECTOR+0x0001);
     }
 }
 
 void CPU::rti()
 {
     mmu.pop(ST);
+    mmu.ld(ST, mmu.tapREG(ST) & ~HX_NUSE & ~HX_INTD);
     mmu.pop(PCH);
     mmu.pop(PCL);
 }
 
 void CPU::rst()
 {
-    if(mmu.tapREG(ST) & HX_INTD == HX_INTD)
+    mmu.ld(A, 0x00);
+    mmu.ld(X, 0x00);
+    mmu.ld(Y, 00);
+    mmu.ld(ST, 0x00 | HX_NUSE);
+    mmu.ld(PCL, NON, RST_VECTOR);
+    mmu.ld(PCH, NON, RST_VECTOR+0x0001);
+}
+
+void CPU::irq()
+{
+    if((mmu.tapREG(ST) & HX_INTD) != HX_INTD)
     {
-        mmu.ld(ST, mmu.tapREG(ST) | HX_BREK | HX_INTD);
+        mmu.ld(ST, mmu.tapREG(ST) & ~HX_BREK | HX_INTD | HX_NUSE);
         mmu.push(PCL);
-        mmu.push(PCH);  
+        mmu.push(PCH);
         mmu.push(ST);
-        mmu.ld(PCL, RST_VECTOR);
-        mmu.ld(PCH, 0xFF);
+        mmu.ld(PCL, NON, IRQ_VECTOR);
+        mmu.ld(PCH, NON, IRQ_VECTOR+0x0001);
     }
 }
 
 void CPU::nmi()
 {
-    mmu.ld(ST, mmu.tapREG(ST) | HX_BREK | HX_INTD);
+    mmu.ld(ST, mmu.tapREG(ST) & ~HX_BREK | HX_INTD | HX_NUSE);
     mmu.push(PCL);
     mmu.push(PCH);
     mmu.push(ST);
-    mmu.ld(PCL, NMI_VECTOR);
-    mmu.ld(PCH, 0xFF);
+    mmu.ld(PCL, NON, NMI_VECTOR);
+    mmu.ld(PCH, NON, NMI_VECTOR+0x0001);
 }

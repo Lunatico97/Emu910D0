@@ -57,14 +57,14 @@ namespace Utils
     static std::string logU8(const char* r, u8 value)
     {
         std::stringstream ss;
-        ss << std::uppercase << r << " [" << std::hex << std::setfill('0') << std::setw(2) << (value & 0xFF) << "] ";
+        ss << std::uppercase << r << " [ " << std::hex << std::setfill('0') << std::setw(2) << (value & 0xFF) << " ] ";
         return ss.str();
     }
 
     static std::string logU16(const char* r, u16 value)
     {
         std::stringstream ss;
-        ss << std::uppercase << r << " [" << std::hex << std::setfill('0') << std::setw(4) << (value & 0xFFFF) << "] ";
+        ss << std::uppercase << r << " [ " << std::hex << std::setfill('0') << std::setw(4) << (value & 0xFFFF) << " ] ";
         return ss.str();
     }
 

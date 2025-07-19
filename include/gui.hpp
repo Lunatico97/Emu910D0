@@ -20,12 +20,13 @@
 class GUI
 {
     public:
-        GUI();
+        GUI();     
         void run_gui();
 
     private:
         void draw_mem();
-        void draw_reg_stack();
+        void draw_stack();
+        void draw_reg_bank();
         void draw_psw();
         void cleanup();
 
