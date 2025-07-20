@@ -7,7 +7,7 @@ MMU& CPU::get_mmu()
     return mmu;
 }
 
-void CPU::load_machine_code(const char* filename)
+void CPU::load_machine_code()
 {
     // u8 hexes[] = {
     //     0xA9, 0x00, 0x69, 0x01, 0xC9, 0x0A, 0xD0, 0xFA, 0x00
@@ -21,6 +21,10 @@ void CPU::load_machine_code(const char* filename)
     {
         mmu.load_mem(i, hexes[i]);
     }
+
+    mmu.load_mem(IRQ_VECTOR, 0xFE);
+    mmu.load_mem(IRQ_VECTOR+0x00001, 0x00);
+    mmu.load_mem(0x00FE, 0x40);
 
     IREG = 0x0000;
 }

@@ -20,14 +20,7 @@ class PPU
         PPU();
         PPU(MMU& mmu);
 
-        void set_ppu_ctrl(const u8& ctrl);
-        void set_ppu_mask(const u8& mask);
-        void set_ppu_scrl(const u8& ctrl);
-        void set_ppu_addr(const u8& addr);
-        void set_ppu_data(const u8& data);
-        void set_oam_addr(const u8& addr);
-        void set_oam_data(const u8& data);
-        void set_oam_dma(const u8& src);
+        void set_ctrl();
 
         void get_ppu_stat();
         void get_ppu_data();

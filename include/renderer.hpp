@@ -28,6 +28,8 @@ class Renderer
 		void render(int x, int y, SDL_Texture *tex);
 		void render(SDL_Texture *t, SDL_Rect src, SDL_Rect des);
 		void renderEx(SDL_Texture *t, SDL_Rect src, SDL_Rect des, float angle, SDL_RendererFlip flipMode, SDL_Point point);
+		void renderPt(int x, int y);
+		void renderRect(SDL_Rect rect, bool fill);
 		void renderRect(SDL_Rect rect, Uint8 r, Uint8 g, Uint8 b, bool fill);
 		void setColor(Uint8 r, Uint8 g, Uint8 b, Uint8 a);
 		void display();
