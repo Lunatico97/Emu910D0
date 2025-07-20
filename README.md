@@ -15,3 +15,6 @@ Legend:
 - Top right block 
 ( Status Flags | Yellow block - General Purpose Registers | Magenta block - Special Purpose Registers)
 
+![Sprite Loaded From Cartridge](rsrc/snip2.gif)
+Note: No PPU operation is involved here yet.
+

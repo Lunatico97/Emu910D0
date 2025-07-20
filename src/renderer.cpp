@@ -95,6 +95,17 @@ void Renderer::display()
 	SDL_RenderPresent(ren) ;
 }
 
+void Renderer::renderPt(int x, int y)
+{
+	SDL_RenderDrawPoint(ren, x, y) ;	
+}
+
+void Renderer::renderRect(SDL_Rect rect, bool fill)
+{
+	SDL_RenderDrawRect(ren, &rect) ;	
+	if(fill) SDL_RenderFillRect(ren, &rect) ;
+}
+
 void Renderer::renderRect(SDL_Rect rect, Uint8 r, Uint8 g, Uint8 b, bool fill)
 {
 	SDL_SetRenderDrawColor(ren, r, g, b, 255) ;
