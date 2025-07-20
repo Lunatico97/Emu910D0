@@ -2,6 +2,8 @@
 #include <cpu.hpp>
 #include <mmu.hpp>
 
+#include <crom.hpp>
+
 #ifndef __GUI_H__
 #define __GUI_H__
 
@@ -22,6 +24,7 @@ class GUI
     public:
         GUI();     
         void run_gui();
+        void draw_tile(u16 tile_addr, int x, int y, bool px);
 
     private:
         void draw_mem();
@@ -31,6 +34,7 @@ class GUI
         void cleanup();
 
         CPU *cpu;
+        CardROM *crom;
         MMU mmu;
         bool _active;
         Renderer* rndr;

@@ -13,7 +13,7 @@ class CPU
     public:
         CPU();
 
-        void load_machine_code(const char* filename);
+        void load_machine_code();
         void step();
 
         // Hardware Interrupts
