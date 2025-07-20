@@ -3,7 +3,9 @@
 GUI::GUI()
 {
     cpu = new CPU();
-    cpu->load_machine_code("");
+    crom = new CardROM();
+    cpu->load_machine_code();
+    crom->load_rom("roms/donkey_kong.nes");
     rndr = new Renderer("E910D0", SCRW, SCRH);
     sys_font = rndr->loadFont("rsrc/font.ttf", FTPT);
     sys_text = rndr->loadText("E910D0 [ Commands: STEP(7) | IRQ (8) | NMI (9) | RST (0) ]", sys_font, CLR_CYAN);
@@ -18,8 +20,37 @@ void GUI::cleanup()
     rndr->freeTex(sys_text);
     rndr->freeFont(sys_font);
     rndr->cleanRenderer();
+    delete crom;
     delete rndr;
     delete cpu;
+}
+
+void GUI::draw_tile(u16 tile_addr, int x, int y, bool px = true)
+{
+    u8 tile_data[16] = {0};
+    u8 place = D7;
+    for(u8 i=0x00; i<0x10; i++) tile_data[i] = crom->read_ppu(tile_addr+i);
+
+    for(u8 i=0x00; i<0x08; i++)
+    {
+        for(u8 j=0x00; j<0x08; j++)
+        {
+            place = D7 >> j;
+            u8 index = ((tile_data[i] & place) >> (0x07-j)) | (((tile_data[i+0x08] & place) >> (0x07-j)) << 1);
+            assert(index < 0x04);
+            switch(index)
+            {
+                case 0x00: rndr->setColor(0,66,66,255); break;
+                case 0x01: rndr->setColor(0,0,128,255); break;
+                case 0x02: rndr->setColor(252,216,168,255); break;
+                case 0x03: rndr->setColor(255,0,0,255); break;
+                default: break;
+            }
+
+            if(px) rndr->renderPt(x+j, y+i);
+            else rndr->renderRect({x+(j*5), y+(i*5), 5, 5}, true);
+        }
+    }
 }
 
 void GUI::draw_mem()
@@ -86,6 +117,8 @@ void GUI::draw_reg_bank()
 
 void GUI::run_gui()
 {
+    u8 size = 0x08, offset = 0x00;
+
     while(_active)
     {
         while(SDL_PollEvent(&event))
@@ -114,6 +147,24 @@ void GUI::run_gui()
         draw_reg_bank();
         draw_stack();
         draw_mem();
+
+        // Pixel
+        size = 0x08;
+        draw_tile(0x0000+offset, 150, 350);
+        draw_tile(0x0000+(offset+0x10), 150, 350+size);
+        draw_tile(0x0000+(offset+0x20), 150+size, 350);
+        draw_tile(0x0000+(offset+0x30), 150+size, 350+size);
+
+        // Block
+        size = 0x28;
+        draw_tile(0x0000+offset, 200, 350, 0);
+        draw_tile(0x0000+(offset+0x10), 200, 350+size, 0);
+        draw_tile(0x0000+(offset+0x20), 200+size, 350, 0);
+        draw_tile(0x0000+(offset+0x30), 200+size, 350+size, 0);
+
+        offset += 0x40;
+        SDL_Delay(100);
+
         rndr->display();
     }
 
