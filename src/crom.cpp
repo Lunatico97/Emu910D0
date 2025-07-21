@@ -63,7 +63,12 @@ void CardROM::load_rom(const char *filename)
     } 
 }
 
-u8 CardROM::read_ppu(u16 ppu_addr)
+u8 CardROM::read_from_cpu(u16 cpu_addr)
+{
+    return *(PRGROM + mapper->map_cpu(cpu_addr));
+}
+
+u8 CardROM::read_from_ppu(u16 ppu_addr)
 {
     return *(CHRROM + mapper->map_ppu(ppu_addr));
 }

@@ -72,7 +72,7 @@ namespace Utils
     static std::string logHEX(HEX value)
     {
         std::stringstream ss;
-        ss << "< OP8: " << value.h8[0] << " | LN8: " << value.h8[1] << " | HN8: " << value.h8[2] << ">";
+        ss << "< " << logU8("OP8:", value.h8[0]) << " | " << logU8("LN8:", value.h8[1]) << " | " << logU8("LN8:", value.h8[2]) << ">";
         return ss.str();
     }
 };

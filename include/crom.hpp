@@ -9,7 +9,8 @@ class CardROM
     public:
         CardROM();
         ~CardROM();
-        u8 read_ppu(u16 ppu_addr);
+        u8 read_from_cpu(u16 cpu_addr);
+        u8 read_from_ppu(u16 ppu_addr);
         void load_rom(const char *filename);
 
     private:

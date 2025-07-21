@@ -33,9 +33,13 @@ class GUI
         void draw_psw();
         void cleanup();
 
-        CPU *cpu;
-        CardROM *crom;
-        MMU mmu;
+        // Console pointer objects
+        CardROM* crom;
+        CPU* cpu;
+        PPU ppu;
+        MMU* mmu;
+
+        // Graphic status & pointer objects
         bool _active;
         Renderer* rndr;
         SDL_Event event;

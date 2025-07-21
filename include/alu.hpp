@@ -16,7 +16,7 @@ class ALU
 {
     public:
         ALU();
-        ALU(MMU& mmu);
+        ALU(MMU* mmu_ptr);
 
         // Flags
         void update_flags();
@@ -51,7 +51,7 @@ class ALU
 
     private:
         u8 TEMP1, TEMP2, SF; // [S V x B D I Z C]
-        MMU& mmu;
+        MMU* mmu;
 
         // Registers
         void fetchIMD(u8 off);

@@ -28,5 +28,5 @@ void Registers::loadREG(REG r, u8 value)
 void Registers::loadPC(u16 value)
 {
     *(BANK+PCL) = (value & 0x00FF);
-    *(BANK+PCH) = (value & 0xFF00);
+    *(BANK+PCH) = (value & 0xFF00) >> 8;
 }
