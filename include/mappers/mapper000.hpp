@@ -11,15 +11,16 @@ class Mapper000: public Mapper
 
         u16 map_cpu(u16 cpu_addr)
         {
+            // std::cout << Utils::logU16("ADDR: ", cpu_addr) << std::endl;
             if(prg_units == 1)
             {
-                assert(cpu_addr >= 0x8000 && cpu_addr < 0xC000);
-                return cpu_addr-0x8000;
+                assert(cpu_addr >= 0x8000 && cpu_addr <= 0xFFFF);
+                return (cpu_addr & 0x3FFF);
             }
             else
             {
-                assert(cpu_addr >= 0xC000 && cpu_addr <= 0xFFFF);
-                return cpu_addr-0xC000;
+                assert(cpu_addr >= 0x8000 && cpu_addr <= 0xFFFF);
+                return (cpu_addr & 0x3FFF);
             }
         }
 

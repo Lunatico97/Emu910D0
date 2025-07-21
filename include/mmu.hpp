@@ -14,7 +14,10 @@ enum ADR
 class MMU
 {
     public:
-        MMU();
+        MMU(CardROM *cptr, PPU* pptr);
+        ~MMU();
+
+        // Memory interactors
         void load_mem(u16 address, u8 value);
         u8 fetch_mem(u16 address);
 
@@ -56,7 +59,7 @@ class MMU
 
     private:
         Registers rb;
-        Memory mem;
+        Memory* mem;
 };
 
 #endif

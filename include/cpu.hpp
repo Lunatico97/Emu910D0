@@ -1,5 +1,6 @@
 #include <alu.hpp>
 #include <mmu.hpp>
+#include <crom.hpp>
 
 #ifndef _CPU_H_
 #define _CPU_H_
@@ -11,18 +12,16 @@
 class CPU
 {
     public:
-        CPU();
+        CPU(MMU* mmu_ptr);
+        ~CPU();
 
-        void load_machine_code();
-        void step();
+        void load_catridge(CardROM* crom, const char* filename);
+        void step(CardROM* crom);
 
         // Hardware Interrupts
         void rst();
         void nmi();
         void irq();
-        
-        // Memory
-        MMU& get_mmu();
 
     private:
         void decode(const HEX& hex);
@@ -46,7 +45,7 @@ class CPU
         void rts();
         void rti();
 
-        MMU mmu;
+        MMU* mmu;
         ALU alu;
         u16 IREG;
 };
