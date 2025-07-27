@@ -3,7 +3,8 @@
 GUI::GUI()
 {
     crom = new CardROM();
-    mmu = new MMU(crom, &ppu);
+    ppu = new PPU(crom);
+    mmu = new MMU(crom, ppu);
     cpu = new CPU(mmu);
     cpu->load_catridge(crom, "roms/donkey_kong.nes");
     rndr = new Renderer("E910D0", SCRW, SCRH);
@@ -21,6 +22,7 @@ void GUI::cleanup()
     rndr->cleanRenderer();
     delete crom;
     delete rndr;
+    delete ppu;
     delete cpu;
 }
 
@@ -116,7 +118,7 @@ void GUI::draw_reg_bank()
 
 void GUI::run_gui()
 {
-    u8 size = 0x08, offset = 0x00;
+    u8 size = 0x08, offset = 0x00, cycles = 0x08;
     bool pause = true;
 
     while(_active)
@@ -139,36 +141,52 @@ void GUI::run_gui()
             }
         }
 
-        rndr->setColor(0, 0, 0, 255);
-        rndr->clear();
-        rndr->render(5, 5, sys_text);
-        draw_psw();
-        draw_reg_bank();
-        draw_stack();
-        draw_mem();
+        // rndr->setColor(0, 0, 0, 255);
+        // rndr->clear();
+        //rndr->render(5, 5, sys_text);
+        // draw_psw();
+        // draw_reg_bank();
+        // draw_stack();
+        // draw_mem();
 
-        // Pixel
-        size = 0x08;
-        draw_tile(0x0000+offset, 150, 350);
-        draw_tile(0x0000+(offset+0x10), 150, 350+size);
-        draw_tile(0x0000+(offset+0x20), 150+size, 350);
-        draw_tile(0x0000+(offset+0x30), 150+size, 350+size);
+        /* 
+          Don't use these below statements while unpausing emulation; these statements are cost expensive 
+          as they keep fetching tile data on every render cycle but I don't need to make amends to this right now !
+        */
 
-        // Block
-        size = 0x28;
-        draw_tile(0x0000+offset, 200, 350, 0);
-        draw_tile(0x0000+(offset+0x10), 200, 350+size, 0);
-        draw_tile(0x0000+(offset+0x20), 200+size, 350, 0);
-        draw_tile(0x0000+(offset+0x30), 200+size, 350+size, 0);
+        // Pixel 64*64 Sprite
+        // draw_tile(0x0000+offset, 150, 350);
+        // draw_tile(0x0000+(offset+0x10), 150, 350+size);
+        // draw_tile(0x0000+(offset+0x20), 150+size, 350);
+        // draw_tile(0x0000+(offset+0x30), 150+size, 350+size);
+        // offset += 0x40;
+
+        // Pixel Tilemap
+        // for(u16 offset = 0x0000; offset < 0x1000; offset += 0x0010)
+        // {
+        //     draw_tile(offset, 150+(((offset%0x0100)/0x0010)*size), 250+((offset/0x0100)*size));
+        //     draw_tile(offset+0x1000, (150+(((offset%0x0100)/0x0010)*size))+170, 250+((offset/0x0100)*size));
+        // }
 
         if(!pause)
         {
-            offset += 0x40;
-            cpu->step(crom);
-            SDL_Delay(100);
-        }     
+            for(u8 i=0; i<(cycles*3); i++)
+            {
+                ppu->run_ppu(rndr);
+            }
 
-        rndr->display();
+            cycles = cpu->step(crom);
+            // std::cout << Utils::logU8("Cycles: ", cycles) << std::endl;
+
+            if(ppu->trigger_nmi)
+            {
+                cycles = 0x08;
+                cpu->nmi();
+                ppu->trigger_nmi = false;
+            }
+
+            //SDL_Delay(100);
+        }     
     }
 
     cleanup();
