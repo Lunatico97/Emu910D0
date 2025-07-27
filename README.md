@@ -4,6 +4,7 @@ Building a NES Emulator
 ![E910D0](rsrc/snip.png)
 
 Commands:
+- NUM_6 -> PAUSE / UNPAUSE (Continuous execute)
 - NUM_7 -> STEP (Stepwise Execute)
 - NUM_8 -> IRQ (Interrupt Request)
 - NUM_9 -> NMI (Non-Maskable Interrupt)

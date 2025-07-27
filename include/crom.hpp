@@ -17,7 +17,7 @@ class CardROM
         void decode(u8 header[]);
 
         u8 *PRGROM, *CHRROM;
-        u8 prg_units = 0x01, chr_units = 0x01;
+        u8 prg_units = 0x01, chr_units = 0x01; 
         u8 mapper_num = 0x00;
         Mapper* mapper;
 };

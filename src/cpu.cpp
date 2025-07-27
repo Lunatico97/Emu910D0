@@ -16,38 +16,37 @@ void CPU::load_catridge(CardROM* crom, const char *filename)
 
     crom->load_rom(filename);
     rst();
-    IREG = mmu->tapPC();
 }
 
-void CPU::step(CardROM *crom)
+u8 CPU::step(CardROM *crom)
 {   
-        std::cout << Utils::logU16("IREG: ", IREG);
+    HEX current;
+    penalty = 0x00;
+    IREG = mmu->tapPC();    
+    u8 l = IL_MAP[mmu->fetch_mem(IREG)];    
+    mmu->init_pc(mmu->tapPC()+l);
 
-        HEX current;
-        u8 l = IL_MAP[mmu->fetch_mem(IREG)];
-        mmu->init_pc(mmu->tapPC()+l);
+    // Tap registers stepwise
+    // std::cout << Utils::logU16("IREG", IREG);
+    // std::cout << Utils::logU16("PC", mmu->tapPC());
+    // std::cout << Utils::logU8("A", mmu->tapREG(A));
+    // std::cout << Utils::logU8("X", mmu->tapREG(X));
+    // std::cout << Utils::logU8("Y", mmu->tapREG(Y));
+    // std::cout << Utils::logU8("SP", mmu->tapREG(SP));
+    // std::cout << Utils::logU8("ST", mmu->tapREG(ST));
 
-        // Tap registers stepwise
-        // std::cout << Utils::logU16("IR", IREG);
-        // std::cout << Utils::logU16("PC", mmu->tapPC());
-        // std::cout << Utils::logU8("SP", mmu->tapREG(SP));
-        // std::cout << Utils::logU8("ST", mmu->tapREG(ST));
-        // std::cout << Utils::logU8("A", mmu->tapREG(A));
-        // std::cout << Utils::logU8("X", mmu->tapREG(X));
-        // std::cout << Utils::logU8("Y", mmu->tapREG(Y));
+    for(int i=0; i<l; i++)
+    {
+        current.h8[i] = mmu->fetch_mem(IREG+i); 
+    }
 
-        for(int i=0; i<l; i++)
-        {
-            current.h8[i] = mmu->fetch_mem(IREG+i); 
-        }
-
-        decode(current);
-        IREG = mmu->tapPC();    
+    decode(current);
+    return CYCLE_MAP[mmu->fetch_mem(IREG)] + penalty;
 }
 
 void CPU::decode(const HEX& hex)
 {
-    std::cout << Utils::logHEX(hex) << std::endl;
+    // std::cout << Utils::logHEX(hex) << std::endl;
     u16 h16 = (static_cast<u16>(hex.h8[1]) | (static_cast<u16>(hex.h8[2]) << 8));
 
     switch(hex.h8[0])
@@ -216,14 +215,14 @@ void CPU::decode(const HEX& hex)
         case 0x24: alu.set_flag(mmu->fetch_mem(static_cast<u16>(hex.h8[1]))); break;
         case 0x2C: alu.set_flag(mmu->fetch_mem(h16)); break;
         
-        case 0x90: bcc(hex.h8[1]); break;
-        case 0xB0: bcs(hex.h8[1]); break;
-        case 0xF0: beq(hex.h8[1]); break;
-        case 0x30: bmi(hex.h8[1]); break;
-        case 0xD0: bne(hex.h8[1]); break;
-        case 0x10: bpl(hex.h8[1]); break;
-        case 0x50: bvc(hex.h8[1]); break;
-        case 0x70: bvs(hex.h8[1]); break;
+        case 0x90: brc_rst(HX_CARY, hex.h8[1]); break;
+        case 0xB0: brc_set(HX_CARY, hex.h8[1]); break;
+        case 0xF0: brc_set(HX_ZERO, hex.h8[1]); break;
+        case 0x30: brc_set(HX_SIGN, hex.h8[1]); break;
+        case 0xD0: brc_rst(HX_ZERO, hex.h8[1]); break;
+        case 0x10: brc_rst(HX_SIGN, hex.h8[1]); break;
+        case 0x50: brc_rst(HX_OVFW, hex.h8[1]); break;
+        case 0x70: brc_set(HX_OVFW, hex.h8[1]); break;
 
         case 0x4C: jmp(h16); break; 
                
@@ -242,51 +241,23 @@ void CPU::jmp(u16 address)
     mmu->init_pc(address);
 }
 
-void CPU::bcc(u8 rel_addr)
+void CPU::brc_set(u8 hx_flag, u8 rel_addr)
 {
-    if((mmu->tapREG(ST) & HX_CARY) != HX_CARY) mmu->init_pc(mmu->get_addr(ADR::REL, 0x0000, rel_addr));
+    if((mmu->tapREG(ST) & hx_flag) == hx_flag)
+    {
+        mmu->init_pc(mmu->get_addr(ADR::REL, 0x0000, rel_addr));
+        penalty += 0x01;
+    }
     else return;
 }
 
-void CPU::bcs(u8 rel_addr)
+void CPU::brc_rst(u8 hx_flag, u8 rel_addr)
 {
-    if((mmu->tapREG(ST) & HX_CARY) == HX_CARY) mmu->init_pc(mmu->get_addr(ADR::REL, 0x0000, rel_addr));
-    else return;
-}
-
-void CPU::beq(u8 rel_addr)
-{
-    if((mmu->tapREG(ST) & HX_ZERO) == HX_ZERO) mmu->init_pc(mmu->get_addr(ADR::REL, 0x0000, rel_addr));
-    else return;
-}
-
-void CPU::bmi(u8 rel_addr)
-{
-    if((mmu->tapREG(ST) & HX_SIGN) == HX_SIGN) mmu->init_pc(mmu->get_addr(ADR::REL, 0x0000, rel_addr));
-    else return;
-}
-
-void CPU::bne(u8 rel_addr)
-{
-    if((mmu->tapREG(ST) & HX_ZERO) != HX_ZERO) mmu->init_pc(mmu->get_addr(ADR::REL, 0x0000, rel_addr));
-    else return;
-}
-
-void CPU::bpl(u8 rel_addr)
-{
-    if((mmu->tapREG(ST) & HX_SIGN) != HX_SIGN) mmu->init_pc(mmu->get_addr(ADR::REL, 0x0000, rel_addr));
-    else return;
-}
-
-void CPU::bvc(u8 rel_addr)
-{
-    if((mmu->tapREG(ST) & HX_OVFW) != HX_OVFW) mmu->init_pc(mmu->get_addr(ADR::REL, 0x0000, rel_addr));
-    else return;
-}
-
-void CPU::bvs(u8 rel_addr)
-{
-    if((mmu->tapREG(ST) & HX_OVFW) == HX_OVFW) mmu->init_pc(mmu->get_addr(ADR::REL, 0x0000, rel_addr));
+    if((mmu->tapREG(ST) & hx_flag) != hx_flag)
+    {
+        mmu->init_pc(mmu->get_addr(ADR::REL, 0x0000, rel_addr));
+        penalty += 0x01;
+    }
     else return;
 }
 

@@ -16,7 +16,8 @@ class CPU
         ~CPU();
 
         void load_catridge(CardROM* crom, const char* filename);
-        void step(CardROM* crom);
+        u8 step(CardROM* crom);
+        u8 penalty;
 
         // Hardware Interrupts
         void rst();
@@ -27,14 +28,8 @@ class CPU
         void decode(const HEX& hex);
 
         // Branching
-        void bcc(u8 rel_addr);
-        void bcs(u8 rel_addr);
-        void beq(u8 rel_addr);
-        void bmi(u8 rel_addr);
-        void bne(u8 rel_addr);
-        void bpl(u8 rel_addr);
-        void bvc(u8 rel_addr);
-        void bvs(u8 rel_addr);
+        void brc_set(u8 hx_flag, u8 rel_addr);
+        void brc_rst(u8 hx_flag, u8 rel_addr);
 
         // Routines & Interrupts
         void jmp(u16 address);

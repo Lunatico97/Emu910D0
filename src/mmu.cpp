@@ -72,12 +72,12 @@ void MMU::st(REG src, REG off, u16 addr)
 void MMU::ldo(REG des, REG off, u16 addr)
 {
     if(off != REG::NON) rb.loadREG(des, mem->retreive((addr & 0x00FF) + rb.fetchREG(off)));
-    else rb.loadREG(des, mem->retreive(addr));
+    else rb.loadREG(des, mem->retreive(addr & 0x00FF));
 }
 
 void MMU::sto(REG src, REG off, u16 addr)
 {
-    if(off != REG::NON) mem->store(addr + rb.fetchREG(off), rb.fetchREG(src));
+    if(off != REG::NON) mem->store((addr & 0x00FF) + rb.fetchREG(off), rb.fetchREG(src));
     else mem->store((addr & 0x00FF), rb.fetchREG(src));
 }
 

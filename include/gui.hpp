@@ -36,7 +36,7 @@ class GUI
         // Console pointer objects
         CardROM* crom;
         CPU* cpu;
-        PPU ppu;
+        PPU* ppu;
         MMU* mmu;
 
         // Graphic status & pointer objects
