@@ -16,8 +16,10 @@ class CPU
         ~CPU();
 
         void load_catridge(CardROM* crom, const char* filename);
-        u8 step(CardROM* crom);
-        u8 penalty;
+
+        // CPU runners
+        void clock();
+        void step();
 
         // Hardware Interrupts
         void rst();
@@ -40,6 +42,7 @@ class CPU
         void rts();
         void rti();
 
+        u8 cycles, penalty;
         MMU* mmu;
         ALU alu;
         u16 IREG;

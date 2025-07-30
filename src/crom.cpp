@@ -22,6 +22,7 @@ void CardROM::decode(u8 header[])
     PRGROM = (u8*)calloc(prg_units*16384, sizeof(u8));
     CHRROM = (u8*)calloc(chr_units*8192, sizeof(u8));
     mapper_num = header[7] | (header[6] >> 4);
+    mirror_mode = ((header[6] & D0) == D0);
     switch(mapper_num)
     {
         case 0x00: mapper = new Mapper000(prg_units, chr_units); break;
@@ -51,6 +52,7 @@ void CardROM::load_rom(const char *filename)
     std::cout << Utils::logU8("PRG Banks: ", prg_units) << std::endl;  
     std::cout << Utils::logU8("CHR Banks: ", chr_units) << std::endl;  
     std::cout << Utils::logU8("Mapper: ", mapper_num) << std::endl;
+    std::cout << "Mirror Mode: " << (mirror_mode ? "Vertical": "Horizontal") << std::endl;
 
     *(PRGROM + 0) = current_hex;
     u16 prg_limit = 0x000F + (prg_units*16384);

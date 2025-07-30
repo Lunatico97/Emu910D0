@@ -1,17 +1,18 @@
 #include <gui.hpp>
 
-GUI::GUI()
+GUI::GUI():system_clock(0)
 {
     crom = new CardROM();
     ppu = new PPU(crom);
     mmu = new MMU(crom, ppu);
     cpu = new CPU(mmu);
-    cpu->load_catridge(crom, "roms/donkey_kong.nes");
+    crom->load_rom("/home/diwas/Downloads/Emu910D0/roms/nestest.nes");
     rndr = new Renderer("E910D0", SCRW, SCRH);
     sys_font = rndr->loadFont("rsrc/font.ttf", FTPT);
     sys_text = rndr->loadText("E910D0 [ Commands: PAUSE(6) | STEP(7) | IRQ (8) | NMI (9) | RST (0) ]", sys_font, CLR_CYAN);
     flag_text = rndr->loadText(" N   V   x   B   D   I   Z   C ", sys_font, CLR_GREEN);
-    _active = true;    
+    _active = true;
+    cpu->rst();    
 }
 
 void GUI::cleanup()
@@ -118,7 +119,7 @@ void GUI::draw_reg_bank()
 
 void GUI::run_gui()
 {
-    u8 size = 0x08, offset = 0x00, cycles = 0x08;
+    u8 size = 0x08, offset = 0x00;
     bool pause = true;
 
     while(_active)
@@ -131,7 +132,7 @@ void GUI::run_gui()
                 switch(event.key.keysym.sym)
                 {
                     case SDLK_6: pause = !pause; break;
-                    case SDLK_7: cpu->step(crom); break;
+                    case SDLK_7: cpu->step(); break;
                     case SDLK_8: cpu->irq(); break;
                     case SDLK_9: cpu->nmi(); break;
                     case SDLK_0: cpu->rst(); break;
@@ -143,7 +144,7 @@ void GUI::run_gui()
 
         // rndr->setColor(0, 0, 0, 255);
         // rndr->clear();
-        //rndr->render(5, 5, sys_text);
+        // rndr->render(5, 5, sys_text);
         // draw_psw();
         // draw_reg_bank();
         // draw_stack();
@@ -170,23 +171,23 @@ void GUI::run_gui()
 
         if(!pause)
         {
-            for(u8 i=0; i<(cycles*3); i++)
-            {
-                ppu->run_ppu(rndr);
-            }
+            ppu->run_ppu(rndr);
 
-            cycles = cpu->step(crom);
-            // std::cout << Utils::logU8("Cycles: ", cycles) << std::endl;
+            if((system_clock % 3) == 0)
+            {
+                cpu->clock();
+            }
 
             if(ppu->trigger_nmi)
             {
-                cycles = 0x08;
                 cpu->nmi();
                 ppu->trigger_nmi = false;
             }
 
+            system_clock++;
             //SDL_Delay(100);
         }     
+        // rndr->display();     
     }
 
     cleanup();

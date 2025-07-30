@@ -2,14 +2,19 @@
     "tasks": [
         {
             "type": "cppbuild",
-            "label": "C/C++: g++ build active file",
+            "label": "C/C++: g++ build E910D0",
             "command": "/usr/bin/g++",
             "args": [
+                "${fileDirname}/*.cpp",
                 "-fdiagnostics-color=always",
-                "-g",
-                "${file}",
+                "-I${fileDirname}/../include/",
                 "-o",
-                "${fileDirname}/${fileBasenameNoExtension}"
+                "${fileDirname}/../bin/e910D0",
+                "-g",
+                "-lSDL2main",
+                "-lSDL2",
+                "-lSDL2_image",
+                "-lSDL2_ttf"
             ],
             "options": {
                 "cwd": "${fileDirname}"

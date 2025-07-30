@@ -12,7 +12,9 @@ void Memory::store(u16 m_address, u8 value)
 {
     if(m_address >= 0x0000 && m_address < 0x2000) block[(m_address & 0x07FF)] = value;
     else if(m_address >= 0x2000 && m_address < 0x4000) ppu->write_from_cpu((m_address & 0x2007), value);
-    else if(m_address >= 0x4000 && m_address < 0x4020);
+    else if(m_address >= 0x4000 && m_address < 0x4020) return;
+    else if(m_address >= 0x4020 && m_address < 0x8000) return;
+    else return;
     //else crom->write_from_cpu(); 
     // Right now, we use only mapper 000 that doesn't perform writes on card
 }
