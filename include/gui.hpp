@@ -33,6 +33,9 @@ class GUI
         void draw_psw();
         void cleanup();
 
+        // Global timer
+        uint32_t system_clock;
+
         // Console pointer objects
         CardROM* crom;
         CPU* cpu;

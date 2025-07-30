@@ -5,7 +5,17 @@ ALU::ALU(MMU* mmu_ptr): mmu(mmu_ptr){}
 void ALU::update_flags()
 {
     if((TEMP1 & D7) == D7) SF |= HX_SIGN;
+    else SF &= ~HX_SIGN;
     if(TEMP1 == 0x00) SF |= HX_ZERO;
+    else SF &= ~HX_ZERO;
+}
+
+void ALU::update_flags_on_ld(REG r)
+{
+    TEMP1 = mmu->tapREG(r);
+    SF = mmu->tapREG(ST);
+    update_flags();
+    mmu->ld(ST, SF);
 }
 
 void ALU::adc(ADR mode, u16 addr, u8 off)
@@ -13,7 +23,8 @@ void ALU::adc(ADR mode, u16 addr, u8 off)
     if(mode == -1) fetchIMD(off);
     else fetchMEM(mode, addr, off);
     TEMP1 = mmu->tapREG(A);   
-    u16 TEMP = TEMP1 + TEMP2;
+    u16 TEMP = TEMP1 + TEMP2 + ((SF & HX_CARY) == HX_CARY ? 1 : 0);
+    SF &= ~(HX_CARY | HX_OVFW);
     if(TEMP > 0xFF) SF |= HX_CARY;
     if((TEMP ^ TEMP1) & (TEMP ^ TEMP2) & D7) SF |= HX_OVFW; 
     TEMP1 += TEMP2;
@@ -25,7 +36,8 @@ void ALU::sbc(ADR mode, u16 addr, u8 off)
     if(mode == -1) fetchIMD(off);
     else fetchMEM(mode, addr, off);
     TEMP1 = mmu->tapREG(A);
-    u16 TEMP = TEMP1 - TEMP2;
+    u16 TEMP = TEMP1 - TEMP2 + ((SF & HX_CARY) == HX_CARY ? 1 : 0);
+    SF &= ~(HX_CARY | HX_OVFW);
     if(!(TEMP < 0x00)) SF |= HX_CARY;
     if((TEMP ^ TEMP1) & (TEMP ^ ~TEMP2) & D7) SF |= HX_OVFW;
     TEMP1 -= TEMP2;
@@ -63,10 +75,11 @@ void ALU::cmp(REG r, ADR mode, u16 addr, u8 off)
 {
     if(mode == -1) fetchIMD(off);
     else fetchMEM(mode, addr, off);
+    SF &= ~(HX_CARY);
     TEMP1 = mmu->tapREG(r);
     if(TEMP1 >= TEMP2) { SF |= HX_CARY; /* A >= M => C = 1 */ }
     if(TEMP1 == TEMP2) { SF |= HX_ZERO; /* A == M => Z = 1 */ }
-    loadREG(r);
+    mmu->ld(ST, SF);
 }
 
 void ALU::asl(ADR mode, u16 addr, u8 off)

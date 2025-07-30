@@ -20,6 +20,7 @@ class ALU
 
         // Flags
         void update_flags();
+        void update_flags_on_ld(REG r);
 
         // Arithmetic Operations
         void adc(ADR mode, u16 addr, u8 off);

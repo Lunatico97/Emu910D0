@@ -38,29 +38,30 @@ u8 PPU::read_from_cpu(u16 addr)
 
 u8 PPU::fetch_vram(u16 addr)
 {
+    addr &= 0x3FFF;
     if(addr >= 0x0000 && addr < 0x2000) return crom->read_from_ppu(addr);
-    else if(addr >= 0x2000 && addr < 0x2800) return NAME[addr-0x2000];
-    else if(addr >= 0x2800 && addr < 0x3F00) return NAME[(addr & 0x07FF)];
-    else if(addr >= 0x3F00 && addr < 0x3F20)
+    else if(addr >= 0x2000 && addr < 0x3F00) return NAME[(addr & 0x07FF)];
+    else if(addr >= 0x3F00 && addr < 0x4000)
     {
         u16 pal_idx = addr & 0x001F; // Original mask
         if ((pal_idx & 0x0003) == 0) pal_idx &= 0x000F; 
-        return NAME[pal_idx];
+        return PAL[pal_idx];
     }
     else throw(std::runtime_error(Utils::logU16("Out of bounds (R) from VRAM: ", addr)));
 }
 
 void PPU::store_vram(u16 addr, u8 value)
 {
-    if(addr >= 0x2000 && addr < 0x2800) NAME[addr-0x2000] = value;
-    else if(addr >= 0x2800 && addr < 0x3F00) NAME[(addr & 0x07FF)] = value;
-    else if(addr >= 0x3F00 && addr < 0x3F20)
+    addr &= 0x3FFF;
+    if(addr >= 0x0000 && addr < 0x2000) return;
+    if(addr >= 0x2000 && addr < 0x3F00) NAME[(addr & 0x07FF)] = value;
+    else if(addr >= 0x3F00 && addr < 0x4000)
     {
         u16 pal_idx = addr & 0x001F; // Original mask
         if((pal_idx & 0x0003) == 0) pal_idx &= 0x000F; 
-        NAME[pal_idx] = value;
+        PAL[pal_idx] = value;
     }
-    else throw(std::runtime_error(Utils::logU16("Out of bounds (R) to VRAM: ", addr)));
+    else throw(std::runtime_error(Utils::logU16("Out of bounds (W) to VRAM: ", addr)));
 }
 
 void PPU::set_ppu_ctrl(u8 ctrl)
@@ -163,20 +164,23 @@ void PPU::update_v(bool vt = 0)
     {
         // Fine scrolling Y
         if ((V & 0x7000) != 0x7000) V += 0x1000;
-        else V &= ~0x7000;
-        
-        // Coarse scrolling Y
-        u16 y = (V & 0x03E0) >> 5; // coarse Y
-        
-        if (y == 29)
+        else
         {
-            y = 0;
-            V ^= 0x0800; // NN = 10
-        }    
-        else if (y == 31) y = 0;
-        else y += 1;
+            V &= ~0x7000;
         
-        V = (V & ~0x03E0) | (y << 5); // put coarse Y back into v
+            // Coarse scrolling Y
+            u16 y = (V & 0x03E0) >> 5; // coarse Y
+            
+            if (y == 29)
+            {
+                y = 0;
+                V ^= 0x0800; // NN = 10
+            }    
+            else if (y == 31) y = 0;
+            else y += 1;
+            
+            V = (V & ~0x03E0) | (y << 5); // put coarse Y back into v
+        }
     }         
 }
 
@@ -253,7 +257,7 @@ void PPU::run_ppu(Renderer *rndr)
                 // Update V register horizontal
                 LBSHF = LBL;
                 HBSHF = HBL;
-                update_v();
+                if(bg_enabled || spr_enabled) update_v();
                 break;
 
             case 0x01:
@@ -284,7 +288,7 @@ void PPU::run_ppu(Renderer *rndr)
 
         if(cycles == 256)
         {
-            update_v(1);
+            if(bg_enabled || spr_enabled) update_v(1);
         }
 
         if(cycles == 257)

@@ -1,24 +1,19 @@
 #include <cpu.hpp>
 
-CPU::CPU(MMU* mmu_ptr): mmu(mmu_ptr), alu(mmu_ptr) {}
+CPU::CPU(MMU* mmu_ptr): mmu(mmu_ptr), alu(mmu_ptr), cycles(0), penalty(0) {}
 CPU::~CPU() { delete mmu; }
 
-void CPU::load_catridge(CardROM* crom, const char *filename)
+void CPU::clock()
 {
-    // u8 hexes[] = {
-    //     0xA9, 0x00, 0xA2, 0x01, 0x69, 0x01, 0xE8, 0x9D, 0xF0, 0x00, 0xE0, 0x0A, 0xD0, 0xF6, 0x00
-    // };
-
-    // for(u16 i=0x0000; i<sizeof(hexes)/sizeof(u8); i++)
-    // {
-    //     mmu->load_mem(i, hexes[i]);
-    // }
-
-    crom->load_rom(filename);
-    rst();
+    if(cycles == 0)
+    {
+        this->step();
+        cycles = CYCLE_MAP[mmu->fetch_mem(IREG)] + penalty;
+    }
+    cycles -= 1;
 }
 
-u8 CPU::step(CardROM *crom)
+void CPU::step()
 {   
     HEX current;
     penalty = 0x00;
@@ -27,13 +22,13 @@ u8 CPU::step(CardROM *crom)
     mmu->init_pc(mmu->tapPC()+l);
 
     // Tap registers stepwise
-    // std::cout << Utils::logU16("IREG", IREG);
-    // std::cout << Utils::logU16("PC", mmu->tapPC());
-    // std::cout << Utils::logU8("A", mmu->tapREG(A));
-    // std::cout << Utils::logU8("X", mmu->tapREG(X));
-    // std::cout << Utils::logU8("Y", mmu->tapREG(Y));
-    // std::cout << Utils::logU8("SP", mmu->tapREG(SP));
-    // std::cout << Utils::logU8("ST", mmu->tapREG(ST));
+    std::cout << Utils::logU16("IREG", IREG);
+    std::cout << Utils::logU16("PC", mmu->tapPC());
+    std::cout << Utils::logU8("A", mmu->tapREG(A));
+    std::cout << Utils::logU8("X", mmu->tapREG(X));
+    std::cout << Utils::logU8("Y", mmu->tapREG(Y));
+    std::cout << Utils::logU8("SP", mmu->tapREG(SP));
+    std::cout << Utils::logU8("ST", mmu->tapREG(ST));
 
     for(int i=0; i<l; i++)
     {
@@ -41,37 +36,36 @@ u8 CPU::step(CardROM *crom)
     }
 
     decode(current);
-    return CYCLE_MAP[mmu->fetch_mem(IREG)] + penalty;
 }
 
 void CPU::decode(const HEX& hex)
 {
-    // std::cout << Utils::logHEX(hex) << std::endl;
+    std::cout << Utils::logHEX(hex) << std::endl;
     u16 h16 = (static_cast<u16>(hex.h8[1]) | (static_cast<u16>(hex.h8[2]) << 8));
 
     switch(hex.h8[0])
     {
         case 0xEA: break;
-        case 0xA9: mmu->ld(A, hex.h8[1]); break;
-        case 0xA5: mmu->ldo(A, NON, h16); break;
-        case 0xB5: mmu->ldo(A, X, h16); break;
-        case 0xAD: mmu->ld(A, NON, h16); break;
-        case 0xBD: mmu->ld(A, X, h16); break;
-        case 0xB9: mmu->ld(A, Y, h16); break;
-        case 0xA1: mmu->ldi(A, X, h16); break;
-        case 0xB1: mmu->ldix(A, Y, h16); break;
+        case 0xA9: mmu->ld(A, hex.h8[1]); alu.update_flags_on_ld(A); break;
+        case 0xA5: mmu->ldo(A, NON, h16); alu.update_flags_on_ld(A); break;
+        case 0xB5: mmu->ldo(A, X, h16); alu.update_flags_on_ld(A); break;
+        case 0xAD: mmu->ld(A, NON, h16); alu.update_flags_on_ld(A); break;
+        case 0xBD: mmu->ld(A, X, h16); alu.update_flags_on_ld(A); break;
+        case 0xB9: mmu->ld(A, Y, h16); alu.update_flags_on_ld(A); break;
+        case 0xA1: mmu->ldi(A, X, h16); alu.update_flags_on_ld(A); break;
+        case 0xB1: mmu->ldix(A, Y, h16); alu.update_flags_on_ld(A); break;
 
-        case 0xA2: mmu->ld(X, hex.h8[1]); break;
-        case 0xA6: mmu->ldo(X, NON, h16); break;
-        case 0xB6: mmu->ldo(X, Y, h16); break;
-        case 0xAE: mmu->ld(X, NON, h16); break;
-        case 0xBE: mmu->ld(X, Y, h16); break;
+        case 0xA2: mmu->ld(X, hex.h8[1]); alu.update_flags_on_ld(X); break;
+        case 0xA6: mmu->ldo(X, NON, h16); alu.update_flags_on_ld(X); break;
+        case 0xB6: mmu->ldo(X, Y, h16); alu.update_flags_on_ld(X); break;
+        case 0xAE: mmu->ld(X, NON, h16); alu.update_flags_on_ld(X); break;
+        case 0xBE: mmu->ld(X, Y, h16); alu.update_flags_on_ld(X); break;
 
-        case 0xA0: mmu->ld(Y, hex.h8[1]); break;
-        case 0xA4: mmu->ldo(Y, NON, h16); break;
-        case 0xB4: mmu->ldo(Y, X, h16); break;
-        case 0xAC: mmu->ld(Y, NON, h16); break;
-        case 0xBC: mmu->ld(Y, X, h16); break;
+        case 0xA0: mmu->ld(Y, hex.h8[1]); alu.update_flags_on_ld(Y); break;
+        case 0xA4: mmu->ldo(Y, NON, h16); alu.update_flags_on_ld(Y); break;
+        case 0xB4: mmu->ldo(Y, X, h16); alu.update_flags_on_ld(Y); break;
+        case 0xAC: mmu->ld(Y, NON, h16); alu.update_flags_on_ld(Y); break;
+        case 0xBC: mmu->ld(Y, X, h16); alu.update_flags_on_ld(Y); break;
 
         case 0x85: mmu->sto(A, NON, h16); break;
         case 0x95: mmu->sto(A, X, h16); break;
