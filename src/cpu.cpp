@@ -46,26 +46,26 @@ void CPU::decode(const HEX& hex)
     switch(hex.h8[0])
     {
         case 0xEA: break;
-        case 0xA9: mmu->ld(A, hex.h8[1]); alu.update_flags_on_ld(A); break;
-        case 0xA5: mmu->ldo(A, NON, h16); alu.update_flags_on_ld(A); break;
-        case 0xB5: mmu->ldo(A, X, h16); alu.update_flags_on_ld(A); break;
-        case 0xAD: mmu->ld(A, NON, h16); alu.update_flags_on_ld(A); break;
-        case 0xBD: mmu->ld(A, X, h16); alu.update_flags_on_ld(A); break;
-        case 0xB9: mmu->ld(A, Y, h16); alu.update_flags_on_ld(A); break;
-        case 0xA1: mmu->ldi(A, X, h16); alu.update_flags_on_ld(A); break;
-        case 0xB1: mmu->ldix(A, Y, h16); alu.update_flags_on_ld(A); break;
+        case 0xA9: mmu->ld(A, hex.h8[1]); mmu->updf(A); break;
+        case 0xA5: mmu->ldo(A, NON, h16); break;
+        case 0xB5: mmu->ldo(A, X, h16); break;
+        case 0xAD: mmu->ld(A, NON, h16); break;
+        case 0xBD: mmu->ld(A, X, h16); break;
+        case 0xB9: mmu->ld(A, Y, h16); break;
+        case 0xA1: mmu->ldi(A, X, h16); break;
+        case 0xB1: mmu->ldix(A, Y, h16); break;
 
-        case 0xA2: mmu->ld(X, hex.h8[1]); alu.update_flags_on_ld(X); break;
-        case 0xA6: mmu->ldo(X, NON, h16); alu.update_flags_on_ld(X); break;
-        case 0xB6: mmu->ldo(X, Y, h16); alu.update_flags_on_ld(X); break;
-        case 0xAE: mmu->ld(X, NON, h16); alu.update_flags_on_ld(X); break;
-        case 0xBE: mmu->ld(X, Y, h16); alu.update_flags_on_ld(X); break;
+        case 0xA2: mmu->ld(X, hex.h8[1]); mmu->updf(X); break;
+        case 0xA6: mmu->ldo(X, NON, h16); break;
+        case 0xB6: mmu->ldo(X, Y, h16); break;
+        case 0xAE: mmu->ld(X, NON, h16); break;
+        case 0xBE: mmu->ld(X, Y, h16); break;
 
-        case 0xA0: mmu->ld(Y, hex.h8[1]); alu.update_flags_on_ld(Y); break;
-        case 0xA4: mmu->ldo(Y, NON, h16); alu.update_flags_on_ld(Y); break;
-        case 0xB4: mmu->ldo(Y, X, h16); alu.update_flags_on_ld(Y); break;
-        case 0xAC: mmu->ld(Y, NON, h16); alu.update_flags_on_ld(Y); break;
-        case 0xBC: mmu->ld(Y, X, h16); alu.update_flags_on_ld(Y); break;
+        case 0xA0: mmu->ld(Y, hex.h8[1]); mmu->updf(Y); break;
+        case 0xA4: mmu->ldo(Y, NON, h16); break;
+        case 0xB4: mmu->ldo(Y, X, h16); break;
+        case 0xAC: mmu->ld(Y, NON, h16); break;
+        case 0xBC: mmu->ld(Y, X, h16); break;
 
         case 0x85: mmu->sto(A, NON, h16); break;
         case 0x95: mmu->sto(A, X, h16); break;
@@ -294,6 +294,7 @@ void CPU::rst()
     mmu->ld(ST, 0x00 | HX_NUSE);
     mmu->ld(PCL, NON, RST_VECTOR);
     mmu->ld(PCH, NON, RST_VECTOR+0x0001);
+    cycles = 7;
 }
 
 void CPU::irq()
@@ -306,6 +307,7 @@ void CPU::irq()
         mmu->push(ST);
         mmu->ld(PCL, NON, IRQ_VECTOR);
         mmu->ld(PCH, NON, IRQ_VECTOR+0x0001);
+        cycles = 7;
     }
 }
 
@@ -317,4 +319,5 @@ void CPU::nmi()
     mmu->push(ST);
     mmu->ld(PCL, NON, NMI_VECTOR);
     mmu->ld(PCH, NON, NMI_VECTOR+0x0001);
+    cycles = 7;
 }

@@ -50,6 +50,7 @@ void MMU::pop(REG r)
 void MMU::tr(REG des, REG src)
 {
     rb.loadREG(des, rb.fetchREG(src));
+    if(des != SP) updf(des);
 }
 
 void MMU::ld(REG des, u8 value)
@@ -61,6 +62,7 @@ void MMU::ld(REG des, REG off, u16 addr)
 {
     if(off != REG::NON) rb.loadREG(des, mem->retreive(addr + rb.fetchREG(off)));
     else rb.loadREG(des, mem->retreive(addr));
+    updf(des);
 }
 
 void MMU::st(REG src, REG off, u16 addr)
@@ -73,6 +75,7 @@ void MMU::ldo(REG des, REG off, u16 addr)
 {
     if(off != REG::NON) rb.loadREG(des, mem->retreive((addr & 0x00FF) + rb.fetchREG(off)));
     else rb.loadREG(des, mem->retreive(addr & 0x00FF));
+    updf(des);
 }
 
 void MMU::sto(REG src, REG off, u16 addr)
@@ -85,6 +88,7 @@ void MMU::ldi(REG des, REG off, u16 addr)
 {
     u8 act_addr = get_addr(ADR::IXI, addr, rb.fetchREG(off));
     rb.loadREG(des, mem->retreive(act_addr));
+    updf(des);
 }
 
 void MMU::sti(REG src, REG off, u16 addr)
@@ -97,6 +101,7 @@ void MMU::ldix(REG des, REG off, u16 addr)
 {
     u16 base_addr = get_addr(ADR::IND, addr, 0x00);
     rb.loadREG(des, mem->retreive(base_addr + rb.fetchREG(off)));
+    updf(des);
 }
 
 void MMU::stix(REG src, REG off, u16 addr)
@@ -117,11 +122,7 @@ u16 MMU::get_addr(ADR mode, u16 addr, u8 off)
         case ADR::IND: res_addr = (mem->retreive(addr) & 0x00FF) | (mem->retreive(addr+1) & 0xFF00); break;
         case ADR::IIX: res_addr = (mem->retreive(addr) & 0x00FF) | (mem->retreive(addr+1) & 0xFF00) + static_cast<u16>(off); break;
         case ADR::IXI: res_addr = ((mem->retreive(addr) + off) & 0x00FF) | (mem->retreive(addr+1) & 0xFF00); break;
-        case ADR::REL: if((off & D7) == D7) 
-                        {
-                            u8 soff = ~off + 1;
-                            res_addr = tapPC() - soff;
-                        }
+        case ADR::REL: if((off & D7) == D7) res_addr = tapPC() - ((~off+1) & 0x00FF);
                        else res_addr = tapPC() + off; 
                        break;
         case ADR::ZER: res_addr = static_cast<u16>(off); break;
@@ -131,6 +132,17 @@ u16 MMU::get_addr(ADR mode, u16 addr, u8 off)
     }
 
     return res_addr;
+}
+
+void MMU::updf(REG r)
+{
+    u8 flags = rb.fetchREG(ST);
+    u8 value = rb.fetchREG(r);
+    if((value & D7) == D7) flags |= D7;
+    else flags &= ~D7;
+    if(value == 0x00) flags |= D1;
+    else flags &= ~D1;
+    rb.loadREG(ST, flags);
 }
 
 u8 MMU::tapREG(REG r)

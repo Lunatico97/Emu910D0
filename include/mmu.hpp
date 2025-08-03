@@ -53,6 +53,9 @@ class MMU
         // Addressing
         u16 get_addr(ADR mode, u16 addr, u8 off);
 
+        // Flags
+        void updf(REG r);
+
         // Taps
         u8 tapREG(REG r);
         u16 tapPC();
