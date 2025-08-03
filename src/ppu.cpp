@@ -40,7 +40,15 @@ u8 PPU::fetch_vram(u16 addr)
 {
     addr &= 0x3FFF;
     if(addr >= 0x0000 && addr < 0x2000) return crom->read_from_ppu(addr);
-    else if(addr >= 0x2000 && addr < 0x3F00) return NAME[(addr & 0x07FF)];
+    else if(addr >= 0x2000 && addr < 0x3000){
+        addr &= 0x07FF;
+        if(crom->mirror_mode)
+        {
+            if(addr >= 0x0800 && addr < 0x0C00) addr &= 0x03FF;
+        }
+        return NAME[addr];
+    }
+    else if(addr >= 0x3000 && addr < 0x3F00) return NAME[(addr & 0x0EFF)];
     else if(addr >= 0x3F00 && addr < 0x4000)
     {
         u16 pal_idx = addr & 0x001F; // Original mask
@@ -54,7 +62,15 @@ void PPU::store_vram(u16 addr, u8 value)
 {
     addr &= 0x3FFF;
     if(addr >= 0x0000 && addr < 0x2000) return;
-    if(addr >= 0x2000 && addr < 0x3F00) NAME[(addr & 0x07FF)] = value;
+     else if(addr >= 0x2000 && addr < 0x3000){
+        addr &= 0x07FF;
+        if(crom->mirror_mode)
+        {
+            if(addr >= 0x0800 && addr < 0x0C00) addr &= 0x03FF;
+        }
+        NAME[addr] = value;
+    }
+    else if(addr >= 0x3000 && addr < 0x3F00) NAME[(addr & 0x0EFF)] = value;
     else if(addr >= 0x3F00 && addr < 0x4000)
     {
         u16 pal_idx = addr & 0x001F; // Original mask
@@ -245,7 +261,7 @@ void PPU::run_ppu(Renderer *rndr)
 
     // Frame timing for background 
     // [Based on NesWiki diagram: https://www.nesdev.org/w/images/default/4/4f/Ppu.svg ]
-    u16 tile_addr, attr_addr;
+    u16 tile_addr, attr_addr, pattern_select, palette_bits;
 
     if((lines >= 0 && lines < 240) || lines == 261)
     {
@@ -257,6 +273,8 @@ void PPU::run_ppu(Renderer *rndr)
                 // Update V register horizontal
                 LBSHF = LBL;
                 HBSHF = HBL;
+                LASHF = (palette_bits & D0) == D0 ? 0xFF: 0x00;
+                HASHF = (palette_bits & D1) == D1 ? 0xFF: 0x00;
                 if(bg_enabled || spr_enabled) update_v();
                 break;
 
@@ -275,11 +293,13 @@ void PPU::run_ppu(Renderer *rndr)
             case 0x05:
                 // Get shifter low bits
                 LBL = fetch_vram(bg_addr + (name_byte*0x10) + ((V >> 12) & 0x0007));
+                palette_select = ((V & 0x02) >> 1) | ((V & 0x40) >> 5);
                 break;
 
             case 0x07:
                 // Get shifter high bits
                 HBL = fetch_vram(bg_addr + (name_byte*0x10) + ((V >> 12) & 0x0007) + 0x08);
+                palette_bits = (attr_byte >> (palette_select * 2)) & 0x03;
                 break;
             
             default:
@@ -312,5 +332,16 @@ void PPU::run_ppu(Renderer *rndr)
         {
             V = (V & 0x841F) | (T & 0x7BE0); // Vertical transfer
         }
+    }
+}
+
+void PPU::draw_palette_table(Renderer *rndr)
+{
+    u8 pal;
+    for(u8 i=0x00; i<0x20; i++)
+    {
+        pal = PAL[i];
+        rndr->renderRect({400+(i%0x10)*10, 200+(i/0x10)*10, 10, 10}, RGB_PAL[pal].r, RGB_PAL[pal].g, RGB_PAL[pal].b, 1);
+        rndr->renderRect({400+(i%0x10)*10, 400+(i/0x10)*10, 10, 10}, RGB_PAL[i].r, RGB_PAL[i].g, RGB_PAL[i].b, 1);
     }
 }

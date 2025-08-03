@@ -6,7 +6,7 @@ GUI::GUI():system_clock(0)
     ppu = new PPU(crom);
     mmu = new MMU(crom, ppu);
     cpu = new CPU(mmu);
-    crom->load_rom("/home/diwas/Downloads/Emu910D0/roms/nestest.nes");
+    crom->load_rom("/home/diwas/Downloads/Emu910D0/roms/donkey_kong.nes");
     rndr = new Renderer("E910D0", SCRW, SCRH);
     sys_font = rndr->loadFont("rsrc/font.ttf", FTPT);
     sys_text = rndr->loadText("E910D0 [ Commands: PAUSE(6) | STEP(7) | IRQ (8) | NMI (9) | RST (0) ]", sys_font, CLR_CYAN);
@@ -172,6 +172,7 @@ void GUI::run_gui()
         if(!pause)
         {
             ppu->run_ppu(rndr);
+            // ppu->draw_palette_table(rndr);
 
             if((system_clock % 3) == 0)
             {

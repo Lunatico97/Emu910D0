@@ -10,14 +10,6 @@ void ALU::update_flags()
     else SF &= ~HX_ZERO;
 }
 
-void ALU::update_flags_on_ld(REG r)
-{
-    TEMP1 = mmu->tapREG(r);
-    SF = mmu->tapREG(ST);
-    update_flags();
-    mmu->ld(ST, SF);
-}
-
 void ALU::adc(ADR mode, u16 addr, u8 off)
 {
     if(mode == -1) fetchIMD(off);
@@ -75,7 +67,7 @@ void ALU::cmp(REG r, ADR mode, u16 addr, u8 off)
 {
     if(mode == -1) fetchIMD(off);
     else fetchMEM(mode, addr, off);
-    SF &= ~(HX_CARY);
+    SF &= ~(HX_CARY | HX_ZERO);
     TEMP1 = mmu->tapREG(r);
     if(TEMP1 >= TEMP2) { SF |= HX_CARY; /* A >= M => C = 1 */ }
     if(TEMP1 == TEMP2) { SF |= HX_ZERO; /* A == M => Z = 1 */ }

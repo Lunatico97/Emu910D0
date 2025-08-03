@@ -27,6 +27,10 @@ class PPU
         u8 read_from_cpu(u16 addr);
         void write_from_cpu(u16 addr, u8 value);
 
+        // Peeks
+        void draw_pattern_table(Renderer *rndr);
+        void draw_palette_table(Renderer *rndr);
+
         // PPU Cycle
         void run_ppu(Renderer *rndr);
 
@@ -77,9 +81,10 @@ class PPU
 
         // Latch
         u16 HBL, LBL;
-        u8 name_byte, attr_byte;
+        u8 name_byte, attr_byte, palette_select, palette_bits;
 
         // CROM
+        Renderer* renderer;
         CardROM *crom;
 };
 
