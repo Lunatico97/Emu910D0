@@ -8,7 +8,7 @@ void CPU::clock()
     if(cycles == 0)
     {
         this->step();
-        cycles = CYCLE_MAP[mmu->fetch_mem(IREG)] + penalty;
+        cycles = CYCLE_MAP[mmu->retreive(IREG)] + penalty;
     }
     cycles -= 1;
 }
@@ -17,30 +17,30 @@ void CPU::step()
 {   
     HEX current;
     penalty = 0x00;
-    IREG = mmu->tapPC();    
-    u8 l = IL_MAP[mmu->fetch_mem(IREG)];    
-    mmu->init_pc(mmu->tapPC()+l);
+    IREG = mmu->fetch_pc();    
+    u8 l = IL_MAP[mmu->retreive(IREG)];    
+    mmu->load_pc(IREG+l);
 
     // Tap registers stepwise
     std::cout << Utils::logU16("IREG", IREG);
-    std::cout << Utils::logU16("PC", mmu->tapPC());
-    std::cout << Utils::logU8("A", mmu->tapREG(A));
-    std::cout << Utils::logU8("X", mmu->tapREG(X));
-    std::cout << Utils::logU8("Y", mmu->tapREG(Y));
-    std::cout << Utils::logU8("SP", mmu->tapREG(SP));
-    std::cout << Utils::logU8("ST", mmu->tapREG(ST));
+    std::cout << Utils::logU16("PC", mmu->fetch_pc());
+    std::cout << Utils::logU8("A", mmu->fetch_reg(A));
+    std::cout << Utils::logU8("X", mmu->fetch_reg(X));
+    std::cout << Utils::logU8("Y", mmu->fetch_reg(Y));
+    std::cout << Utils::logU8("SP", mmu->fetch_reg(SP));
+    std::cout << Utils::logU8("ST", mmu->fetch_reg(ST));
 
     for(int i=0; i<l; i++)
     {
-        current.h8[i] = mmu->fetch_mem(IREG+i); 
+        current.h8[i] = mmu->retreive(IREG+i); 
     }
 
+    std::cout << Utils::logHEX(current) << std::endl;
     decode(current);
 }
 
 void CPU::decode(const HEX& hex)
 {
-    std::cout << Utils::logHEX(hex) << std::endl;
     u16 h16 = (static_cast<u16>(hex.h8[1]) | (static_cast<u16>(hex.h8[2]) << 8));
 
     switch(hex.h8[0])
@@ -101,8 +101,8 @@ void CPU::decode(const HEX& hex)
         case 0x6D: alu.adc(ADR::ABS, h16, 0x00); break;
         case 0x7D: alu.adc(ADR::ABX, h16, 0x00); break;
         case 0x79: alu.adc(ADR::ABY, h16, 0x00); break;
-        case 0x61: alu.adc(ADR::IXI, h16, mmu->tapREG(X)); break;
-        case 0x71: alu.adc(ADR::IIX, h16, mmu->tapREG(Y)); break;
+        case 0x61: alu.adc(ADR::IXI, h16, mmu->fetch_reg(X)); break;
+        case 0x71: alu.adc(ADR::IIX, h16, mmu->fetch_reg(Y)); break;
 
         case 0xE9: alu.sbc((ADR)-1, 0x0000, hex.h8[1]); break;
         case 0xE5: alu.sbc(ADR::ZER, 0x0000, hex.h8[1]); break;
@@ -110,8 +110,8 @@ void CPU::decode(const HEX& hex)
         case 0xED: alu.sbc(ADR::ABS, h16, 0x00); break;
         case 0xFD: alu.sbc(ADR::ABX, h16, 0x00); break;
         case 0xF9: alu.sbc(ADR::ABY, h16, 0x00); break;
-        case 0xE1: alu.sbc(ADR::IXI, h16, mmu->tapREG(X)); break;
-        case 0xF1: alu.sbc(ADR::IIX, h16, mmu->tapREG(Y)); break;
+        case 0xE1: alu.sbc(ADR::IXI, h16, mmu->fetch_reg(X)); break;
+        case 0xF1: alu.sbc(ADR::IIX, h16, mmu->fetch_reg(Y)); break;
 
         case 0x29: alu.ana((ADR)-1, 0x0000, hex.h8[1]); break;
         case 0x25: alu.ana(ADR::ZER, 0x0000, hex.h8[1]); break;
@@ -119,8 +119,8 @@ void CPU::decode(const HEX& hex)
         case 0x2D: alu.ana(ADR::ABS, h16, 0x00); break;
         case 0x3D: alu.ana(ADR::ABX, h16, 0x00); break;
         case 0x39: alu.ana(ADR::ABY, h16, 0x00); break;
-        case 0x21: alu.ana(ADR::IXI, h16, mmu->tapREG(X)); break;
-        case 0x31: alu.ana(ADR::IIX, h16, mmu->tapREG(Y)); break;
+        case 0x21: alu.ana(ADR::IXI, h16, mmu->fetch_reg(X)); break;
+        case 0x31: alu.ana(ADR::IIX, h16, mmu->fetch_reg(Y)); break;
 
         case 0x49: alu.eor((ADR)-1, 0x0000, hex.h8[1]); break;
         case 0x45: alu.eor(ADR::ZER, 0x0000, hex.h8[1]); break;
@@ -128,8 +128,8 @@ void CPU::decode(const HEX& hex)
         case 0x4D: alu.eor(ADR::ABS, h16, 0x00); break;
         case 0x5D: alu.eor(ADR::ABX, h16, 0x00); break;
         case 0x59: alu.eor(ADR::ABY, h16, 0x00); break;
-        case 0x41: alu.eor(ADR::IXI, h16, mmu->tapREG(X)); break;
-        case 0x51: alu.eor(ADR::IIX, h16, mmu->tapREG(Y)); break;
+        case 0x41: alu.eor(ADR::IXI, h16, mmu->fetch_reg(X)); break;
+        case 0x51: alu.eor(ADR::IIX, h16, mmu->fetch_reg(Y)); break;
 
         case 0x09: alu.ora((ADR)-1, 0x0000, hex.h8[1]); break;
         case 0x05: alu.ora(ADR::ZER, 0x0000, hex.h8[1]); break;
@@ -137,8 +137,8 @@ void CPU::decode(const HEX& hex)
         case 0x0D: alu.ora(ADR::ABS, h16, 0x00); break;
         case 0x1D: alu.ora(ADR::ABX, h16, 0x00); break;
         case 0x19: alu.ora(ADR::ABY, h16, 0x00); break;
-        case 0x01: alu.ora(ADR::IXI, h16, mmu->tapREG(X)); break;
-        case 0x11: alu.ora(ADR::IIX, h16, mmu->tapREG(Y)); break;
+        case 0x01: alu.ora(ADR::IXI, h16, mmu->fetch_reg(X)); break;
+        case 0x11: alu.ora(ADR::IIX, h16, mmu->fetch_reg(Y)); break;
 
         case 0xC9: alu.cmp(A, (ADR)-1, 0x0000, hex.h8[1]); break;
         case 0xC5: alu.cmp(A, ADR::ZER, 0x0000, hex.h8[1]); break;
@@ -146,8 +146,8 @@ void CPU::decode(const HEX& hex)
         case 0xCD: alu.cmp(A, ADR::ABS, h16, 0x00); break;
         case 0xDD: alu.cmp(A, ADR::ABX, h16, 0x00); break;
         case 0xD9: alu.cmp(A, ADR::ABY, h16, 0x00); break;
-        case 0xC1: alu.cmp(A, ADR::IXI, h16, mmu->tapREG(X)); break;
-        case 0xD1: alu.cmp(A, ADR::IIX, h16, mmu->tapREG(Y)); break;
+        case 0xC1: alu.cmp(A, ADR::IXI, h16, mmu->fetch_reg(X)); break;
+        case 0xD1: alu.cmp(A, ADR::IIX, h16, mmu->fetch_reg(Y)); break;
 
         case 0xE0: alu.cmp(X, (ADR)-1, 0x0000, hex.h8[1]); break;
         case 0xE4: alu.cmp(X, ADR::ZER, 0x0000, hex.h8[1]); break;
@@ -206,8 +206,8 @@ void CPU::decode(const HEX& hex)
         case 0x58: alu.clr_flag(HX_INTD); break;
         case 0xB8: alu.clr_flag(HX_OVFW); break;
 
-        case 0x24: alu.set_flag(mmu->fetch_mem(static_cast<u16>(hex.h8[1]))); break;
-        case 0x2C: alu.set_flag(mmu->fetch_mem(h16)); break;
+        case 0x24: alu.set_flag(mmu->retreive(static_cast<u16>(hex.h8[1]))); break;
+        case 0x2C: alu.set_flag(mmu->retreive(h16)); break;
         
         case 0x90: brc_rst(HX_CARY, hex.h8[1]); break;
         case 0xB0: brc_set(HX_CARY, hex.h8[1]); break;
@@ -232,14 +232,14 @@ void CPU::decode(const HEX& hex)
 
 void CPU::jmp(u16 address)
 {
-    mmu->init_pc(address);
+    mmu->load_pc(address);
 }
 
 void CPU::brc_set(u8 hx_flag, u8 rel_addr)
 {
-    if((mmu->tapREG(ST) & hx_flag) == hx_flag)
+    if((mmu->fetch_reg(ST) & hx_flag) == hx_flag)
     {
-        mmu->init_pc(mmu->get_addr(ADR::REL, 0x0000, rel_addr));
+        mmu->load_pc(mmu->get_addr(ADR::REL, 0x0000, rel_addr));
         penalty += 0x01;
     }
     else return;
@@ -247,9 +247,9 @@ void CPU::brc_set(u8 hx_flag, u8 rel_addr)
 
 void CPU::brc_rst(u8 hx_flag, u8 rel_addr)
 {
-    if((mmu->tapREG(ST) & hx_flag) != hx_flag)
+    if((mmu->fetch_reg(ST) & hx_flag) != hx_flag)
     {
-        mmu->init_pc(mmu->get_addr(ADR::REL, 0x0000, rel_addr));
+        mmu->load_pc(mmu->get_addr(ADR::REL, 0x0000, rel_addr));
         penalty += 0x01;
     }
     else return;
@@ -259,7 +259,7 @@ void CPU::jsr(u16 address)
 {
     mmu->push(PCL);
     mmu->push(PCH);
-    mmu->init_pc(address);
+    mmu->load_pc(address);
 }
 
 void CPU::rts()
@@ -270,7 +270,7 @@ void CPU::rts()
 
 void CPU::brk()
 {
-    mmu->ld(ST, mmu->tapREG(ST) | HX_BREK | HX_INTD | HX_NUSE);
+    mmu->ld(ST, mmu->fetch_reg(ST) | HX_BREK | HX_INTD | HX_NUSE);
     mmu->push(PCL);
     mmu->push(PCH);
     mmu->push(ST);
@@ -281,7 +281,7 @@ void CPU::brk()
 void CPU::rti()
 {
     mmu->pop(ST);
-    mmu->ld(ST, mmu->tapREG(ST) & ~HX_NUSE & ~HX_INTD);
+    mmu->ld(ST, mmu->fetch_reg(ST) & ~HX_NUSE & ~HX_INTD);
     mmu->pop(PCH);
     mmu->pop(PCL);
 }
@@ -299,9 +299,9 @@ void CPU::rst()
 
 void CPU::irq()
 {
-    if((mmu->tapREG(ST) & HX_INTD) != HX_INTD)
+    if((mmu->fetch_reg(ST) & HX_INTD) != HX_INTD)
     {
-        mmu->ld(ST, mmu->tapREG(ST) & ~HX_BREK | HX_INTD | HX_NUSE);
+        mmu->ld(ST, mmu->fetch_reg(ST) & ~HX_BREK | HX_INTD | HX_NUSE);
         mmu->push(PCL);
         mmu->push(PCH);
         mmu->push(ST);
@@ -313,7 +313,7 @@ void CPU::irq()
 
 void CPU::nmi()
 {
-    mmu->ld(ST, mmu->tapREG(ST) & ~HX_BREK | HX_INTD | HX_NUSE);
+    mmu->ld(ST, mmu->fetch_reg(ST) & ~HX_BREK | HX_INTD | HX_NUSE);
     mmu->push(PCL);
     mmu->push(PCH);
     mmu->push(ST);
