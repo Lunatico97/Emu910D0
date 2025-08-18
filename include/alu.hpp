@@ -15,7 +15,6 @@
 class ALU
 {
     public:
-        ALU();
         ALU(MMU* mmu_ptr);
 
         // Flags

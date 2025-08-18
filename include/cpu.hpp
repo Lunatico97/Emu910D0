@@ -26,9 +26,10 @@ class CPU
         void nmi();
         void irq();
 
-    private:
+        // Decoder
         void decode(const HEX& hex);
 
+    private:
         // Branching
         void brc_set(u8 hx_flag, u8 rel_addr);
         void brc_rst(u8 hx_flag, u8 rel_addr);

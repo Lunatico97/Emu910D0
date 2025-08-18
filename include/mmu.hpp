@@ -1,10 +1,16 @@
-#include <registers.hpp>
-#include <memory.hpp>
+#include <utils.hpp>
+#include <crom.hpp>
+#include <ppu.hpp>
 
 #ifndef _MMU_H_
 #define _MMU_H_
 
 #define SP_INDEX 0x0100
+
+enum REG
+{
+    A = 0, X, Y, ST, SP, PCH, PCL, NON
+};
 
 enum ADR
 {
@@ -14,15 +20,8 @@ enum ADR
 class MMU
 {
     public:
-        MMU(CardROM *cptr, PPU* pptr);
+        MMU(CardROM* cptr, PPU* pptr);
         ~MMU();
-
-        // Memory interactors
-        void load_mem(u16 address, u8 value);
-        u8 fetch_mem(u16 address);
-
-        // Program Counter
-        void init_pc(u16 value);
 
         // Stack Pointer
         void push(REG r);
@@ -56,13 +55,26 @@ class MMU
         // Flags
         void updf(REG r);
 
-        // Taps
-        u8 tapREG(REG r);
-        u16 tapPC();
+        // Register operations
+        void load_reg(REG r, const u8& value);
+        void load_pc(const u16& addr);
+        u8 fetch_reg(REG r);
+        u16 fetch_pc();
+
+        // Memory operations
+        void store(u16 m_address, u8 value);
+        u8 retreive(u16 m_address);
 
     private:
-        Registers rb;
-        Memory* mem;
+        // Reset MMU
+        void reset();
+
+        // References
+        CardROM *crom;
+        PPU *ppu;
+
+        u8 BANK[7];
+        u8 RAM[2048];
 };
 
 #endif
