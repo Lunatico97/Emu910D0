@@ -217,6 +217,60 @@ void test_stack()
     assert(mmu->fetch_reg(ST) == 0x08);  
 }
 
+void test_brc()
+{
+    // Initialize status
+    mmu->load_reg(ST, 0x00 | HX_NUSE);
+    // BCC $90H(-) 
+    mmu->load_pc(0x0090);
+    cpu->decode({0x90, 0x90});
+    assert(mmu->fetch_pc() == 0x0020);
+    // BCC $70H [+]
+    cpu->decode({0x90, 0x70});
+    assert(mmu->fetch_pc() == 0x0090);
+    // BCC $90H [No branching]
+    mmu->load_reg(ST, HX_CARY | HX_NUSE);
+    cpu->decode({0x90, 0x90});
+    assert(mmu->fetch_pc() == 0x0090);
+    // BCS $90H [-] 
+    cpu->decode({0xB0, 0xB0});
+    assert(mmu->fetch_pc() == 0x0040);
+    // BCS $40H [+]
+    cpu->decode({0xB0, 0x70});
+    assert(mmu->fetch_pc() == 0x00B0);
+    // BCS $90H [No branching]
+    mmu->load_reg(ST, 0x00 | HX_NUSE);
+    cpu->decode({0xB0, 0xB0});
+    assert(mmu->fetch_pc() == 0x00B0);
+}
+
+void test_jmp()
+{
+    // JMP $014C
+    cpu->decode({0x4C, 0x4C, 0x01});
+    assert(mmu->fetch_pc() == 0x014C);
+    // JMP ($016C)
+    mmu->store(0x016C, 0x6C);
+    mmu->store(0x016D, 0x02);
+    cpu->decode({0x6C, 0x6C, 0x01});
+    assert(mmu->fetch_pc() == 0x026C);
+    // JMP ($016C) [No page offset]
+    mmu->store(0x0100, 0x01);
+    mmu->store(0x01FF, 0x6C);
+    mmu->store(0x0200, 0x02);
+    cpu->decode({0x6C, 0xFF, 0x01});
+    assert(mmu->fetch_pc() == 0x016C);
+    // JSR $0120
+    mmu->load_pc(0x0160);
+    cpu->decode({0x20, 0x20, 0x01});
+    assert(mmu->fetch_reg(SP) == 0xFD);
+    assert(mmu->fetch_pc() == 0x0120);
+    // RTS
+    cpu->decode({0x0060});
+    assert(mmu->fetch_reg(SP) == 0xFF);
+    assert(mmu->fetch_pc() == 0x0160);
+}
+
 void test_runner()
 {
     test_lda();
@@ -227,6 +281,10 @@ void test_runner()
     test_sty();
     test_tr();
     test_stack();
+    std::cout << "MMU Tests Passed ! \n";
+    test_brc();
+    test_jmp();
+    std::cout << "Branch Tests Passed ! \n";
 }
 
 int main(int argc, char* argv[]) 

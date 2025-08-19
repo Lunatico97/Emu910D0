@@ -35,6 +35,7 @@ class CPU
         void brc_rst(u8 hx_flag, u8 rel_addr);
 
         // Routines & Interrupts
+        void jmpi(u16 address);
         void jmp(u16 address);
         void jsr(u16 address);
         void brk();
