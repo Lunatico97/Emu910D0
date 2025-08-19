@@ -219,6 +219,7 @@ void CPU::decode(const HEX& hex)
         case 0x70: brc_set(HX_OVFW, hex.h8[1]); break;
 
         case 0x4C: jmp(h16); break; 
+        case 0x6C: jmpi(h16); break;
                
         case 0x20: jsr(h16); break;
         case 0x60: rts(); break;
@@ -233,6 +234,12 @@ void CPU::decode(const HEX& hex)
 void CPU::jmp(u16 address)
 {
     mmu->load_pc(address);
+}
+
+void CPU::jmpi(u16 address)
+{
+    u16 res_addr = mmu->retreive(address) | ((mmu->retreive((address & 0xFF00) | ((address & 0x00FF)+1)) & 0x00FF) << 8);
+    mmu->load_pc(res_addr);
 }
 
 void CPU::brc_set(u8 hx_flag, u8 rel_addr)
