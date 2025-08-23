@@ -95,12 +95,11 @@ void MMU::stix(REG src, REG off, u16 addr)
 
 u16 MMU::get_addr(ADR mode, u16 addr, u8 off)
 {
-    u16 res_addr = addr;
-    u8 ln, hn;
+    u16 res_addr;
 
     switch(mode)
     {
-        case ADR::ABS: break;
+        case ADR::ABS: res_addr = addr; break;
         case ADR::ABX: res_addr = addr + fetch_reg(X); break;
         case ADR::ABY: res_addr = addr + fetch_reg(Y); break;
         case ADR::IND: res_addr = retreive(addr) | ((retreive(addr+1) & 0x00FF) << 8); break;

@@ -148,6 +148,14 @@ void ALU::dec(ADR mode, u16 addr, u8 off)
     loadMEM(mode, addr, off);
 }
 
+void ALU::bit(ADR mode, u16 addr, u8 off)
+{
+    fetchMEM(mode, addr, off);
+    TEMP1 = mmu->fetch_reg(A);
+    TEMP1 &= TEMP2;
+    set_flag((TEMP2 & (HX_SIGN | HX_OVFW) | ((TEMP1 == 0) ? HX_ZERO : 0x00)));
+}
+
 void ALU::set_flag(u8 mask)
 {
     SF = mmu->fetch_reg(ST);

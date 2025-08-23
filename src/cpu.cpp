@@ -206,8 +206,8 @@ void CPU::decode(const HEX& hex)
         case 0x58: alu.clr_flag(HX_INTD); break;
         case 0xB8: alu.clr_flag(HX_OVFW); break;
 
-        case 0x24: alu.set_flag(mmu->retreive(static_cast<u16>(hex.h8[1]))); break;
-        case 0x2C: alu.set_flag(mmu->retreive(h16)); break;
+        case 0x24: alu.bit(ADR::ZER, 0x0000, hex.h8[1]); break;
+        case 0x2C: alu.bit(ADR::ABS, h16, 0x00); break;
         
         case 0x90: brc_rst(HX_CARY, hex.h8[1]); break;
         case 0xB0: brc_set(HX_CARY, hex.h8[1]); break;
