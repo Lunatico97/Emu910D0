@@ -271,6 +271,30 @@ void test_jmp()
     assert(mmu->fetch_pc() == 0x0160);
 }
 
+void test_flags()
+{
+    // Initialize status
+    mmu->load_reg(ST, 0x00 | HX_NUSE);
+    // SEC
+    cpu->decode({0x38});
+    assert(mmu->fetch_reg(ST) == (HX_NUSE | HX_CARY));
+    // CLC
+    cpu->decode({0x18});
+    assert(mmu->fetch_reg(ST) == HX_NUSE);
+    // BIT $24H
+    mmu->load_reg(A, 0x00);
+    mmu->store(0x0024, 0xC0);
+    cpu->decode({0x24, 0x24});
+    assert(mmu->fetch_reg(ST) == (HX_NUSE | HX_SIGN | HX_OVFW | HX_ZERO));
+    // CLV
+    cpu->decode({0xB8});
+    assert(mmu->fetch_reg(ST) == (HX_NUSE | HX_SIGN | HX_ZERO));
+    // BIT $012CH
+    mmu->store(0x012C, 0xC0);
+    cpu->decode({0x2C, 0x2C, 0x01});
+    assert(mmu->fetch_reg(ST) == (HX_NUSE | HX_SIGN | HX_OVFW | HX_ZERO));
+}
+
 void test_runner()
 {
     test_lda();
@@ -285,6 +309,8 @@ void test_runner()
     test_brc();
     test_jmp();
     std::cout << "Branch Tests Passed ! \n";
+    test_flags();
+    std::cout << "Flag Tests Passed ! \n";
 }
 
 int main(int argc, char* argv[]) 

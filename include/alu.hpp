@@ -19,7 +19,6 @@ class ALU
 
         // Flags
         void update_flags();
-        void update_flags_on_ld(REG r);
 
         // Arithmetic Operations
         void adc(ADR mode, u16 addr, u8 off);
@@ -46,6 +45,7 @@ class ALU
         void inc(ADR mode, u16 addr, u8 off);
 
         // Flags
+        void bit(ADR mode, u16 addr, u8 off);
         void set_flag(u8 mask);
         void clr_flag(u8 mask);
 
