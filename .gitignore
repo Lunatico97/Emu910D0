@@ -1,0 +1,6 @@
+# Exclude ROMs
+*.com
+*.dll
+*.exe
+*.o
+*.nes

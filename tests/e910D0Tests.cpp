@@ -496,6 +496,244 @@ void test_ror()
     assert(mmu->fetch_reg(ST) == (HX_NUSE | HX_SIGN));
 }
 
+void test_cmp()
+{
+    // Initialize status
+    mmu->load_reg(ST, 0x00 | HX_NUSE);
+    // CMP #$C9H [A==M]
+    mmu->load_reg(A, 0xC9);
+    cpu->decode({0xC9, 0xC9});
+    assert(mmu->fetch_reg(ST) == (HX_NUSE | HX_ZERO | HX_CARY));
+    // CMP $C5H [A>M]
+    mmu->load_reg(A, 0xC6);
+    mmu->store(0x00C5, 0xC5);
+    cpu->decode({0xC5, 0xC5});
+    assert(mmu->fetch_reg(ST) == (HX_NUSE | HX_CARY));
+    // CMP $D5H, X [A<M]
+    mmu->load_reg(A, 0xD4);
+    mmu->load_reg(X, 0x10);
+    mmu->store(0x00E5, 0xD5);
+    cpu->decode({0xD5, 0xD5});
+    assert(mmu->fetch_reg(ST) == (HX_NUSE | HX_SIGN));
+    // CMP $01CDH [A>M]
+    mmu->load_reg(A, 0xCD);
+    mmu->store(0x01CD, 0xCC);
+    cpu->decode({0xCD, 0xCD, 0x01});
+    assert(mmu->fetch_reg(ST) == (HX_NUSE | HX_CARY));
+    // CMP $01DDH, X [A<M]
+    mmu->load_reg(A, 0xDD);
+    mmu->store(0x01ED, 0xDE);
+    cpu->decode({0xDD, 0xDD, 0x01});
+    assert(mmu->fetch_reg(ST) == (HX_NUSE | HX_SIGN)); 
+    // CMP $01D9H, Y [A==M]
+    mmu->load_reg(A, 0xD9);
+    mmu->load_reg(Y, 0x10);
+    mmu->store(0x01E9, 0xD9);
+    cpu->decode({0xD9, 0xD9, 0x01});
+    assert(mmu->fetch_reg(ST) == (HX_NUSE | HX_ZERO | HX_CARY));
+    // CMP ($C1H, X) [A==M]
+    mmu->load_reg(A, 0xC1);
+    mmu->store(0x01C1, 0xC1);
+    mmu->store(0x00D1, 0xC1);
+    mmu->store(0x00D2, 0x01);
+    cpu->decode({0xC1, 0xC1});
+    assert(mmu->fetch_reg(ST) == (HX_NUSE | HX_ZERO | HX_CARY));
+    // CMP ($D1H), Y [A==M]
+    mmu->load_reg(A, 0xD1);
+    mmu->store(0x01D1, 0xD1);
+    mmu->store(0x00D1, 0xC1);
+    mmu->store(0x00D2, 0x01);
+    cpu->decode({0xD1, 0xD1});
+    assert(mmu->fetch_reg(ST) == (HX_NUSE | HX_ZERO | HX_CARY));
+}
+
+void test_cpx()
+{
+    // Initialize status
+    mmu->load_reg(ST, 0x00 | HX_NUSE);
+    // CPX #$E0H [X==M]
+    mmu->load_reg(X, 0xE0);
+    cpu->decode({0xE0, 0xE0});
+    assert(mmu->fetch_reg(ST) == (HX_NUSE | HX_ZERO | HX_CARY));
+    // CPX $E4H [X>M]
+    mmu->load_reg(X, 0xE5);
+    mmu->store(0x00E4, 0xE4);
+    cpu->decode({0xE4, 0xE4});
+    assert(mmu->fetch_reg(ST) == (HX_NUSE | HX_CARY));
+    // CPX $01ECH [X<M]
+    mmu->load_reg(X, 0xEC);
+    mmu->store(0x01EC, 0xED);
+    cpu->decode({0xEC, 0xEC, 0x01});
+    assert(mmu->fetch_reg(ST) == (HX_NUSE | HX_SIGN)); 
+}
+
+void test_cpy()
+{
+    // Initialize status
+    mmu->load_reg(ST, 0x00 | HX_NUSE);
+    // CPX #$C0H [Y==M]
+    mmu->load_reg(Y, 0xC0);
+    cpu->decode({0xC0, 0xC0});
+    assert(mmu->fetch_reg(ST) == (HX_NUSE | HX_ZERO | HX_CARY));
+    // CPX $C4H [Y>M]
+    mmu->load_reg(Y, 0xC5);
+    mmu->store(0x00C4, 0xC4);
+    cpu->decode({0xC4, 0xC4});
+    assert(mmu->fetch_reg(ST) == (HX_NUSE | HX_CARY));
+    // CPX $01CCH [Y<M]
+    mmu->load_reg(Y, 0xCC);
+    mmu->store(0x01CC, 0xCD);
+    cpu->decode({0xCC, 0xCC, 0x01});
+    assert(mmu->fetch_reg(ST) == (HX_NUSE | HX_SIGN)); 
+}
+
+void test_ana()
+{
+    // AND #$29H
+    mmu->load_reg(A, 0x29);
+    cpu->decode({0x29, 0x29});
+    assert(mmu->fetch_reg(A) == 0x29);
+    // AND $25H
+    mmu->load_reg(A, 0x25);
+    mmu->store(0x0025, 0x05);
+    cpu->decode({0x25, 0x25});
+    assert(mmu->fetch_reg(A) == 0x05);
+    // AND $35H, X
+    mmu->load_reg(A, 0x35);
+    mmu->load_reg(X, 0x10);
+    mmu->store(0x0045, 0x30);
+    cpu->decode({0x35, 0x35});
+    assert(mmu->fetch_reg(A) == 0x30);
+    // AND $012DH
+    mmu->load_reg(A, 0x2D);
+    mmu->store(0x012D, 0xFD);
+    cpu->decode({0x2D, 0x2D, 0x01});
+    assert(mmu->fetch_reg(A) == 0x2D);
+    // AND $013DH, X
+    mmu->load_reg(A, 0x3D);
+    mmu->store(0x014D, 0x3F);
+    cpu->decode({0x3D, 0x3D, 0x01});
+    assert(mmu->fetch_reg(A) == 0x3D);
+    // AND $0139H, Y
+    mmu->load_reg(A, 0x39);
+    mmu->load_reg(Y, 0x10);
+    mmu->store(0x0149, 0xF0);
+    cpu->decode({0x39, 0x39, 0x01});
+    assert(mmu->fetch_reg(A) == 0x30);
+    // AND ($21H, X)
+    mmu->load_reg(A, 0x21);
+    mmu->store(0x0121, 0x00);
+    mmu->store(0x0031, 0x21);
+    mmu->store(0x0032, 0x01);
+    cpu->decode({0x21, 0x21});
+    assert(mmu->fetch_reg(A) == 0x00);
+    // AND ($31H), Y
+    mmu->load_reg(A, 0x31);
+    mmu->store(0x0141, 0xFF);
+    mmu->store(0x0031, 0x31);
+    mmu->store(0x0032, 0x01);
+    cpu->decode({0x31, 0x31});
+    assert(mmu->fetch_reg(A) == 0x31);
+}
+
+void test_ora()
+{
+    // ORA #$09H
+    mmu->load_reg(A, 0x09);
+    cpu->decode({0x09, 0x09});
+    assert(mmu->fetch_reg(A) == 0x09);
+    // ORA $05H
+    mmu->load_reg(A, 0x05);
+    mmu->store(0x0005, 0x05);
+    cpu->decode({0x05, 0x05});
+    assert(mmu->fetch_reg(A) == 0x05);
+    // ORA $05H, X
+    mmu->load_reg(A, 0x15);
+    mmu->load_reg(X, 0x10);
+    mmu->store(0x0025, 0x10);
+    cpu->decode({0x15, 0x15});
+    assert(mmu->fetch_reg(A) == 0x15);
+    // ORA $010DH
+    mmu->load_reg(A, 0x0D);
+    mmu->store(0x010D, 0x0F);
+    cpu->decode({0x0D, 0x0D, 0x01});
+    assert(mmu->fetch_reg(A) == 0x0F);
+    // ORA $011DH, X
+    mmu->load_reg(A, 0x1D);
+    mmu->store(0x012D, 0xF0);
+    cpu->decode({0x1D, 0x1D, 0x01});
+    assert(mmu->fetch_reg(A) == 0xFD);
+    // ORA $0119H, Y
+    mmu->load_reg(A, 0x19);
+    mmu->load_reg(Y, 0x10);
+    mmu->store(0x0129, 0xF9);
+    cpu->decode({0x19, 0x19, 0x01});
+    assert(mmu->fetch_reg(A) == 0xF9);
+    // ORA ($01H, X)
+    mmu->load_reg(A, 0x01);
+    mmu->store(0x0101, 0x00);
+    mmu->store(0x0011, 0x01);
+    mmu->store(0x0012, 0x01);
+    cpu->decode({0x01, 0x01});
+    assert(mmu->fetch_reg(A) == 0x01);
+    // ORA ($11H), Y
+    mmu->load_reg(A, 0x11);
+    mmu->store(0x0111, 0xFF);
+    mmu->store(0x0011, 0x01);
+    mmu->store(0x0012, 0x01);
+    cpu->decode({0x11, 0x11});
+    assert(mmu->fetch_reg(A) == 0xFF);
+}
+
+void test_eor()
+{
+    // EOR #$49H
+    mmu->load_reg(A, 0x49);
+    cpu->decode({0x49, 0x49});
+    assert(mmu->fetch_reg(A) == 0x00);
+    // EOR $45H
+    mmu->load_reg(A, 0x45);
+    mmu->store(0x0045, 0x45);
+    cpu->decode({0x45, 0x45});
+    assert(mmu->fetch_reg(A) == 0x00);
+    // EOR $55H, X
+    mmu->load_reg(A, 0x55);
+    mmu->load_reg(X, 0x10);
+    mmu->store(0x0065, 0x55);
+    cpu->decode({0x55, 0x55});
+    assert(mmu->fetch_reg(A) == 0x00);
+    // EOR $014DH
+    mmu->load_reg(A, 0x4D);
+    mmu->store(0x014D, 0x4D);
+    cpu->decode({0x4D, 0x4D, 0x01});
+    assert(mmu->fetch_reg(A) == 0x00);
+    // EOR $015DH, X
+    mmu->load_reg(A, 0x5D);
+    mmu->store(0x016D, 0x5D);
+    cpu->decode({0x5D, 0x5D, 0x01});
+    assert(mmu->fetch_reg(A) == 0x00);
+    // EOR $0159H, Y
+    mmu->load_reg(A, 0x59);
+    mmu->load_reg(Y, 0x10);
+    mmu->store(0x0169, 0x59);
+    cpu->decode({0x59, 0x59, 0x01});
+    assert(mmu->fetch_reg(A) == 0x00);
+    // EOR ($41H, X)
+    mmu->load_reg(A, 0x41);
+    mmu->store(0x0141, 0x41);
+    mmu->store(0x0051, 0x41);
+    mmu->store(0x0052, 0x01);
+    cpu->decode({0x41, 0x41});
+    assert(mmu->fetch_reg(A) == 0x00);
+    // EOR ($51H), Y
+    mmu->load_reg(A, 0x51);
+    mmu->store(0x0151, 0x51);
+    mmu->store(0x0051, 0x41);
+    mmu->store(0x0052, 0x01);
+    cpu->decode({0x51, 0x51});
+    assert(mmu->fetch_reg(A) == 0x00);
+}
+
 void test_runner()
 {
     test_lda();
@@ -524,6 +762,14 @@ void test_runner()
     test_rol();
     test_ror();
     std::cout << "Rotate Tests Passed ! \n";
+    test_cmp();
+    test_cpx();
+    test_cpy();
+    std::cout << "Compare Tests Passed ! \n";
+    test_ana();
+    test_ora();
+    test_eor();
+    std::cout << "Logic Tests Passed ! \n";
 }
 
 int main(int argc, char* argv[]) 
