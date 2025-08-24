@@ -104,7 +104,7 @@ u16 MMU::get_addr(ADR mode, u16 addr, u8 off)
         case ADR::ABX: res_addr = addr + fetch_reg(X); break;
         case ADR::ABY: res_addr = addr + fetch_reg(Y); break;
         case ADR::IND: res_addr = retreive(addr) | ((retreive(addr+1) & 0x00FF) << 8); break;
-        case ADR::IIX: res_addr = retreive(addr) | ((retreive(addr+1) & 0x00FF) << 8) + static_cast<u16>(off); break;
+        case ADR::IIX: res_addr = (retreive(addr) | ((retreive(addr+1) & 0x00FF) << 8)) + static_cast<u16>(off); break;
         case ADR::IXI: res_addr = retreive(addr+off) | ((retreive(addr+off+1) & 0x00FF) << 8) ; break;
         case ADR::REL: if((off & D7) == D7) res_addr = fetch_pc() - ((~off+1) & 0x00FF);
                        else res_addr = fetch_pc() + off; 

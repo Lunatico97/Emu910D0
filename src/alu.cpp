@@ -65,12 +65,13 @@ void ALU::ora(ADR mode, u16 addr, u8 off)
 
 void ALU::cmp(REG r, ADR mode, u16 addr, u8 off)
 {
-    if(mode == -1) fetchIMD(off);
+   if(mode == -1) fetchIMD(off);
     else fetchMEM(mode, addr, off);
-    SF &= ~(HX_CARY | HX_ZERO);
     TEMP1 = mmu->fetch_reg(r);
-    if(TEMP1 >= TEMP2) { SF |= HX_CARY; /* A >= M => C = 1 */ }
-    if(TEMP1 == TEMP2) { SF |= HX_ZERO; /* A == M => Z = 1 */ }
+    SF &= ~HX_CARY;
+    if(TEMP1 >= TEMP2) SF |= HX_CARY; /* A >= M => C = 1 */
+    TEMP1 -= TEMP2;
+    update_flags();
     mmu->load_reg(ST, SF);
 }
 
