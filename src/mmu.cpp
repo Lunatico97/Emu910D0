@@ -39,6 +39,7 @@ void MMU::tr(REG des, REG src)
 void MMU::ld(REG des, u8 value)
 {
     load_reg(des, value);
+    updf(des);
 }
 
 void MMU::ld(REG des, REG off, u16 addr)

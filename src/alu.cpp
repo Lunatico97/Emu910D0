@@ -71,7 +71,7 @@ void ALU::cmp(REG r, ADR mode, u16 addr, u8 off)
     TEMP1 = mmu->fetch_reg(r);
     if(TEMP1 >= TEMP2) { SF |= HX_CARY; /* A >= M => C = 1 */ }
     if(TEMP1 == TEMP2) { SF |= HX_ZERO; /* A == M => Z = 1 */ }
-    mmu->ld(ST, SF);
+    mmu->load_reg(ST, SF);
 }
 
 void ALU::asl(ADR mode, u16 addr, u8 off)
@@ -79,6 +79,7 @@ void ALU::asl(ADR mode, u16 addr, u8 off)
     if(mode == -1) fetchREG(A);
     else fetchMEM(mode, addr, off);
     TEMP1 = TEMP2 << 1;
+    SF &= ~HX_CARY;
     SF |= (TEMP2 & D7) >> 7;
     if(mode == -1) loadREG(A);
     else loadMEM(mode, addr, off);
@@ -89,6 +90,7 @@ void ALU::lsr(ADR mode, u16 addr, u8 off)
     if(mode == -1) fetchREG(A);
     else fetchMEM(mode, addr, off);
     TEMP1 = TEMP2 >> 1;
+    SF &= ~HX_CARY;
     SF |= (TEMP2 & D0);
     if(mode == -1) loadREG(A);
     else loadMEM(mode, addr, off);
@@ -100,6 +102,7 @@ void ALU::rol(ADR mode, u16 addr, u8 off)
     else fetchMEM(mode, addr, off);
     TEMP1 = TEMP2 << 1;
     TEMP1 |= (SF & HX_CARY);
+    SF &= ~HX_CARY;
     SF |= (TEMP2 & D7) >> 7;
     if(mode == -1) loadREG(A);
     else loadMEM(mode, addr, off);
@@ -111,6 +114,7 @@ void ALU::ror(ADR mode, u16 addr, u8 off)
     else fetchMEM(mode, addr, off);
     TEMP1 = TEMP2 >> 1;
     TEMP1 |= (SF & HX_CARY) << 7;
+    SF &= ~HX_CARY;
     SF |= (TEMP2 & D0);
     if(mode == -1) loadREG(A);
     else loadMEM(mode, addr, off);
@@ -160,14 +164,14 @@ void ALU::set_flag(u8 mask)
 {
     SF = mmu->fetch_reg(ST);
     SF |= mask;
-    mmu->ld(ST, SF);
+    mmu->load_reg(ST, SF);
 }
 
 void ALU::clr_flag(u8 mask)
 {
     SF = mmu->fetch_reg(ST);
     SF &= ~mask;
-    mmu->ld(ST, SF);
+    mmu->load_reg(ST, SF);
 }
 
 void ALU::fetchIMD(u8 off)
@@ -192,12 +196,12 @@ void ALU::loadMEM(ADR mode, u16 addr, u8 off)
 {
     update_flags();
     mmu->store(mmu->get_addr(mode, addr, off), TEMP1);
-    mmu->ld(ST, SF);
+    mmu->load_reg(ST, SF);
 }
 
 void ALU::loadREG(REG r)
 {
     update_flags();
-    mmu->ld(r, TEMP1);
-    mmu->ld(ST, SF);
+    mmu->load_reg(r, TEMP1);
+    mmu->load_reg(ST, SF);
 }

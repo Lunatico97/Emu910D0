@@ -1,3 +1,10 @@
+/*
+    Test Suite v1.0 [E910D0]
+    Author: Diwas Adhikari
+    Comments: Writing all these tests might seem a lot to do but, it was absolutely essential for me to get
+              the CPU working right for the emulator to work as expected ! Enjoy :)
+*/
+
 #include <cpu.hpp>
 
 MMU* mmu = nullptr;
@@ -295,22 +302,159 @@ void test_flags()
     assert(mmu->fetch_reg(ST) == (HX_NUSE | HX_SIGN | HX_OVFW | HX_ZERO));
 }
 
+void test_asl()
+{
+    // Initialize status
+    mmu->load_reg(ST, 0x00 | HX_NUSE);
+    // ASL
+    mmu->load_reg(A, 0x0A);
+    cpu->decode({0x0A});
+    assert(mmu->fetch_reg(A) == 0x14);
+    assert(mmu->fetch_reg(ST) == HX_NUSE);
+    // ASL $06H
+    mmu->store(0x0006, 0x06);
+    cpu->decode({0x06, 0x06});
+    assert(mmu->retreive(0x0006) == 0x0C);
+    assert(mmu->fetch_reg(ST) == HX_NUSE);
+    // ASL $16H, X
+    mmu->load_reg(X, 0x10);
+    mmu->store(0x0026, 0x16);
+    cpu->decode({0x16, 0x16});
+    assert(mmu->retreive(0x0026) == 0x2C);
+    assert(mmu->fetch_reg(ST) == HX_NUSE);
+    // ASL $010EH
+    mmu->store(0x010E, 0x8E);
+    cpu->decode({0x0E, 0x0E, 0x01});
+    assert(mmu->retreive(0x010E) == 0x1C);
+    assert(mmu->fetch_reg(ST) == (HX_NUSE | HX_CARY));
+    // ASL $011EH, X
+    mmu->store(0x012E, 0x0E);
+    cpu->decode({0x1E, 0x1E, 0x01});
+    assert(mmu->retreive(0x012E) == 0x1C);
+    assert(mmu->fetch_reg(ST) == HX_NUSE);
+}
+
+void test_lsr()
+{
+    // Initialize status
+    mmu->load_reg(ST, 0x00 | HX_NUSE);
+    // LSR
+    mmu->load_reg(A, 0x4A);
+    cpu->decode({0x4A});
+    assert(mmu->fetch_reg(A) == 0x25);
+    assert(mmu->fetch_reg(ST) == HX_NUSE);
+    // LSR $46H
+    mmu->store(0x0046, 0x46);
+    cpu->decode({0x46, 0x46});
+    assert(mmu->retreive(0x0046) == 0x23);
+    assert(mmu->fetch_reg(ST) == HX_NUSE);
+    // LSR $56H, X
+    mmu->load_reg(X, 0x10);
+    mmu->store(0x0066, 0x56);
+    cpu->decode({0x56, 0x56});
+    assert(mmu->retreive(0x0066) == 0x2B);
+    assert(mmu->fetch_reg(ST) == HX_NUSE);
+    // LSR $014EH
+    mmu->store(0x014E, 0x4F);
+    cpu->decode({0x4E, 0x4E, 0x01});
+    assert(mmu->retreive(0x014E) == 0x27);
+    assert(mmu->fetch_reg(ST) == (HX_NUSE | HX_CARY));
+    // LSR $015EH, X
+    mmu->store(0x016E, 0x5E);
+    cpu->decode({0x5E, 0x5E, 0x01});
+    assert(mmu->retreive(0x016E) == 0x2F);
+    assert(mmu->fetch_reg(ST) == HX_NUSE);
+}
+
+void test_rol()
+{
+    // Initialize status
+    mmu->load_reg(ST, 0x00 | HX_NUSE);
+    // ROL
+    mmu->load_reg(A, 0x2A);
+    cpu->decode({0x2A});
+    assert(mmu->fetch_reg(A) == 0x54);
+    assert(mmu->fetch_reg(ST) == HX_NUSE);
+    // ROL $26H
+    mmu->store(0x0026, 0x26);
+    cpu->decode({0x26, 0x26});
+    assert(mmu->retreive(0x0026) == 0x4C);
+    assert(mmu->fetch_reg(ST) == HX_NUSE);
+    // ROL $36H, X
+    mmu->load_reg(X, 0x10);
+    mmu->store(0x0046, 0x36);
+    cpu->decode({0x36, 0x36});
+    assert(mmu->retreive(0x0046) == 0x6C);
+    assert(mmu->fetch_reg(ST) == HX_NUSE);
+    // ROL $012EH
+    mmu->store(0x012E, 0x8E);
+    cpu->decode({0x2E, 0x2E, 0x01});
+    assert(mmu->retreive(0x012E) == 0x1C);
+    assert(mmu->fetch_reg(ST) == (HX_NUSE | HX_CARY));
+    // ROL $013EH, X
+    mmu->store(0x014E, 0x0E);
+    cpu->decode({0x3E, 0x3E, 0x01});
+    assert(mmu->retreive(0x014E) == 0x1D);
+    assert(mmu->fetch_reg(ST) == HX_NUSE);
+}
+
+void test_ror()
+{
+// Initialize status
+    mmu->load_reg(ST, 0x00 | HX_NUSE);
+    // ROR
+    mmu->load_reg(A, 0x6A);
+    cpu->decode({0x6A});
+    assert(mmu->fetch_reg(A) == 0x35);
+    assert(mmu->fetch_reg(ST) == HX_NUSE);
+    // ROR $66H
+    mmu->store(0x0066, 0x66);
+    cpu->decode({0x66, 0x66});
+    assert(mmu->retreive(0x0066) == 0x33);
+    assert(mmu->fetch_reg(ST) == HX_NUSE);
+    // ROR $76H, X
+    mmu->load_reg(X, 0x10);
+    mmu->store(0x0086, 0x76);
+    cpu->decode({0x76, 0x76});
+    assert(mmu->retreive(0x0086) == 0x3B);
+    assert(mmu->fetch_reg(ST) == HX_NUSE);
+    // ROR $016EH
+    mmu->store(0x016E, 0x6F);
+    cpu->decode({0x6E, 0x6E, 0x01});
+    assert(mmu->retreive(0x016E) == 0x37);
+    assert(mmu->fetch_reg(ST) == (HX_NUSE | HX_CARY));
+    // ROR $017EH, X
+    mmu->store(0x018E, 0x7E);
+    cpu->decode({0x7E, 0x7E, 0x01});
+    assert(mmu->retreive(0x018E) == 0xBF);
+    assert(mmu->fetch_reg(ST) == (HX_NUSE | HX_SIGN));
+}
+
 void test_runner()
 {
     test_lda();
     test_ldx();
     test_ldy();
+    std::cout << "Load Tests Passed ! \n";
     test_sta();
     test_stx();
     test_sty();
+    std::cout << "Store Tests Passed ! \n";
     test_tr();
+    std::cout << "Transfer Tests Passed ! \n";
     test_stack();
-    std::cout << "MMU Tests Passed ! \n";
+    std::cout << "Stack Tests Passed ! \n";
     test_brc();
     test_jmp();
     std::cout << "Branch Tests Passed ! \n";
     test_flags();
     std::cout << "Flag Tests Passed ! \n";
+    test_asl();
+    test_lsr();
+    std::cout << "Shift Tests Passed ! \n";
+    test_rol();
+    test_ror();
+    std::cout << "Rotate Tests Passed ! \n";
 }
 
 int main(int argc, char* argv[]) 
