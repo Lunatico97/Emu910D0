@@ -1,14 +1,15 @@
 # E910D0 v1.0 [NES Emulator]
-Author: Diwas Adhikari
-Status: In Progress
-Description: NES Emulator to relive my childhood memories of playing with a bootleg NES console 
+- Author: Diwas Adhikari
+- Status: In Progress
+- Description: NES Emulator to relive my childhood memories of playing with a bootleg NES console 
              which looked like a PS1 and had a vertical cartridge slot like a SNES :)
-Comments: This started up as being rigidly behavior-driven but, I kept on removing unnecessary
+- Comments: This started up as being rigidly behavior-driven but, I kept on removing unnecessary
           junk to speed up and keep stuff clean. The goal itself is to make NES games playable.
 
 ![E910D0](rsrc/snip.png)
 
 [Only relevant for CPU testing phase]
+
 Commands:
 - NUM_6 -> PAUSE / UNPAUSE (Continuous execute)
 - NUM_7 -> STEP (Stepwise Execute)
@@ -24,7 +25,8 @@ Legend:
 
 ![Sprite Loaded From Cartridge](rsrc/snip2.gif)
 
-(Note: No PPU operation is involved here yet.) [Working on getting PPU right]
 [The sprite is directly loaded from CHR-ROM data just to make sure I see Mario !] 
+
+(Note: No PPU operation is involved here yet.) [ Working on getting PPU right currently !]
 
 

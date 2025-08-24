@@ -366,6 +366,72 @@ void test_lsr()
     assert(mmu->fetch_reg(ST) == HX_NUSE);
 }
 
+void test_inc()
+{
+    // INX
+    mmu->load_reg(X, 0x0F);
+    cpu->decode({0xE8});
+    assert(mmu->fetch_reg(X) == 0x10);
+    // INX [Bound Wrap]
+    mmu->load_reg(X, 0xFF);
+    cpu->decode({0xE8});
+    assert(mmu->fetch_reg(X) == 0x00); 
+    // INY
+    mmu->load_reg(Y, 0x0F);
+    cpu->decode({0xC8});
+    assert(mmu->fetch_reg(Y) == 0x10);
+    // INC $E6H
+    mmu->store(0x00E6, 0xE6);
+    cpu->decode({0xE6, 0xE6});
+    assert(mmu->retreive(0x00E6) == 0xE7);
+    // INC $F6H, X
+    mmu->load_reg(X, 0x10);
+    mmu->store(0x0106, 0xF6);
+    cpu->decode({0xF6, 0xF6});
+    assert(mmu->retreive(0x0106) == 0xF7);
+    // DEC $01EEH
+    mmu->store(0x01EE, 0xEE);
+    cpu->decode({0xEE, 0xEE, 0x01});
+    assert(mmu->retreive(0x01EE) == 0xEF);
+    // DEC $01FEH, X
+    mmu->store(0x020E, 0xDE);
+    cpu->decode({0xFE, 0xFE, 0x01});
+    assert(mmu->retreive(0x020E) == 0xDF);
+}
+
+void test_dec()
+{
+    // DEX
+    mmu->load_reg(X, 0x10);
+    cpu->decode({0xCA});
+    assert(mmu->fetch_reg(X) == 0x0F);
+    // DEX [Bound Wrap]
+    mmu->load_reg(X, 0x00);
+    cpu->decode({0xCA});
+    assert(mmu->fetch_reg(X) == 0xFF); 
+    // DEY
+    mmu->load_reg(Y, 0x10);
+    cpu->decode({0x88});
+    assert(mmu->fetch_reg(Y) == 0x0F);
+    // DEC $C6H
+    mmu->store(0x00C6, 0xC6);
+    cpu->decode({0xC6, 0xC6});
+    assert(mmu->retreive(0x00C6) == 0xC5);
+    // DEC $C6H, X
+    mmu->load_reg(X, 0x10);
+    mmu->store(0x00E6, 0xD6);
+    cpu->decode({0xD6, 0xD6});
+    assert(mmu->retreive(0x00E6) == 0xD5);
+    // DEC $01CEH
+    mmu->store(0x01CE, 0xCE);
+    cpu->decode({0xCE, 0xCE, 0x01});
+    assert(mmu->retreive(0x01CE) == 0xCD);
+    // DEC $01DEH, X
+    mmu->store(0x01EE, 0xDE);
+    cpu->decode({0xDE, 0xDE, 0x01});
+    assert(mmu->retreive(0x01EE) == 0xDD);
+}
+
 void test_rol()
 {
     // Initialize status
@@ -400,7 +466,7 @@ void test_rol()
 
 void test_ror()
 {
-// Initialize status
+    // Initialize status
     mmu->load_reg(ST, 0x00 | HX_NUSE);
     // ROR
     mmu->load_reg(A, 0x6A);
@@ -449,6 +515,9 @@ void test_runner()
     std::cout << "Branch Tests Passed ! \n";
     test_flags();
     std::cout << "Flag Tests Passed ! \n";
+    test_inc();
+    test_dec();
+    std::cout << "In/Decrement Tests Passed ! \n";
     test_asl();
     test_lsr();
     std::cout << "Shift Tests Passed ! \n";
