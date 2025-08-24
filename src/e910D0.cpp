@@ -1,3 +1,10 @@
+/*
+    E910D0 v1.0 [NES Emulator]
+    Author: Diwas Adhikari
+    Description: NES Emulator to relive my childhood memories of playing with a bootleg NES console 
+                 which looked like a PS1 and had a vertical cartridge slot like a SNES :)
+*/
+
 #include <apu.hpp>
 #include <gui.hpp>
 

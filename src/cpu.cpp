@@ -46,7 +46,7 @@ void CPU::decode(const HEX& hex)
     switch(hex.h8[0])
     {
         case 0xEA: break;
-        case 0xA9: mmu->ld(A, hex.h8[1]); mmu->updf(A); break;
+        case 0xA9: mmu->ld(A, hex.h8[1]); break;
         case 0xA5: mmu->ldo(A, NON, h16); break;
         case 0xB5: mmu->ldo(A, X, h16); break;
         case 0xAD: mmu->ld(A, NON, h16); break;
@@ -55,13 +55,13 @@ void CPU::decode(const HEX& hex)
         case 0xA1: mmu->ldi(A, X, h16); break;
         case 0xB1: mmu->ldix(A, Y, h16); break;
 
-        case 0xA2: mmu->ld(X, hex.h8[1]); mmu->updf(X); break;
+        case 0xA2: mmu->ld(X, hex.h8[1]); break;
         case 0xA6: mmu->ldo(X, NON, h16); break;
         case 0xB6: mmu->ldo(X, Y, h16); break;
         case 0xAE: mmu->ld(X, NON, h16); break;
         case 0xBE: mmu->ld(X, Y, h16); break;
 
-        case 0xA0: mmu->ld(Y, hex.h8[1]); mmu->updf(Y); break;
+        case 0xA0: mmu->ld(Y, hex.h8[1]); break;
         case 0xA4: mmu->ldo(Y, NON, h16); break;
         case 0xB4: mmu->ldo(Y, X, h16); break;
         case 0xAC: mmu->ld(Y, NON, h16); break;
@@ -157,25 +157,25 @@ void CPU::decode(const HEX& hex)
         case 0xC4: alu.cmp(Y, ADR::ZER, 0x0000, hex.h8[1]); break;
         case 0xCC: alu.cmp(Y, ADR::ABS, h16, 0x00); break;
 
-        case 0x0A: alu.asl((ADR)-1, 0x0000, hex.h8[1]); break;
+        case 0x0A: alu.asl((ADR)-1, 0x0000, 0x00); break;
         case 0x06: alu.asl(ADR::ZER, 0x0000, hex.h8[1]); break;
         case 0x16: alu.asl(ADR::ZEX, 0x0000, hex.h8[1]); break;
         case 0x0E: alu.asl(ADR::ABS, h16, 0x00); break;
         case 0x1E: alu.asl(ADR::ABX, h16, 0x00); break;
 
-        case 0x4A: alu.lsr((ADR)-1, 0x0000, hex.h8[1]); break;
+        case 0x4A: alu.lsr((ADR)-1, 0x0000, 0x00); break;
         case 0x46: alu.lsr(ADR::ZER, 0x0000, hex.h8[1]); break;
         case 0x56: alu.lsr(ADR::ZEX, 0x0000, hex.h8[1]); break;
         case 0x4E: alu.lsr(ADR::ABS, h16, 0x00); break;
         case 0x5E: alu.lsr(ADR::ABX, h16, 0x00); break;
 
-        case 0x2A: alu.rol((ADR)-1, 0x0000, hex.h8[1]); break;
+        case 0x2A: alu.rol((ADR)-1, 0x0000, 0x00); break;
         case 0x26: alu.rol(ADR::ZER, 0x0000, hex.h8[1]); break;
         case 0x36: alu.rol(ADR::ZEX, 0x0000, hex.h8[1]); break;
         case 0x2E: alu.rol(ADR::ABS, h16, 0x00); break;
         case 0x3E: alu.rol(ADR::ABX, h16, 0x00); break;
 
-        case 0x6A: alu.ror((ADR)-1, 0x0000, hex.h8[1]); break;
+        case 0x6A: alu.ror((ADR)-1, 0x0000, 0x00); break;
         case 0x66: alu.ror(ADR::ZER, 0x0000, hex.h8[1]); break;
         case 0x76: alu.ror(ADR::ZEX, 0x0000, hex.h8[1]); break;
         case 0x6E: alu.ror(ADR::ABS, h16, 0x00); break;
@@ -277,30 +277,30 @@ void CPU::rts()
 
 void CPU::brk()
 {
-    mmu->ld(ST, mmu->fetch_reg(ST) | HX_BREK | HX_INTD | HX_NUSE);
+    mmu->load_reg(ST, mmu->fetch_reg(ST) | HX_BREK | HX_INTD | HX_NUSE);
     mmu->push(PCL);
     mmu->push(PCH);
     mmu->push(ST);
-    mmu->ld(PCL, NON, IRQ_VECTOR);
-    mmu->ld(PCH, NON, IRQ_VECTOR+0x0001);
+    mmu->load_reg(PCL, mmu->retreive(IRQ_VECTOR));
+    mmu->load_reg(PCH, mmu->retreive(IRQ_VECTOR+0x0001));
 }
 
 void CPU::rti()
 {
     mmu->pop(ST);
-    mmu->ld(ST, mmu->fetch_reg(ST) & ~HX_NUSE & ~HX_INTD);
+    mmu->load_reg(ST, mmu->fetch_reg(ST) & ~HX_NUSE & ~HX_INTD);
     mmu->pop(PCH);
     mmu->pop(PCL);
 }
 
 void CPU::rst()
 {
-    mmu->ld(A, 0x00);
-    mmu->ld(X, 0x00);
-    mmu->ld(Y, 00);
-    mmu->ld(ST, 0x00 | HX_NUSE);
-    mmu->ld(PCL, NON, RST_VECTOR);
-    mmu->ld(PCH, NON, RST_VECTOR+0x0001);
+    mmu->load_reg(A, 0x00);
+    mmu->load_reg(X, 0x00);
+    mmu->load_reg(Y, 00);
+    mmu->load_reg(ST, 0x00 | HX_NUSE);
+    mmu->load_reg(PCL, mmu->retreive(RST_VECTOR));
+    mmu->load_reg(PCH, mmu->retreive(RST_VECTOR+0x0001));
     cycles = 7;
 }
 
@@ -308,23 +308,23 @@ void CPU::irq()
 {
     if((mmu->fetch_reg(ST) & HX_INTD) != HX_INTD)
     {
-        mmu->ld(ST, mmu->fetch_reg(ST) & ~HX_BREK | HX_INTD | HX_NUSE);
+        mmu->load_reg(ST, mmu->fetch_reg(ST) & ~HX_BREK | HX_INTD | HX_NUSE);
         mmu->push(PCL);
         mmu->push(PCH);
         mmu->push(ST);
-        mmu->ld(PCL, NON, IRQ_VECTOR);
-        mmu->ld(PCH, NON, IRQ_VECTOR+0x0001);
+        mmu->load_reg(PCL, mmu->retreive(IRQ_VECTOR));
+        mmu->load_reg(PCH, mmu->retreive(IRQ_VECTOR+0x0001));
         cycles = 7;
     }
 }
 
 void CPU::nmi()
 {
-    mmu->ld(ST, mmu->fetch_reg(ST) & ~HX_BREK | HX_INTD | HX_NUSE);
+    mmu->load_reg(ST, mmu->fetch_reg(ST) & ~HX_BREK | HX_INTD | HX_NUSE);
     mmu->push(PCL);
     mmu->push(PCH);
     mmu->push(ST);
-    mmu->ld(PCL, NON, NMI_VECTOR);
-    mmu->ld(PCH, NON, NMI_VECTOR+0x0001);
+    mmu->load_reg(PCL, mmu->retreive(NMI_VECTOR));
+    mmu->load_reg(PCH, mmu->retreive(NMI_VECTOR+0x0001));
     cycles = 7;
 }
