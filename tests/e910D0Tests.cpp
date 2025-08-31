@@ -734,6 +734,96 @@ void test_eor()
     assert(mmu->fetch_reg(A) == 0x00);
 }
 
+void test_adc()
+{
+    // Initialize status
+    mmu->load_reg(ST, 0x00 | HX_NUSE);
+    // ADC #$69H
+    mmu->load_reg(A, 0x69);
+    cpu->decode({0x69, 0x69});
+    assert(mmu->fetch_reg(A) == 0xD2);
+    assert(mmu->fetch_reg(ST) == (HX_NUSE | HX_SIGN | HX_OVFW));
+    // ADC $65H 
+    mmu->load_reg(A, 0x65);
+    mmu->store(0x0065, 0x15);
+    cpu->decode({0x65, 0x65});
+    assert(mmu->fetch_reg(A) == 0x7A);
+    assert(mmu->fetch_reg(ST) == HX_NUSE);
+    // ADC $75H, X
+    mmu->load_reg(A, 0x75);
+    mmu->load_reg(X, 0x10);
+    mmu->store(0x0085, 0xFB);
+    cpu->decode({0x75, 0x75});
+    assert(mmu->fetch_reg(A) == 0x70);
+    assert(mmu->fetch_reg(ST) == (HX_NUSE | HX_CARY));
+    // ADC $016DH
+    mmu->load_reg(A, 0x6D);
+    mmu->store(0x016D, 0x00);
+    cpu->decode({0x6D, 0x6D, 0x01});
+    assert(mmu->fetch_reg(A) == 0x6E);
+    assert(mmu->fetch_reg(ST) == HX_NUSE);
+    // ADC $017DH, X
+    mmu->load_reg(A, 0x7D);
+    mmu->load_reg(X, 0x10);
+    mmu->store(0x018D, 0x82);
+    cpu->decode({0x7D, 0x7D, 0x01});
+    assert(mmu->fetch_reg(A) == 0xFF);
+    assert(mmu->fetch_reg(ST) == (HX_NUSE | HX_SIGN));
+    // ADC $0179H, Y
+    mmu->load_reg(A, 0x79);
+    mmu->load_reg(X, 0x10);
+    mmu->store(0x0189, 0x87);
+    cpu->decode({0x79, 0x79, 0x01});
+    assert(mmu->fetch_reg(A) == 0x00);
+    assert(mmu->fetch_reg(ST) == (HX_NUSE | HX_CARY | HX_ZERO));
+    // ADC ($61H, X)
+    mmu->load_reg(A, 0xFF);
+    mmu->store(0x0161, 0xFF);
+    mmu->store(0x0071, 0x61);
+    mmu->store(0x0072, 0x01);
+    cpu->decode({0x61, 0x61});
+    assert(mmu->fetch_reg(A) == 0xFF);
+    assert(mmu->fetch_reg(ST) == (HX_NUSE | HX_CARY | HX_SIGN));
+    // ADC ($71H), Y
+    mmu->load_reg(A, 0x88);
+    mmu->store(0x0181, 0x87);
+    mmu->store(0x0071, 0x71);
+    mmu->store(0x0072, 0x01);
+    cpu->decode({0x71, 0x71});
+    assert(mmu->fetch_reg(A) == 0x10);
+    assert(mmu->fetch_reg(ST) == (HX_NUSE | HX_CARY | HX_OVFW));
+}
+
+void test_sbc()
+{
+    // Initialize status
+    mmu->load_reg(ST, 0x00 | HX_NUSE | HX_CARY);
+    // SBC #$E9H [C<in>]
+    mmu->load_reg(A, 0x7F);
+    cpu->decode({0xE9, 0x01});
+    assert(mmu->fetch_reg(A) == 0x7E);
+    assert(mmu->fetch_reg(ST) == HX_NUSE);
+    // SBC $E5H [Off-by-one]
+    mmu->load_reg(A, 0xE5);
+    mmu->store(0x00E5, 0x01);
+    cpu->decode({0xE5, 0xE5});
+    assert(mmu->fetch_reg(A) == 0xE3);
+    assert(mmu->fetch_reg(ST) == (HX_NUSE | HX_SIGN));
+    // SBC $F5H, X
+    mmu->load_reg(A, 0x6D);
+    mmu->load_reg(X, 0x10);
+    mmu->store(0x0105, 0x6E);
+    cpu->decode({0xF5, 0xF5});
+    assert(mmu->fetch_reg(A) == 0xFE);
+    assert(mmu->fetch_reg(ST) == (HX_NUSE | HX_CARY | HX_SIGN));
+    // SBC $01EDH
+    mmu->load_reg(A, 0xED);
+    mmu->store(0x01ED, 0xED);
+    cpu->decode({0xED, 0xED, 0x01});
+    assert(mmu->fetch_reg(A) == 0x00);
+    assert(mmu->fetch_reg(ST) == (HX_NUSE | HX_ZERO));
+}
+
 void test_runner()
 {
     test_lda();
@@ -770,6 +860,9 @@ void test_runner()
     test_ora();
     test_eor();
     std::cout << "Logic Tests Passed ! \n";
+    test_adc();
+    test_sbc();
+    std::cout << "Arithmetic Tests Passed ! \n";
 }
 
 int main(int argc, char* argv[]) 

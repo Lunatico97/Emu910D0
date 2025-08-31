@@ -15,11 +15,11 @@ void ALU::adc(ADR mode, u16 addr, u8 off)
     if(mode == -1) fetchIMD(off);
     else fetchMEM(mode, addr, off);
     TEMP1 = mmu->fetch_reg(A);   
-    u16 TEMP = TEMP1 + TEMP2 + ((SF & HX_CARY) == HX_CARY ? 1 : 0);
+    u16 TEMP = TEMP1 + TEMP2 + ((SF & HX_CARY) ? 1 : 0);
     SF &= ~(HX_CARY | HX_OVFW);
     if(TEMP > 0xFF) SF |= HX_CARY;
-    if((TEMP ^ TEMP1) & (TEMP ^ TEMP2) & D7) SF |= HX_OVFW; 
-    TEMP1 += TEMP2;
+    TEMP1 = static_cast<u8>(TEMP); 
+    if((TEMP1 ^ mmu->fetch_reg(A)) & (TEMP1 ^ TEMP2) & D7) SF |= HX_OVFW;
     loadREG(A);
 }
 
@@ -28,11 +28,11 @@ void ALU::sbc(ADR mode, u16 addr, u8 off)
     if(mode == -1) fetchIMD(off);
     else fetchMEM(mode, addr, off);
     TEMP1 = mmu->fetch_reg(A);
-    u16 TEMP = TEMP1 - TEMP2 + ((SF & HX_CARY) == HX_CARY ? 1 : 0);
+    u16 TEMP = TEMP1 + ~TEMP2 + ((SF & HX_CARY) ? 1 : 0);
     SF &= ~(HX_CARY | HX_OVFW);
-    if(!(TEMP < 0x00)) SF |= HX_CARY;
-    if((TEMP ^ TEMP1) & (TEMP ^ ~TEMP2) & D7) SF |= HX_OVFW;
-    TEMP1 -= TEMP2;
+    if(TEMP > 0xFF) SF |= HX_CARY;
+    TEMP1 = static_cast<u8>(TEMP); 
+    if((TEMP1 ^ mmu->fetch_reg(A)) & (TEMP1 ^ ~TEMP2) & D7) SF |= HX_OVFW;
     loadREG(A);
 }
 
