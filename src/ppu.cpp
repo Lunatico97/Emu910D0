@@ -38,7 +38,6 @@ u8 PPU::read_from_cpu(u16 addr)
 
 u8 PPU::fetch_vram(u16 addr)
 {
-    addr &= 0x3FFF;
     if(addr >= 0x0000 && addr < 0x2000) return crom->read_from_ppu(addr);
     else if(addr >= 0x2000 && addr < 0x3000){
         addr &= 0x07FF;
@@ -60,7 +59,6 @@ u8 PPU::fetch_vram(u16 addr)
 
 void PPU::store_vram(u16 addr, u8 value)
 {
-    addr &= 0x3FFF;
     if(addr >= 0x0000 && addr < 0x2000) return;
      else if(addr >= 0x2000 && addr < 0x3000){
         addr &= 0x07FF;
@@ -83,27 +81,18 @@ void PPU::store_vram(u16 addr, u8 value)
 void PPU::set_ppu_ctrl(u8 ctrl)
 {
     std::cout << Utils::logU8("PPUCTRL: ", ctrl) << std::endl;
-    bool old_nmi = ((ppu_ctrl & D7) == D7);
-    ppu_ctrl = ctrl;
-    T &= ~0x0C00;
-    T |= ((u16)(ctrl & 0x03) << 10);
-    nmi_enabled = ((ctrl & D7) == D7);
-    if((ctrl & D2) != D2) vram_icr = 0x01;
-    else vram_icr = 0x20; 
-    if((ctrl & D3) != D3) spr_addr = 0x0000;
-    else spr_addr = 0x1000; 
-    if((ctrl & D4) != D4) bg_addr = 0x0000;
-    else bg_addr = 0x1000;
-    if((ctrl & D5) != D5) spr_size = 0x08;
-    else spr_size = 0x10;
-
-    if(!old_nmi && nmi_enabled && (ppu_status & D7) == D7) trigger_nmi = true;
+    bool old_nmi = CTRL_REG.nmi_enabled;
+    bg_addr = CTRL_REG.bg_addr ? 0x1000: 0x0000;
+    spr_addr = CTRL_REG.spr_addr ? 0x1000: 0x0000;
+    CTRL_REG.byte = ctrl;
+    T.nm_select = CTRL_REG.nm_addr;
+    // if(!old_nmi && nmi_enabled && (ppu_status & D7) == D7) trigger_nmi = true;
 }
 
 void PPU::set_ppu_mask(u8 mask)
 {
     std::cout << Utils::logU8("PPUMASK: ", mask) << std::endl;
-    ppu_mask = mask;
+    MASK_REG.byte = mask;
 }
 
 void PPU::set_ppu_scrl(u8 pos)
@@ -111,47 +100,55 @@ void PPU::set_ppu_scrl(u8 pos)
     std::cout << Utils::logU8("PPUSCLL: ", pos) << std::endl;
     if(W == 0x00)
     {
-        X = pos & 0x07; // Fine X
-        T = (T & 0xFFE0) | ((pos >> 3) & 0x1F); // Coarse X
-        T = (T & 0xFBFF) | ((pos & 0x08) << 7); // Name Table
+        // Get horizontal scroll position
+        X = pos & 0x07;
+        T.coarse_x = pos & 0xF8;
     }
     else
     {
-        T = (T & 0x8FFF) | ((pos & 0x07) << 12); // Fine Y
-        T = (T & 0xFC1F) | ((pos & 0xF8) << 2); // Coarse Y
+        // Get vertical scroll position
+        T.fine_y = pos & 0x07;
+        T.coarse_y = pos & 0xF8;
     }
+    // Toggle latch
     W = ~W;
 }
 
 void PPU::set_ppu_addr(u8 addr)
 {
-    if(W == 0) T = (T & 0x00FF) | (addr << 8); // higher nibble
+    if(W == 0)
+    {
+       // Get higher address byte
+       addr &= 0x3F;
+       T.addr = (T.addr & 0x00FF) | (static_cast<u16>(addr) << 8);
+    }
     else 
     {
-        T = (T & 0xFF00) | addr; // lower nibble
-        V = T;
+        // Get lower address byte
+        T.addr = (T.addr & 0xFF00) | addr;
+        V.addr = T.addr;
     }
-
+    // Toggle latch
     W = ~W;
 }
  
 void PPU::set_ppu_data(u8 data)
 {
-   std::cout << Utils::logU16("PPUADDR: ", V) << " " << Utils::logU8("PPUDATA: ", data) << std::endl;
-   store_vram(V, data);
-   V += vram_icr;
+   std::cout << Utils::logU16("PPUADDR: ", V.addr) << " " << Utils::logU8("PPUDATA: ", data) << std::endl;
+   store_vram(V.addr, data);
+   V.addr += (CTRL_REG.vram_icr ? 0x20: 0x01);
 }
 
 u8 PPU::get_ppu_data()
 {
     u8 value;
-    if(V >= 0x3F00) value = fetch_vram(V);
+    if(V.addr >= 0x3F00) value = fetch_vram(V.addr);
     else
     {
         value = ppu_data_buffer;
-        ppu_data_buffer = fetch_vram(V);
+        ppu_data_buffer = fetch_vram(V.addr);
     }
-    V += vram_icr;
+    V.addr += (CTRL_REG.vram_icr ? 0x20: 0x01);
     return value;
 }
 
@@ -159,8 +156,8 @@ u8 PPU::get_ppu_stat()
 {
     W = 0;
     // ppu_status |= D7;
-    u8 out_stat = (ppu_status & 0xE0) | (ppu_data_buffer & 0x1F);
-    ppu_status &= ~D7;
+    u8 out_stat = (STAT_REG.byte & 0xE0) | (ppu_data_buffer & 0x1F);
+    STAT_REG.vblank = 0;
     return out_stat;
 }
 
@@ -168,52 +165,46 @@ void PPU::update_v(bool vt = 0)
 {
     if(!vt)
     {
-        // Coarse scrolling X
-        if((V & 0x001F) == 31)
+        // Update horizontal scroll position
+        if(V.coarse_x == 0x20)
         {
-            V &= ~0x001F;         
-            V ^= 0x0400; // NN = 01         
+            V.coarse_x = 0x00;         
+            V.nm_select = 0b01;         
         }
-        else V += 1;  
+        else V.coarse_x += 0x01;  
     }
     else
     {
-        // Fine scrolling Y
-        if ((V & 0x7000) != 0x7000) V += 0x1000;
+        // Update vertical scroll position
+        if (V.fine_y != 0x07) V.fine_y += 0x01;
         else
         {
-            V &= ~0x7000;
-        
-            // Coarse scrolling Y
-            u16 y = (V & 0x03E0) >> 5; // coarse Y
-            
-            if (y == 29)
+            V.fine_y = 0x00;
+            if (V.coarse_y == 0x1E)
             {
-                y = 0;
-                V ^= 0x0800; // NN = 10
+                V.coarse_y = 0;
+                V.nm_select = 0b10;
             }    
-            else if (y == 31) y = 0;
-            else y += 1;
-            
-            V = (V & ~0x03E0) | (y << 5); // put coarse Y back into v
+            else if (V.coarse_y == 0x20) V.coarse_y = 0;
+            else V.coarse_y += 0x01;
         }
     }         
 }
 
 void PPU::run_ppu(Renderer *rndr)
 {
+    // Reset cycles and lines
     cycles += 0x0001;
-
     if(cycles == 340)
     {
         cycles = 0x0000;
         if(lines == 261)
         {
             lines = 0x0000;
-            spr_hit = 0;
-            spr_ovf = 0;
+            STAT_REG.spr_hit = 0;
+            STAT_REG.spr_ovf = 0;
+            STAT_REG.vblank = 0;
             W = 0;
-            ppu_status &= ~D7;
 
             rndr->display();
             rndr->setColor(0, 0, 0, 255);
@@ -222,17 +213,14 @@ void PPU::run_ppu(Renderer *rndr)
         lines += 0x0001;
     }
 
-    bg_enabled = ((ppu_mask & D3) == D3);
-    spr_enabled = ((ppu_mask & D4) == D4);
-
     u8 bg_index = 0x00;
     bool visible_element = (lines >= 0 && lines < 240) && (cycles >= 1 && cycles <= 256);
 
     if(visible_element)
     {
-        if(bg_enabled)
+        if(MASK_REG.bg_enabled)
         {
-            u8 color_index = ((((HBSHF >> (0x0F - X)) & 0x01)) << 1) | ((LBSHF >> (0x0F - X)) & 0x01);
+            u8 color_index = ((((P1SHF >> (0x0F - X)) & 0x01)) << 1) | ((P0SHF >> (0x0F - X)) & 0x01);
             u8 palette_index = ((((HASHF >> (0x07 - X)) & 0x01)) << 1) | ((LASHF >> (0x07 - X)) & 0x01);
             if(color_index == 0x00) bg_index = fetch_vram(0x3F00);
             else bg_index = fetch_vram(0x3F00 | (palette_index << 2) | color_index);
@@ -247,14 +235,15 @@ void PPU::run_ppu(Renderer *rndr)
         // Render pixel
         // std::cout << "(" << cycles-1 << ", " << lines << ")" << std::endl;
         rndr->setColor(RGB_PAL[bg_index].r, RGB_PAL[bg_index].g, RGB_PAL[bg_index].b, 255);
-        rndr->renderPt(cycles-1, lines);
-        // rndr->renderRect({0+((cycles-1)*5), 0+(lines*5), 5, 5}, true);
+        // rndr->renderPt(cycles-1, lines);
+        rndr->renderRect({0+((cycles-1)*PIX), 0+(lines*PIY), PIX, PIY}, true);
     }
 
-    if(bg_enabled || spr_enabled)
+    // Shift plane data for tiles
+    if(MASK_REG.bg_enabled || MASK_REG.spr_enabled)
     {
-        LBSHF = LBSHF << 1;
-        HBSHF = HBSHF << 1;
+        P0SHF = P0SHF << 1;
+        P1SHF = P1SHF << 1;
         LASHF = LASHF << 1;
         HASHF = HASHF << 1;
     }
@@ -270,35 +259,35 @@ void PPU::run_ppu(Renderer *rndr)
         switch (cycle_num)
         {
             case 0x00:
-                // Update V register horizontal
-                LBSHF = LBL;
-                HBSHF = HBL;
+                // Load latched data to shift registers
+                P0SHF = static_cast<u16>(P0L) << 8;
+                P1SHF = static_cast<u16>(P1L) << 8;
                 LASHF = (palette_bits & D0) == D0 ? 0xFF: 0x00;
                 HASHF = (palette_bits & D1) == D1 ? 0xFF: 0x00;
-                if(bg_enabled || spr_enabled) update_v();
+                // Update V register horizontal
+                if(MASK_REG.bg_enabled || MASK_REG.spr_enabled) update_v();
                 break;
 
             case 0x01:
-                // Read name table
-                tile_addr = 0x2000 | (V & 0x0FFF);
-                name_byte = fetch_vram(tile_addr);
+                // Fetch name table byte
+                name_byte = fetch_vram(0x2000 | (V.addr & 0x0FFF));
                 break;
             
             case 0x03:
-                // Read attribute from name table
-                attr_addr = ATRB_INDEX | (V & 0x0C00) | ((V >> 4) & 0x38) | ((V >> 2) & 0x07);
+                // Fetch attribute byte
+                attr_addr = ATRB_INDEX | (V.addr & 0x0C00) | ((V.addr >> 4) & 0x38) | ((V.addr >> 2) & 0x07);
                 attr_byte = fetch_vram(attr_addr);
                 break;
 
             case 0x05:
-                // Get shifter low bits
-                LBL = fetch_vram(bg_addr + (name_byte*0x10) + ((V >> 12) & 0x0007));
-                palette_select = ((V & 0x02) >> 1) | ((V & 0x40) >> 5);
+                // Latch plane-0 data
+                P0L = fetch_vram(bg_addr + (name_byte*0x10) + ((V.addr >> 12) & 0x0007));
+                palette_select = ((V.addr & 0x02) >> 1) | ((V.addr & 0x40) >> 5);
                 break;
 
             case 0x07:
-                // Get shifter high bits
-                HBL = fetch_vram(bg_addr + (name_byte*0x10) + ((V >> 12) & 0x0007) + 0x08);
+                // Latch plane-1 data
+                P1L = fetch_vram(bg_addr + (name_byte*0x10) + ((V.addr >> 12) & 0x0007) + 0x08);
                 palette_bits = (attr_byte >> (palette_select * 2)) & 0x03;
                 break;
             
@@ -306,14 +295,32 @@ void PPU::run_ppu(Renderer *rndr)
                 break;
         }
 
-        if(cycles == 256)
+        // Render-only operations
+        if(MASK_REG.bg_enabled || MASK_REG.spr_enabled)
         {
-            if(bg_enabled || spr_enabled) update_v(1);
-        }
+            if(cycles == 256)
+            {
+                // Update V register vertical
+                update_v(1);
+            }
 
-        if(cycles == 257)
-        {
-            V = (V & 0x7BE0) | (T & 0x041F); // Horizontal transfer
+            if(cycles == 257)
+            {
+                // Perform horizontal transfer
+                V.coarse_x = T.coarse_x;
+                V.nm_select = T.nm_select & 0b01;
+            }
+
+            if(lines == 261)
+            {
+                if(cycles >= 280 && cycles <=304)
+                {
+                    // Perform vertical transfer
+                    V.coarse_y = T.coarse_y;
+                    V.fine_y = T.fine_y;
+                    V.nm_select = T.nm_select & 0b10;
+                }
+            }
         }
     }
 
@@ -321,17 +328,9 @@ void PPU::run_ppu(Renderer *rndr)
 
     if(lines == 241 && cycles == 1)
     {
-        ppu_status |= D7; 
-        std::cout << Utils::logU8("PPUSTAT: ", ppu_status) << std::endl;
-        if(nmi_enabled) trigger_nmi = true; // Trigger NMI if enabled
-    }
-
-    if(lines == 261)
-    {
-        if(cycles  >= 280 && cycles <= 304)
-        {
-            V = (V & 0x841F) | (T & 0x7BE0); // Vertical transfer
-        }
+        STAT_REG.vblank = 1; 
+        std::cout << Utils::logU8("PPUSTAT: ", STAT_REG.byte) << std::endl;
+        if(CTRL_REG.nmi_enabled) trigger_nmi = true; // Trigger NMI if enabled
     }
 }
 

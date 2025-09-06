@@ -13,7 +13,7 @@ void CPU::clock()
     cycles -= 1;
 }
 
-void CPU::step()
+void CPU::step(bool debug)
 {   
     HEX current;
     penalty = 0x00;
@@ -21,21 +21,24 @@ void CPU::step()
     u8 l = IL_MAP[mmu->retreive(IREG)];    
     mmu->load_pc(IREG+l);
 
-    // Tap registers stepwise
-    std::cout << Utils::logU16("IREG", IREG);
-    std::cout << Utils::logU16("PC", mmu->fetch_pc());
-    std::cout << Utils::logU8("A", mmu->fetch_reg(A));
-    std::cout << Utils::logU8("X", mmu->fetch_reg(X));
-    std::cout << Utils::logU8("Y", mmu->fetch_reg(Y));
-    std::cout << Utils::logU8("SP", mmu->fetch_reg(SP));
-    std::cout << Utils::logU8("ST", mmu->fetch_reg(ST));
+    if(debug)
+    {
+        // Tap registers stepwise
+        std::cout << Utils::logU16("IREG", IREG);
+        std::cout << Utils::logU16("PC", mmu->fetch_pc());
+        std::cout << Utils::logU8("A", mmu->fetch_reg(A));
+        std::cout << Utils::logU8("X", mmu->fetch_reg(X));
+        std::cout << Utils::logU8("Y", mmu->fetch_reg(Y));
+        std::cout << Utils::logU8("SP", mmu->fetch_reg(SP));
+        std::cout << Utils::logU8("ST", mmu->fetch_reg(ST));
+    }
 
     for(int i=0; i<l; i++)
     {
         current.h8[i] = mmu->retreive(IREG+i); 
     }
 
-    std::cout << Utils::logHEX(current) << std::endl;
+    if(debug) std::cout << Utils::logHEX(current) << std::endl;
     decode(current);
 }
 

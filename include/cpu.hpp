@@ -19,7 +19,7 @@ class CPU
 
         // CPU runners
         void clock();
-        void step();
+        void step(bool debug = 0);
 
         // Hardware Interrupts
         void rst();
