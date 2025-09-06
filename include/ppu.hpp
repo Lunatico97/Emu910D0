@@ -18,6 +18,9 @@
 #define ATRB_INDEX 0x23C0 // start of last 64 bytes for name table
 #define PAL_INDEX 0x3F00
 
+#define PIX 3 // width of pixel
+#define PIY 2 // height of pixel
+
 class PPU
 {
     public:
@@ -28,7 +31,6 @@ class PPU
         void write_from_cpu(u16 addr, u8 value);
 
         // Peeks
-        void draw_pattern_table(Renderer *rndr);
         void draw_palette_table(Renderer *rndr);
 
         // PPU Cycle
@@ -60,28 +62,77 @@ class PPU
         
         // PPU Memory
         u8 NAME[2048], OAM[256], SPAM[32], PAL[32]; 
-        u8 ppu_data_buffer, ppu_status, ppu_mask, ppu_ctrl;
+        u8 ppu_data_buffer;
 
-        // PPU Internal Registers
-        u16 LBSHF, HBSHF;
+        // Shift & Latch Registers
+        u8 P0L, P1L;
+        u16 P0SHF, P1SHF;
         u8 LASHF, HASHF;
-        u16 T, V; // 0 yyy NN YYYYY XXXXX
-        bool W;
-        u8 X;
-
-        // Controls
-        bool nmi_enabled = 0, bg_enabled = 1, spr_enabled = 1;
-        u16 spr_addr;
-        u16 bg_addr;
-        u8 spr_size;
-        u8 vram_icr = 0x01;
-        
-        // Status flags
-        bool spr_ovf = 0, spr_hit = 0;
+        u16 bg_addr, spr_addr;
 
         // Latch
-        u16 HBL, LBL;
         u8 name_byte, attr_byte, palette_select, palette_bits;
+
+        // Internal registers
+        u8 X;
+        bool W;
+        union PPUINTL_REG
+        {
+            u16 addr; // 0 yyy NN YYYYY XXXXX
+            struct
+            {
+                u8 coarse_x: 5;
+                u8 coarse_y: 5;
+                u8 nm_select: 2;
+                u8 fine_y: 3;
+            }; 
+        } T, V;
+
+        // Control register
+        union PPUCTRL_REG
+        {
+            u8 byte;
+            struct
+            {
+                u8 nm_addr: 2;
+                u8 vram_icr: 1;
+                u8 spr_addr: 1;
+                u8 bg_addr: 1;
+                u8 spr_size: 1;
+                u8 ms_select: 1;
+                u8 nmi_enabled: 1;
+            };
+        } CTRL_REG;
+
+        // Mask register
+        union PPUMASK_REG
+        {
+            u8 byte;
+            struct
+            {
+                u8 greyscale: 1;
+                u8 bg_left: 1;
+                u8 spr_left: 1;
+                u8 bg_enabled: 1;
+                u8 spr_enabled: 1;
+                u8 red: 1;
+                u8 green: 1;
+                u8 blue: 1;
+            };
+        } MASK_REG;
+
+        // Status register
+        union PPUSTAT_REG
+        {
+            u8 byte;
+            struct
+            {
+                u8 bus: 5;
+                u8 spr_ovf: 1;
+                u8 spr_hit: 1;
+                u8 vblank: 1;
+            };
+        } STAT_REG;
 
         // CROM
         Renderer* renderer;
