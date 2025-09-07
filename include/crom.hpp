@@ -12,7 +12,7 @@ class CardROM
         u8 read_from_cpu(u16 cpu_addr);
         u8 read_from_ppu(u16 ppu_addr);
         void load_rom(const char *filename);
-        bool mirror_mode;
+        bool mirror_mode; // Mirror mode: [0 - Horizontal / 1 - Vertical]
 
     private:
         void decode(u8 header[]);
