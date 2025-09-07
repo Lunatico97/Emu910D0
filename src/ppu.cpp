@@ -40,18 +40,19 @@ u8 PPU::fetch_vram(u16 addr)
 {
     if(addr >= 0x0000 && addr < 0x2000) return crom->read_from_ppu(addr);
     else if(addr >= 0x2000 && addr < 0x3000){
-        addr &= 0x07FF;
         if(crom->mirror_mode)
         {
-            if(addr >= 0x0800 && addr < 0x0C00) addr &= 0x03FF;
+            if(addr >= 0x2400 && addr < 0x2800) addr &= 0x03FF;
+            else if(addr >= 0x2C00 && addr < 0x3000) addr &= 0x07FF;
         }
+        else addr &= 0x07FF;
         return NAME[addr];
     }
     else if(addr >= 0x3000 && addr < 0x3F00) return NAME[(addr & 0x0EFF)];
     else if(addr >= 0x3F00 && addr < 0x4000)
     {
-        u16 pal_idx = addr & 0x001F; // Original mask
-        if ((pal_idx & 0x0003) == 0) pal_idx &= 0x000F; 
+        u8 pal_idx = addr & 0x1F;
+        if ((pal_idx & 0x03) == 0) pal_idx &= 0x0F; 
         return PAL[pal_idx];
     }
     else throw(std::runtime_error(Utils::logU16("Out of bounds (R) from VRAM: ", addr)));
@@ -61,18 +62,19 @@ void PPU::store_vram(u16 addr, u8 value)
 {
     if(addr >= 0x0000 && addr < 0x2000) return;
      else if(addr >= 0x2000 && addr < 0x3000){
-        addr &= 0x07FF;
         if(crom->mirror_mode)
         {
-            if(addr >= 0x0800 && addr < 0x0C00) addr &= 0x03FF;
+            if(addr >= 0x2400 && addr < 0x2800) addr &= 0x03FF;
+            else if(addr >= 0x2C00 && addr < 0x3000) addr &= 0x07FF;
         }
+        else addr &= 0x07FF;
         NAME[addr] = value;
     }
     else if(addr >= 0x3000 && addr < 0x3F00) NAME[(addr & 0x0EFF)] = value;
     else if(addr >= 0x3F00 && addr < 0x4000)
     {
-        u16 pal_idx = addr & 0x001F; // Original mask
-        if((pal_idx & 0x0003) == 0) pal_idx &= 0x000F; 
+        u8 pal_idx = addr & 0x1F;
+        if ((pal_idx & 0x03) == 0) pal_idx &= 0x0F; 
         PAL[pal_idx] = value;
     }
     else throw(std::runtime_error(Utils::logU16("Out of bounds (W) to VRAM: ", addr)));
@@ -86,7 +88,7 @@ void PPU::set_ppu_ctrl(u8 ctrl)
     spr_addr = CTRL_REG.spr_addr ? 0x1000: 0x0000;
     CTRL_REG.byte = ctrl;
     T.nm_select = CTRL_REG.nm_addr;
-    // if(!old_nmi && nmi_enabled && (ppu_status & D7) == D7) trigger_nmi = true;
+    // if(!old_nmi && CTRL_REG.nmi_enabled && STAT_REG.vblank) trigger_nmi = true;
 }
 
 void PPU::set_ppu_mask(u8 mask)
@@ -102,13 +104,13 @@ void PPU::set_ppu_scrl(u8 pos)
     {
         // Get horizontal scroll position
         X = pos & 0x07;
-        T.coarse_x = pos & 0xF8;
+        T.coarse_x = (pos >> 3);
     }
     else
     {
         // Get vertical scroll position
         T.fine_y = pos & 0x07;
-        T.coarse_y = pos & 0xF8;
+        T.coarse_y = (pos >> 3);
     }
     // Toggle latch
     W = ~W;
@@ -139,7 +141,7 @@ void PPU::set_ppu_data(u8 data)
    V.addr += (CTRL_REG.vram_icr ? 0x20: 0x01);
 }
 
-u8 PPU::get_ppu_data()
+u8 PPU::get_ppu_data() 
 {
     u8 value;
     if(V.addr >= 0x3F00) value = fetch_vram(V.addr);
@@ -155,7 +157,6 @@ u8 PPU::get_ppu_data()
 u8 PPU::get_ppu_stat()
 {
     W = 0;
-    // ppu_status |= D7;
     u8 out_stat = (STAT_REG.byte & 0xE0) | (ppu_data_buffer & 0x1F);
     STAT_REG.vblank = 0;
     return out_stat;
@@ -180,12 +181,12 @@ void PPU::update_v(bool vt = 0)
         else
         {
             V.fine_y = 0x00;
-            if (V.coarse_y == 0x1E)
+            if (V.coarse_y == 0x1D)
             {
-                V.coarse_y = 0;
+                V.coarse_y = 0x00;
                 V.nm_select = 0b10;
             }    
-            else if (V.coarse_y == 0x20) V.coarse_y = 0;
+            else if (V.coarse_y == 0x1F) V.coarse_y = 0x00;
             else V.coarse_y += 0x01;
         }
     }         
@@ -224,7 +225,6 @@ void PPU::run_ppu(Renderer *rndr)
             u8 palette_index = ((((HASHF >> (0x07 - X)) & 0x01)) << 1) | ((LASHF >> (0x07 - X)) & 0x01);
             if(color_index == 0x00) bg_index = fetch_vram(0x3F00);
             else bg_index = fetch_vram(0x3F00 | (palette_index << 2) | color_index);
-            // std::cout << Utils::logU8("Index: ", bg_index) << std::endl;
         }
         else bg_index = fetch_vram(0x3F00);
 
@@ -250,7 +250,7 @@ void PPU::run_ppu(Renderer *rndr)
 
     // Frame timing for background 
     // [Based on NesWiki diagram: https://www.nesdev.org/w/images/default/4/4f/Ppu.svg ]
-    u16 tile_addr, attr_addr, pattern_select, palette_bits;
+    u16 tile_addr, attr_addr;
 
     if((lines >= 0 && lines < 240) || lines == 261)
     {
@@ -281,13 +281,13 @@ void PPU::run_ppu(Renderer *rndr)
 
             case 0x05:
                 // Latch plane-0 data
-                P0L = fetch_vram(bg_addr + (name_byte*0x10) + ((V.addr >> 12) & 0x0007));
+                P0L = fetch_vram(bg_addr + (name_byte << 4) + V.fine_y);
                 palette_select = ((V.addr & 0x02) >> 1) | ((V.addr & 0x40) >> 5);
                 break;
 
             case 0x07:
                 // Latch plane-1 data
-                P1L = fetch_vram(bg_addr + (name_byte*0x10) + ((V.addr >> 12) & 0x0007) + 0x08);
+                P1L = fetch_vram(bg_addr + (name_byte << 4) + V.fine_y + 0x08);
                 palette_bits = (attr_byte >> (palette_select * 2)) & 0x03;
                 break;
             
