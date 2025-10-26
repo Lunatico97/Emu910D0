@@ -120,7 +120,7 @@ void GUI::draw_reg_bank()
 void GUI::run_gui()
 {
     u8 size = 0x08, offset = 0x00;
-    bool pause = true;
+    bool pause = false;
 
     while(_active)
     {
