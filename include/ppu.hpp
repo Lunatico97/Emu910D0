@@ -68,7 +68,6 @@ class PPU
         u8 P0L, P1L;
         u16 P0SHF, P1SHF;
         u8 LASHF, HASHF;
-        u16 bg_addr, spr_addr;
 
         // Latch
         u8 name_byte, attr_byte, palette_select, palette_bits;
@@ -81,28 +80,21 @@ class PPU
             u16 addr; // 0 yyy NN YYYYY XXXXX
             struct
             {
-                u8 coarse_x: 5;
-                u8 coarse_y: 5;
-                u8 nm_select: 2;
-                u8 fine_y: 3;
+                u16 coarse_x: 5;
+                u16 coarse_y: 5;
+                u16 nm_select: 2;
+                u16 fine_y: 3;
             }; 
         } T, V;
 
-        // Control register
-        union PPUCTRL_REG
+        // Control register values
+        struct PPUCTRL_VAL 
         {
-            u8 byte;
-            struct
-            {
-                u8 nm_addr: 2;
-                u8 vram_icr: 1;
-                u8 spr_addr: 1;
-                u8 bg_addr: 1;
-                u8 spr_size: 1;
-                u8 ms_select: 1;
-                u8 nmi_enabled: 1;
-            };
-        } CTRL_REG;
+            u16 bg_addr;
+            u16 spr_addr;
+            u8 vram_icr;
+            bool nmi_enabled;
+        } CVALS;
 
         // Mask register
         union PPUMASK_REG

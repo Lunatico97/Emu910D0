@@ -102,15 +102,15 @@ void Renderer::renderPt(int x, int y)
 
 void Renderer::renderRect(SDL_Rect rect, bool fill)
 {
-	SDL_RenderDrawRect(ren, &rect) ;	
 	if(fill) SDL_RenderFillRect(ren, &rect) ;
+	else SDL_RenderDrawRect(ren, &rect) ;	
 }
 
 void Renderer::renderRect(SDL_Rect rect, Uint8 r, Uint8 g, Uint8 b, bool fill)
 {
 	SDL_SetRenderDrawColor(ren, r, g, b, 255) ;
-	SDL_RenderDrawRect(ren, &rect) ;	
 	if(fill) SDL_RenderFillRect(ren, &rect) ;
+	else SDL_RenderDrawRect(ren, &rect) ;	
 }
 
 void Renderer::setColor(Uint8 r, Uint8 g, Uint8 b, Uint8 a)

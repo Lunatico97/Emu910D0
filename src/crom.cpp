@@ -21,8 +21,8 @@ void CardROM::decode(u8 header[])
     assert(chr_units != 0);
     PRGROM = (u8*)calloc(prg_units*16384, sizeof(u8));
     CHRROM = (u8*)calloc(chr_units*8192, sizeof(u8));
-    mapper_num = header[7] | (header[6] >> 4);
-    mirror_mode = ((header[6] & D0) == D0);
+    mapper_num = (header[7] & 0xF0) | (header[6] >> 4);
+    mirror_mode = (header[6] & D0);
     switch(mapper_num)
     {
         case 0x00: mapper = new Mapper000(prg_units, chr_units); break;
@@ -36,7 +36,7 @@ void CardROM::load_rom(const char *filename)
     ss >> std::hex >> std::noskipws;
     u16 counter = 0x0000;
     u8 current_hex = 0x00;
-    u8 header[16] = {0};
+    u8 header[16] = {0};  
 
     while(ss >> current_hex)
     {
