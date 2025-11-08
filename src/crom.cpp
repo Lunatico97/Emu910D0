@@ -49,9 +49,9 @@ void CardROM::load_rom(const char *filename)
     }
 
     decode(header);
-    std::cout << Utils::logU8("PRG Banks: ", prg_units) << std::endl;  
-    std::cout << Utils::logU8("CHR Banks: ", chr_units) << std::endl;  
-    std::cout << Utils::logU8("Mapper: ", mapper_num) << std::endl;
+    std::cout << "PRG Banks: [ " << static_cast<int>(prg_units) << " ]\n";  
+    std::cout << "CHR Banks: [ " << static_cast<int>(chr_units) << " ]\n";  
+    std::cout << "Mapper: [ " << static_cast<int>(mapper_num) << " ]\n";
     std::cout << "Mirror Mode: " << (mirror_mode ? "Vertical": "Horizontal") << std::endl;
 
     *(PRGROM + 0) = current_hex;

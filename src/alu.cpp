@@ -4,7 +4,7 @@ ALU::ALU(MMU* mmu_ptr): mmu(mmu_ptr){}
 
 void ALU::update_flags()
 {
-    if((TEMP1 & D7) == D7) SF |= HX_SIGN;
+    if(TEMP1 & D7) SF |= HX_SIGN;
     else SF &= ~HX_SIGN;
     if(TEMP1 == 0x00) SF |= HX_ZERO;
     else SF &= ~HX_ZERO;

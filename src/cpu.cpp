@@ -247,7 +247,7 @@ void CPU::jmpi(u16 address)
 
 void CPU::brc_set(u8 hx_flag, u8 rel_addr)
 {
-    if((mmu->fetch_reg(ST) & hx_flag) == hx_flag)
+    if(mmu->fetch_reg(ST) & hx_flag)
     {
         mmu->load_pc(mmu->get_addr(ADR::REL, 0x0000, rel_addr));
         penalty += 0x01;
@@ -257,12 +257,9 @@ void CPU::brc_set(u8 hx_flag, u8 rel_addr)
 
 void CPU::brc_rst(u8 hx_flag, u8 rel_addr)
 {
-    if((mmu->fetch_reg(ST) & hx_flag) != hx_flag)
-    {
-        mmu->load_pc(mmu->get_addr(ADR::REL, 0x0000, rel_addr));
-        penalty += 0x01;
-    }
-    else return;
+    if(mmu->fetch_reg(ST) & hx_flag) return;   
+    mmu->load_pc(mmu->get_addr(ADR::REL, 0x0000, rel_addr));
+    penalty += 0x01;
 }
 
 void CPU::jsr(u16 address)

@@ -57,14 +57,14 @@ void MMU::st(REG src, REG off, u16 addr)
 
 void MMU::ldo(REG des, REG off, u16 addr)
 {
-    if(off != REG::NON) load_reg(des, retreive((addr & 0x00FF) + fetch_reg(off)));
+    if(off != REG::NON) load_reg(des, retreive(static_cast<u8>((addr & 0x00FF) + fetch_reg(off))));
     else load_reg(des, retreive(addr & 0x00FF));
     updf(des);
 }
 
 void MMU::sto(REG src, REG off, u16 addr)
 {
-    if(off != REG::NON) store((addr & 0x00FF) + fetch_reg(off), fetch_reg(src));
+    if(off != REG::NON) store(static_cast<u8>((addr & 0x00FF) + fetch_reg(off)), fetch_reg(src));
     else store((addr & 0x00FF), fetch_reg(src));
 }
 
@@ -106,12 +106,12 @@ u16 MMU::get_addr(ADR mode, u16 addr, u8 off)
         case ADR::IND: res_addr = retreive(addr) | ((retreive(addr+1) & 0x00FF) << 8); break;
         case ADR::IIX: res_addr = (retreive(addr) | ((retreive(addr+1) & 0x00FF) << 8)) + static_cast<u16>(off); break;
         case ADR::IXI: res_addr = retreive(addr+off) | ((retreive(addr+off+1) & 0x00FF) << 8) ; break;
-        case ADR::REL: if((off & D7) == D7) res_addr = fetch_pc() - ((~off+1) & 0x00FF);
+        case ADR::REL: if(off & D7) res_addr = fetch_pc() - ((~off+1) & 0x00FF);
                        else res_addr = fetch_pc() + off; 
                        break;
         case ADR::ZER: res_addr = static_cast<u16>(off); break;
-        case ADR::ZEX: res_addr = static_cast<u16>(fetch_reg(X) + off); break;
-        case ADR::ZEY: res_addr = static_cast<u16>(fetch_reg(Y) + off); break;
+        case ADR::ZEX: res_addr = static_cast<u8>(fetch_reg(X) + off); break;
+        case ADR::ZEY: res_addr = static_cast<u8>(fetch_reg(Y) + off); break;
         default: break;
     }
 
@@ -122,7 +122,7 @@ void MMU::updf(REG r)
 {
     u8 flags = fetch_reg(ST);
     u8 value = fetch_reg(r);
-    if((value & D7) == D7) flags |= D7;
+    if(value & D7) flags |= D7;
     else flags &= ~D7;
     if(value == 0x00) flags |= D1;
     else flags &= ~D1;

@@ -7,8 +7,6 @@
 #ifndef __GUI_H__
 #define __GUI_H__
 
-#define SCRW 768
-#define SCRH 480
 #define FTPT 16
 #define CLR_RED {255, 0, 0, 255}
 #define CLR_GREEN {0, 255, 0, 255}

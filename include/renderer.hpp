@@ -17,7 +17,8 @@ class Renderer
 {
     public:
         Renderer(const char *title, int width, int height);
-		SDL_Texture *loadTexture(const char *location);
+		SDL_Texture* loadTexture(const char *location);
+		SDL_Texture *loadTexture(const int width, const int height);
 		SDL_Texture* loadTextureCK(const char *path, Uint8 r, Uint8 g, Uint8 b);
 		SDL_Texture* loadText(const char *text, TTF_Font *font, SDL_Color color);
 		TTF_Font *loadFont(const char *location, int pt);
@@ -31,6 +32,7 @@ class Renderer
 		void renderPt(int x, int y);
 		void renderRect(SDL_Rect rect, bool fill);
 		void renderRect(SDL_Rect rect, Uint8 r, Uint8 g, Uint8 b, bool fill);
+		void renderFrame(SDL_Rect rect, SDL_Texture* frame_tex, u32* frame_buffer, int frame_pitch);
 		void setColor(Uint8 r, Uint8 g, Uint8 b, Uint8 a);
 		void display();
 		void clear();

@@ -25,6 +25,13 @@ SDL_Texture *Renderer::loadTexture(const char *location)
 	return tex ;
 }
 
+SDL_Texture *Renderer::loadTexture(const int width, const int height)
+{
+	SDL_Texture *tex = SDL_CreateTexture(ren, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, width, height);
+	if(tex == NULL) std::cout << TTF_GetError() << std::endl ;
+	return tex;
+}
+
 SDL_Texture* Renderer::loadTextureCK(const char *path, Uint8 r, Uint8 g, Uint8 b)
 {
 	SDL_Surface *surface = IMG_Load(path) ;
@@ -111,6 +118,12 @@ void Renderer::renderRect(SDL_Rect rect, Uint8 r, Uint8 g, Uint8 b, bool fill)
 	SDL_SetRenderDrawColor(ren, r, g, b, 255) ;
 	if(fill) SDL_RenderFillRect(ren, &rect) ;
 	else SDL_RenderDrawRect(ren, &rect) ;	
+}
+
+void Renderer::renderFrame(SDL_Rect rect, SDL_Texture* frame_tex, u32* frame_buffer, int frame_pitch)
+{
+	SDL_UpdateTexture(frame_tex, NULL, frame_buffer, frame_pitch*sizeof(u32));
+	SDL_RenderCopy(ren, frame_tex, NULL, &rect);
 }
 
 void Renderer::setColor(Uint8 r, Uint8 g, Uint8 b, Uint8 a)
