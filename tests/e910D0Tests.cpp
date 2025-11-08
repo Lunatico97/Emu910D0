@@ -24,6 +24,10 @@ void test_lda()
     mmu->store(0x00C5, 0xB5);
     cpu->decode({0xB5, 0xB5});
     assert(mmu->fetch_reg(A) == 0xB5);
+    // LDA $F5H, X [Zero page wrap]
+    mmu->store(0x0005, 0xB5);
+    cpu->decode({0xB5, 0xF5});
+    assert(mmu->fetch_reg(A) == 0xB5);
     // LDA $01ADH
     mmu->store(0x01AD, 0xAD);
     cpu->decode({0xAD, 0xAD, 0x01});
@@ -384,11 +388,11 @@ void test_inc()
     mmu->store(0x00E6, 0xE6);
     cpu->decode({0xE6, 0xE6});
     assert(mmu->retreive(0x00E6) == 0xE7);
-    // INC $F6H, X
+    // INC $F6H, X [Zero-page wrap]
     mmu->load_reg(X, 0x10);
-    mmu->store(0x0106, 0xF6);
+    mmu->store(0x0006, 0xF6);
     cpu->decode({0xF6, 0xF6});
-    assert(mmu->retreive(0x0106) == 0xF7);
+    assert(mmu->retreive(0x0006) == 0xF7);
     // DEC $01EEH
     mmu->store(0x01EE, 0xEE);
     cpu->decode({0xEE, 0xEE, 0x01});
@@ -809,10 +813,10 @@ void test_sbc()
     cpu->decode({0xE5, 0xE5});
     assert(mmu->fetch_reg(A) == 0xE3);
     assert(mmu->fetch_reg(ST) == (HX_NUSE | HX_SIGN));
-    // SBC $F5H, X
+    // SBC $F5H, X [Zero-page wrap]
     mmu->load_reg(A, 0x6D);
     mmu->load_reg(X, 0x10);
-    mmu->store(0x0105, 0x6E);
+    mmu->store(0x0005, 0x6E);
     cpu->decode({0xF5, 0xF5});
     assert(mmu->fetch_reg(A) == 0xFE);
     assert(mmu->fetch_reg(ST) == (HX_NUSE | HX_CARY | HX_SIGN));

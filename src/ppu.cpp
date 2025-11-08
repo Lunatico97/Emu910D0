@@ -1,6 +1,10 @@
 #include <ppu.hpp>
 
-PPU::PPU(CardROM *crom) : W(0), crom(crom), cycles(0), lines(0), trigger_nmi(false) {}
+PPU::PPU(CardROM *crom, Renderer *rndr) : W(0), crom(crom), cycles(0), lines(0), rndr(rndr), trigger_nmi(false) 
+{
+    frame_buf = (u32*)calloc(FRAME_W*FRAME_H, sizeof(u32));
+    frame = rndr->loadTexture(FRAME_W, FRAME_H);
+}
 
 void PPU::write_from_cpu(u16 addr, u8 value)
 {
@@ -206,7 +210,7 @@ void PPU::update_v(bool vt = 0)
     }        
 }
 
-void PPU::run_ppu(Renderer *rndr)
+void PPU::run_ppu()
 {
     // Reset cycles and lines
     cycles += 0x0001;
@@ -221,8 +225,9 @@ void PPU::run_ppu(Renderer *rndr)
             STAT_REG.vblank = 0;
             W = 0;
 
+            // Render frame
+            rndr->renderFrame({0, 0, SCRW, SCRH}, frame, frame_buf, FRAME_W);
             rndr->display();
-            rndr->setColor(0, 0, 0, 255);
             rndr->clear();
         }
         lines += 0x0001;
@@ -245,10 +250,8 @@ void PPU::run_ppu(Renderer *rndr)
 
         // Priority (Depth & Collision) (later ...)
 
-        // Render pixel
-        rndr->setColor(RGB_PAL[bg_index].r, RGB_PAL[bg_index].g, RGB_PAL[bg_index].b, 255);
-        // rndr->renderPt(cycles-1, lines);
-        rndr->renderRect({0+((cycles-1)*PIX), 0+(lines*PIY), PIX, PIY}, true);
+        // Populate pixel to frame buffer;
+        frame_buf[lines*FRAME_W+(cycles-1)] = RGB_PAL[bg_index];
     }
 
     // Frame timing for background 
@@ -338,18 +341,7 @@ void PPU::run_ppu(Renderer *rndr)
     if(lines == 241 && cycles == 1)
     {
         STAT_REG.vblank = 1; 
-        std::cout << Utils::logU8("PPUSTAT: ", STAT_REG.byte) << std::endl;
         if(CVALS.nmi_enabled) trigger_nmi = true; // Trigger NMI if enabled
     }
 }
 
-void PPU::draw_palette_table(Renderer *rndr)
-{
-    u8 pal;
-    for(u8 i=0x00; i<0x20; i++)
-    {
-        pal = PAL[i];
-        rndr->renderRect({400+(i%0x10)*10, 200+(i/0x10)*10, 10, 10}, RGB_PAL[pal].r, RGB_PAL[pal].g, RGB_PAL[pal].b, 1);
-        rndr->renderRect({400+(i%0x10)*10, 400+(i/0x10)*10, 10, 10}, RGB_PAL[i].r, RGB_PAL[i].g, RGB_PAL[i].b, 1);
-    }
-}

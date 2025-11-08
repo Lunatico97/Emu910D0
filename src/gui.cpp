@@ -3,11 +3,11 @@
 GUI::GUI():system_clock(0)
 {
     crom = new CardROM();
-    ppu = new PPU(crom);
+    rndr = new Renderer("E910D0", SCRW, SCRH);
+    ppu = new PPU(crom, rndr);
     mmu = new MMU(crom, ppu);
     cpu = new CPU(mmu);
     crom->load_rom("/home/diwas/Downloads/Emu910D0/roms/donkey_kong.nes");
-    rndr = new Renderer("E910D0", SCRW, SCRH);
     sys_font = rndr->loadFont("rsrc/font.ttf", FTPT);
     sys_text = rndr->loadText("E910D0 [ Commands: PAUSE(6) | STEP(7) | IRQ (8) | NMI (9) | RST (0) ]", sys_font, CLR_CYAN);
     flag_text = rndr->loadText(" N   V   x   B   D   I   Z   C ", sys_font, CLR_GREEN);
@@ -119,7 +119,6 @@ void GUI::draw_reg_bank()
 
 void GUI::run_gui()
 {
-    u8 size = 0x08, offset = 0x00;
     bool pause = false;
 
     while(_active)
@@ -142,37 +141,9 @@ void GUI::run_gui()
             }
         }
 
-        // rndr->setColor(0, 0, 0, 255);
-        // rndr->clear();
-        // rndr->render(5, 5, sys_text);
-        // draw_psw();
-        // draw_reg_bank();
-        // draw_stack();
-        // draw_mem();
-
-        /* 
-          Don't use these below statements while unpausing emulation; these statements are cost expensive 
-          as they keep fetching tile data on every render cycle but I don't need to make amends to this right now !
-        */
-
-        // Pixel 64*64 Sprite
-        // draw_tile(0x0000+offset, 150, 350);
-        // draw_tile(0x0000+(offset+0x10), 150, 350+size);
-        // draw_tile(0x0000+(offset+0x20), 150+size, 350);
-        // draw_tile(0x0000+(offset+0x30), 150+size, 350+size);
-        // offset += 0x40;
-
-        // Pixel Tilemap
-        // for(u16 offset = 0x0000; offset < 0x1000; offset += 0x0010)
-        // {
-        //     draw_tile(offset, 150+(((offset%0x0100)/0x0010)*size), 250+((offset/0x0100)*size));
-        //     draw_tile(offset+0x1000, (150+(((offset%0x0100)/0x0010)*size))+170, 250+((offset/0x0100)*size));
-        // }
-
         if(!pause)
         {
-            ppu->run_ppu(rndr);
-            // ppu->draw_palette_table(rndr);
+            ppu->run_ppu();
 
             if((system_clock % 3) == 0)
             {
@@ -186,9 +157,7 @@ void GUI::run_gui()
             }
 
             system_clock++;
-            //SDL_Delay(100);
         }     
-        // rndr->display();     
     }
 
     cleanup();

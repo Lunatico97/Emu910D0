@@ -18,23 +18,23 @@
 #define ATRB_INDEX 0x23C0 // start of last 64 bytes for name table
 #define PAL_INDEX 0x3F00
 
+#define FRAME_W 256
+#define FRAME_H 240
+
 #define PIX 3 // width of pixel
 #define PIY 2 // height of pixel
 
 class PPU
 {
     public:
-        PPU(CardROM *crom);
+        PPU(CardROM *crom, Renderer *rndr);
 
         // CPU Interactions
         u8 read_from_cpu(u16 addr);
         void write_from_cpu(u16 addr, u8 value);
 
-        // Peeks
-        void draw_palette_table(Renderer *rndr);
-
         // PPU Cycle
-        void run_ppu(Renderer *rndr);
+        void run_ppu();
 
         // PPU Counters
         u16 cycles, lines;
@@ -126,8 +126,12 @@ class PPU
             };
         } STAT_REG;
 
+        // Frame buffer
+        u32* frame_buf;
+        SDL_Texture* frame;
+
         // CROM
-        Renderer* renderer;
+        Renderer* rndr;
         CardROM *crom;
 };
 

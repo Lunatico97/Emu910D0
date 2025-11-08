@@ -1,0 +1,685 @@
+Flat profile:
+
+Each sample counts as 0.01 seconds.
+  %   cumulative   self              self     total           
+ time   seconds   seconds    calls   s/call   s/call  name    
+ 49.69      3.22     3.22 121547138     0.00     0.00  PPU::run_ppu()
+ 19.60      4.49     1.27        1     1.27     6.36  GUI::run_gui()
+ 10.19      5.15     0.66 139693925     0.00     0.00  PPU::fetch_vram(unsigned short)
+  3.55      5.38     0.23 40515713     0.00     0.00  CPU::clock()
+  3.09      5.58     0.20 10840051     0.00     0.00  CPU::step(bool)
+  2.31      5.73     0.15 10840051     0.00     0.00  CPU::decode(HEX const&)
+  2.01      5.86     0.13 27614377     0.00     0.00  CardROM::read_from_ppu(unsigned short)
+  1.85      5.98     0.12                             _init
+  1.70      6.09     0.11 47835166     0.00     0.00  MMU::retreive(unsigned short)
+  1.23      6.17     0.08 42688628     0.00     0.00  CardROM::read_from_cpu(unsigned short)
+  0.77      6.22     0.05 10840051     0.00     0.00  MMU::fetch_pc()
+  0.62      6.26     0.04 14401313     0.00     0.00  PPU::update_v(bool)
+  0.62      6.30     0.04  7214285     0.00     0.00  MMU::get_addr(ADR, unsigned short, unsigned char)
+  0.46      6.33     0.03  3089312     0.00     0.00  ALU::loadMEM(ADR, unsigned short, unsigned char)
+  0.31      6.35     0.02 12312696     0.00     0.00  MMU::load_pc(unsigned short const&)
+  0.31      6.37     0.02  8825870     0.00     0.00  MMU::fetch_reg(REG)
+  0.31      6.39     0.02   796963     0.00     0.00  ALU::ana(ADR, unsigned short, unsigned char)
+  0.31      6.41     0.02   193287     0.00     0.00  ALU::cmp(REG, ADR, unsigned short, unsigned char)
+  0.15      6.42     0.01  1213004     0.00     0.00  MMU::push(REG)
+  0.15      6.43     0.01  1213002     0.00     0.00  MMU::pop(REG)
+  0.15      6.44     0.01   565651     0.00     0.00  CPU::brc_set(unsigned char, unsigned char)
+  0.15      6.45     0.01   508615     0.00     0.00  ALU::clr_flag(unsigned char)
+  0.15      6.46     0.01   385243     0.00     0.00  ALU::eor(ADR, unsigned short, unsigned char)
+  0.15      6.47     0.01    89718     0.00     0.00  MMU::ldix(REG, REG, unsigned short)
+  0.15      6.48     0.01    76070     0.00     0.00  ALU::lsr(ADR, unsigned short, unsigned char)
+  0.00      6.48     0.00  7638937     0.00     0.00  MMU::load_reg(REG, unsigned char const&)
+  0.00      6.48     0.00  3089312     0.00     0.00  MMU::store(unsigned short, unsigned char)
+  0.00      6.48     0.00  3042657     0.00     0.00  ALU::ror(ADR, unsigned short, unsigned char)
+  0.00      6.48     0.00  1816956     0.00     0.00  ALU::loadREG(REG)
+  0.00      6.48     0.00  1124106     0.00     0.00  MMU::ldo(REG, REG, unsigned short)
+  0.00      6.48     0.00   722908     0.00     0.00  MMU::sto(REG, REG, unsigned short)
+  0.00      6.48     0.00   261520     0.00     0.00  CPU::brc_rst(unsigned char, unsigned char)
+  0.00      6.48     0.00   208337     0.00     0.00  ALU::set_flag(unsigned char)
+  0.00      6.48     0.00   179080     0.00     0.00  ALU::inc(REG)
+  0.00      6.48     0.00   144436     0.00     0.00  MMU::ld(REG, REG, unsigned short)
+  0.00      6.48     0.00   143987     0.00     0.00  MMU::tr(REG, REG)
+  0.00      6.48     0.00   134317     0.00     0.00  MMU::ld(REG, unsigned char)
+  0.00      6.48     0.00   133003     0.00     0.00  ALU::adc(ADR, unsigned short, unsigned char)
+  0.00      6.48     0.00    90521     0.00     0.00  ALU::asl(ADR, unsigned short, unsigned char)
+  0.00      6.48     0.00    79889     0.00     0.00  ALU::dec(REG)
+  0.00      6.48     0.00    41130     0.00     0.00  MMU::stix(REG, REG, unsigned short)
+  0.00      6.48     0.00    39787     0.00     0.00  MMU::st(REG, REG, unsigned short)
+  0.00      6.48     0.00    36212     0.00     0.00  ALU::sbc(ADR, unsigned short, unsigned char)
+  0.00      6.48     0.00    23697     0.00     0.00  ALU::inc(ADR, unsigned short, unsigned char)
+  0.00      6.48     0.00    22763     0.00     0.00  ALU::ora(ADR, unsigned short, unsigned char)
+  0.00      6.48     0.00    22359     0.00     0.00  ALU::rol(ADR, unsigned short, unsigned char)
+  0.00      6.48     0.00    17811     0.00     0.00  ALU::dec(ADR, unsigned short, unsigned char)
+  0.00      6.48     0.00    12805     0.00     0.00  PPU::write_from_cpu(unsigned short, unsigned char)
+  0.00      6.48     0.00     4720     0.00     0.00  PPU::read_from_cpu(unsigned short)
+  0.00      6.48     0.00     3635     0.00     0.00  PPU::store_vram(unsigned short, unsigned char)
+  0.00      6.48     0.00     3053     0.00     0.00  PPU::set_ppu_ctrl(unsigned char)
+  0.00      6.48     0.00     1369     0.00     0.00  Renderer::renderFrame(SDL_Rect, SDL_Texture*, unsigned int*, int)
+  0.00      6.48     0.00     1369     0.00     0.00  Renderer::clear()
+  0.00      6.48     0.00     1369     0.00     0.00  Renderer::display()
+  0.00      6.48     0.00     1367     0.00     0.00  CPU::nmi()
+  0.00      6.48     0.00     1367     0.00     0.00  CPU::rti()
+  0.00      6.48     0.00        2     0.00     0.00  Renderer::freeTex(SDL_Texture*)
+  0.00      6.48     0.00        2     0.00     0.00  Renderer::loadText(char const*, _TTF_Font*, SDL_Color)
+  0.00      6.48     0.00        1     0.00     0.00  ALU::ALU(MMU*)
+  0.00      6.48     0.00        1     0.00     0.00  CPU::rst()
+  0.00      6.48     0.00        1     0.00     0.00  CPU::CPU(MMU*)
+  0.00      6.48     0.00        1     0.00     0.00  CPU::~CPU()
+  0.00      6.48     0.00        1     0.00     0.00  GUI::cleanup()
+  0.00      6.48     0.00        1     0.00     0.00  GUI::GUI()
+  0.00      6.48     0.00        1     0.00     0.00  MMU::MMU(CardROM*, PPU*)
+  0.00      6.48     0.00        1     0.00     0.00  MMU::~MMU()
+  0.00      6.48     0.00        1     0.00     0.00  PPU::PPU(CardROM*, Renderer*)
+  0.00      6.48     0.00        1     0.00     0.00  CardROM::decode(unsigned char*)
+  0.00      6.48     0.00        1     0.00     0.00  CardROM::load_rom(char const*)
+  0.00      6.48     0.00        1     0.00     0.00  CardROM::CardROM()
+  0.00      6.48     0.00        1     0.00     0.00  CardROM::~CardROM()
+  0.00      6.48     0.00        1     0.00     0.00  Renderer::loadTexture(int, int)
+  0.00      6.48     0.00        1     0.00     0.00  Renderer::cleanRenderer()
+  0.00      6.48     0.00        1     0.00     0.00  Renderer::freeFont(_TTF_Font*)
+  0.00      6.48     0.00        1     0.00     0.00  Renderer::loadFont(char const*, int)
+  0.00      6.48     0.00        1     0.00     0.00  Renderer::Renderer(char const*, int, int)
+  0.00      6.48     0.00        1     0.00     0.00  std::__cxx11::basic_stringbuf<char, std::char_traits<char>, std::allocator<char> >::~basic_stringbuf()
+
+ %         the percentage of the total running time of the
+time       program used by this function.
+
+cumulative a running sum of the number of seconds accounted
+ seconds   for by this function and those listed above it.
+
+ self      the number of seconds accounted for by this
+seconds    function alone.  This is the major sort for this
+           listing.
+
+calls      the number of times this function was invoked, if
+           this function is profiled, else blank.
+
+ self      the average number of milliseconds spent in this
+ms/call    function per call, if this function is profiled,
+	   else blank.
+
+ total     the average number of milliseconds spent in this
+ms/call    function and its descendents per call, if this
+	   function is profiled, else blank.
+
+name       the name of the function.  This is the minor sort
+           for this listing. The index shows the location of
+	   the function in the gprof listing. If the index is
+	   in parenthesis it shows where it would appear in
+	   the gprof listing if it were to be printed.
+
+Copyright (C) 2012-2022 Free Software Foundation, Inc.
+
+Copying and distribution of this file, with or without modification,
+are permitted in any medium without royalty provided the copyright
+notice and this notice are preserved.
+
+		     Call graph (explanation follows)
+
+
+granularity: each sample hit covers 4 byte(s) for 0.15% of 6.48 seconds
+
+index % time    self  children    called     name
+                                                 <spontaneous>
+[1]     98.1    0.00    6.36                 main [1]
+                1.27    5.09       1/1           GUI::run_gui() [2]
+                0.00    0.00       1/1           CPU::rst() [44]
+                0.00    0.00       1/1           GUI::cleanup() [71]
+                0.00    0.00       1/1           GUI::GUI() [72]
+-----------------------------------------------
+                1.27    5.09       1/1           main [1]
+[2]     98.1    1.27    5.09       1         GUI::run_gui() [2]
+                3.22    0.83 121547138/121547138     PPU::run_ppu() [3]
+                0.23    0.81 40515713/40515713     CPU::clock() [4]
+                0.00    0.00    1367/1367        CPU::nmi() [42]
+-----------------------------------------------
+                3.22    0.83 121547138/121547138     GUI::run_gui() [2]
+[3]     62.5    3.22    0.83 121547138         PPU::run_ppu() [3]
+                0.66    0.00 139693925/139693925     PPU::fetch_vram(unsigned short) [6]
+                0.13    0.00 27614377/27614377     CardROM::read_from_ppu(unsigned short) [8]
+                0.04    0.00 14401313/14401313     PPU::update_v(bool) [14]
+                0.00    0.00    1369/1369        Renderer::renderFrame(SDL_Rect, SDL_Texture*, unsigned int*, int) [63]
+                0.00    0.00    1369/1369        Renderer::display() [65]
+                0.00    0.00    1369/1369        Renderer::clear() [64]
+-----------------------------------------------
+                0.23    0.81 40515713/40515713     GUI::run_gui() [2]
+[4]     16.0    0.23    0.81 40515713         CPU::clock() [4]
+                0.20    0.56 10840051/10840051     CPU::step(bool) [5]
+                0.02    0.00 10840051/47835166     MMU::retreive(unsigned short) [10]
+                0.02    0.00 10840051/42688628     CardROM::read_from_cpu(unsigned short) [11]
+-----------------------------------------------
+                0.20    0.56 10840051/10840051     CPU::clock() [4]
+[5]     11.8    0.20    0.56 10840051         CPU::step(bool) [5]
+                0.15    0.02 10840051/10840051     CPU::decode(HEX const&) [7]
+                0.07    0.00 31701929/47835166     MMU::retreive(unsigned short) [10]
+                0.06    0.00 31701929/42688628     CardROM::read_from_cpu(unsigned short) [11]
+                0.05    0.00 10840051/10840051     MMU::fetch_pc() [12]
+                0.03    0.02 3089312/3089312     ALU::loadMEM(ADR, unsigned short, unsigned char) [13]
+                0.00    0.03 3042657/3042657     ALU::ror(ADR, unsigned short, unsigned char) [16]
+                0.02    0.00  796963/796963      ALU::ana(ADR, unsigned short, unsigned char) [17]
+                0.02    0.00  193287/193287      ALU::cmp(REG, ADR, unsigned short, unsigned char) [18]
+                0.02    0.00 10840051/12312696     MMU::load_pc(unsigned short const&) [20]
+                0.01    0.00  385243/385243      ALU::eor(ADR, unsigned short, unsigned char) [21]
+                0.01    0.00  565651/565651      CPU::brc_set(unsigned char, unsigned char) [22]
+                0.01    0.00  508615/508615      ALU::clr_flag(unsigned char) [23]
+                0.01    0.00   89718/89718       MMU::ldix(REG, REG, unsigned short) [24]
+                0.01    0.00   76070/76070       ALU::lsr(ADR, unsigned short, unsigned char) [25]
+                0.01    0.00  649827/1213002     MMU::pop(REG) [27]
+                0.00    0.00 1124106/1124106     MMU::ldo(REG, REG, unsigned short) [28]
+                0.00    0.00  261520/261520      CPU::brc_rst(unsigned char, unsigned char) [29]
+                0.00    0.00  133003/133003      ALU::adc(ADR, unsigned short, unsigned char) [30]
+                0.00    0.00  179080/179080      ALU::inc(REG) [31]
+                0.00    0.00   87991/1213004     MMU::push(REG) [26]
+                0.00    0.00   36212/36212       ALU::sbc(ADR, unsigned short, unsigned char) [32]
+                0.00    0.00  208337/208337      ALU::set_flag(unsigned char) [33]
+                0.00    0.00  144436/144436      MMU::ld(REG, REG, unsigned short) [34]
+                0.00    0.00   90521/90521       ALU::asl(ADR, unsigned short, unsigned char) [35]
+                0.00    0.00   79889/79889       ALU::dec(REG) [36]
+                0.00    0.00   22763/22763       ALU::ora(ADR, unsigned short, unsigned char) [37]
+                0.00    0.00   23697/23697       ALU::inc(ADR, unsigned short, unsigned char) [38]
+                0.00    0.00   41130/41130       MMU::stix(REG, REG, unsigned short) [39]
+                0.00    0.00   17811/17811       ALU::dec(ADR, unsigned short, unsigned char) [40]
+                0.00    0.00   22359/22359       ALU::rol(ADR, unsigned short, unsigned char) [41]
+                0.00    0.00    1367/1367        CPU::rti() [43]
+                0.00    0.00 5816507/7638937     MMU::load_reg(REG, unsigned char const&) [52]
+                0.00    0.00 1816956/1816956     ALU::loadREG(REG) [54]
+                0.00    0.00  722908/722908      MMU::sto(REG, REG, unsigned short) [55]
+                0.00    0.00  143987/143987      MMU::tr(REG, REG) [56]
+                0.00    0.00  134317/134317      MMU::ld(REG, unsigned char) [57]
+                0.00    0.00   39787/39787       MMU::st(REG, REG, unsigned short) [58]
+                0.00    0.00   12805/12805       PPU::write_from_cpu(unsigned short, unsigned char) [59]
+                0.00    0.00    3053/3053        PPU::set_ppu_ctrl(unsigned char) [62]
+-----------------------------------------------
+                0.66    0.00 139693925/139693925     PPU::run_ppu() [3]
+[6]     10.2    0.66    0.00 139693925         PPU::fetch_vram(unsigned short) [6]
+-----------------------------------------------
+                0.15    0.02 10840051/10840051     CPU::step(bool) [5]
+[7]      2.6    0.15    0.02 10840051         CPU::decode(HEX const&) [7]
+                0.01    0.00 1120912/1213004     MMU::push(REG) [26]
+                0.00    0.00  560441/1213002     MMU::pop(REG) [27]
+                0.00    0.00 1018166/12312696     MMU::load_pc(unsigned short const&) [20]
+-----------------------------------------------
+                0.13    0.00 27614377/27614377     PPU::run_ppu() [3]
+[8]      2.0    0.13    0.00 27614377         CardROM::read_from_ppu(unsigned short) [8]
+-----------------------------------------------
+                                                 <spontaneous>
+[9]      1.9    0.12    0.00                 _init [9]
+-----------------------------------------------
+                0.00    0.00       2/47835166     CPU::rst() [44]
+                0.00    0.00    2530/47835166     ALU::lsr(ADR, unsigned short, unsigned char) [25]
+                0.00    0.00    2734/47835166     ALU::asl(ADR, unsigned short, unsigned char) [35]
+                0.00    0.00    2734/47835166     CPU::nmi() [42]
+                0.00    0.00    8141/47835166     ALU::ana(ADR, unsigned short, unsigned char) [17]
+                0.00    0.00   17811/47835166     ALU::dec(ADR, unsigned short, unsigned char) [40]
+                0.00    0.00   21950/47835166     ALU::ora(ADR, unsigned short, unsigned char) [37]
+                0.00    0.00   23697/47835166     ALU::inc(ADR, unsigned short, unsigned char) [38]
+                0.00    0.00   31030/47835166     ALU::sbc(ADR, unsigned short, unsigned char) [32]
+                0.00    0.00   60935/47835166     ALU::cmp(REG, ADR, unsigned short, unsigned char) [18]
+                0.00    0.00   78317/47835166     ALU::adc(ADR, unsigned short, unsigned char) [30]
+                0.00    0.00   82260/47835166     MMU::stix(REG, REG, unsigned short) [39]
+                0.00    0.00  144436/47835166     MMU::ld(REG, REG, unsigned short) [34]
+                0.00    0.00  269154/47835166     MMU::ldix(REG, REG, unsigned short) [24]
+                0.00    0.00  380809/47835166     ALU::eor(ADR, unsigned short, unsigned char) [21]
+                0.00    0.00 1124106/47835166     MMU::ldo(REG, REG, unsigned short) [28]
+                0.01    0.00 3042540/47835166     ALU::ror(ADR, unsigned short, unsigned char) [16]
+                0.02    0.00 10840051/47835166     CPU::clock() [4]
+                0.07    0.00 31701929/47835166     CPU::step(bool) [5]
+[10]     1.7    0.11    0.00 47835166         MMU::retreive(unsigned short) [10]
+-----------------------------------------------
+                0.00    0.00       2/42688628     CPU::rst() [44]
+                0.00    0.00      33/42688628     ALU::adc(ADR, unsigned short, unsigned char) [30]
+                0.00    0.00    2734/42688628     CPU::nmi() [42]
+                0.00    0.00   14042/42688628     ALU::cmp(REG, ADR, unsigned short, unsigned char) [18]
+                0.00    0.00   52200/42688628     MMU::ld(REG, REG, unsigned short) [34]
+                0.00    0.00   77637/42688628     MMU::ldix(REG, REG, unsigned short) [24]
+                0.02    0.00 10840051/42688628     CPU::clock() [4]
+                0.06    0.00 31701929/42688628     CPU::step(bool) [5]
+[11]     1.2    0.08    0.00 42688628         CardROM::read_from_cpu(unsigned short) [11]
+-----------------------------------------------
+                0.05    0.00 10840051/10840051     CPU::step(bool) [5]
+[12]     0.8    0.05    0.00 10840051         MMU::fetch_pc() [12]
+-----------------------------------------------
+                0.03    0.02 3089312/3089312     CPU::step(bool) [5]
+[13]     0.7    0.03    0.02 3089312         ALU::loadMEM(ADR, unsigned short, unsigned char) [13]
+                0.02    0.00 3089312/7214285     MMU::get_addr(ADR, unsigned short, unsigned char) [15]
+                0.00    0.00 3089312/3089312     MMU::store(unsigned short, unsigned char) [53]
+-----------------------------------------------
+                0.04    0.00 14401313/14401313     PPU::run_ppu() [3]
+[14]     0.6    0.04    0.00 14401313         PPU::update_v(bool) [14]
+-----------------------------------------------
+                0.00    0.00    2530/7214285     ALU::lsr(ADR, unsigned short, unsigned char) [25]
+                0.00    0.00    2734/7214285     ALU::asl(ADR, unsigned short, unsigned char) [35]
+                0.00    0.00    8141/7214285     ALU::ana(ADR, unsigned short, unsigned char) [17]
+                0.00    0.00   17811/7214285     ALU::dec(ADR, unsigned short, unsigned char) [40]
+                0.00    0.00   21950/7214285     ALU::ora(ADR, unsigned short, unsigned char) [37]
+                0.00    0.00   23697/7214285     ALU::inc(ADR, unsigned short, unsigned char) [38]
+                0.00    0.00   31030/7214285     ALU::sbc(ADR, unsigned short, unsigned char) [32]
+                0.00    0.00   60935/7214285     ALU::cmp(REG, ADR, unsigned short, unsigned char) [18]
+                0.00    0.00   78317/7214285     ALU::adc(ADR, unsigned short, unsigned char) [30]
+                0.00    0.00  176142/7214285     CPU::brc_rst(unsigned char, unsigned char) [29]
+                0.00    0.00  278337/7214285     CPU::brc_set(unsigned char, unsigned char) [22]
+                0.00    0.00  380809/7214285     ALU::eor(ADR, unsigned short, unsigned char) [21]
+                0.02    0.00 3042540/7214285     ALU::ror(ADR, unsigned short, unsigned char) [16]
+                0.02    0.00 3089312/7214285     ALU::loadMEM(ADR, unsigned short, unsigned char) [13]
+[15]     0.6    0.04    0.00 7214285         MMU::get_addr(ADR, unsigned short, unsigned char) [15]
+-----------------------------------------------
+                0.00    0.03 3042657/3042657     CPU::step(bool) [5]
+[16]     0.5    0.00    0.03 3042657         ALU::ror(ADR, unsigned short, unsigned char) [16]
+                0.02    0.00 3042540/7214285     MMU::get_addr(ADR, unsigned short, unsigned char) [15]
+                0.01    0.00 3042540/47835166     MMU::retreive(unsigned short) [10]
+                0.01    0.00 3042774/8825870     MMU::fetch_reg(REG) [19]
+-----------------------------------------------
+                0.02    0.00  796963/796963      CPU::step(bool) [5]
+[17]     0.4    0.02    0.00  796963         ALU::ana(ADR, unsigned short, unsigned char) [17]
+                0.00    0.00 1593926/8825870     MMU::fetch_reg(REG) [19]
+                0.00    0.00    8141/7214285     MMU::get_addr(ADR, unsigned short, unsigned char) [15]
+                0.00    0.00    8141/47835166     MMU::retreive(unsigned short) [10]
+-----------------------------------------------
+                0.02    0.00  193287/193287      CPU::step(bool) [5]
+[18]     0.3    0.02    0.00  193287         ALU::cmp(REG, ADR, unsigned short, unsigned char) [18]
+                0.00    0.00  386574/8825870     MMU::fetch_reg(REG) [19]
+                0.00    0.00   60935/7214285     MMU::get_addr(ADR, unsigned short, unsigned char) [15]
+                0.00    0.00   60935/47835166     MMU::retreive(unsigned short) [10]
+                0.00    0.00   14042/42688628     CardROM::read_from_cpu(unsigned short) [11]
+-----------------------------------------------
+                0.00    0.00    1367/8825870     CPU::rti() [43]
+                0.00    0.00    1367/8825870     CPU::nmi() [42]
+                0.00    0.00   17811/8825870     ALU::dec(ADR, unsigned short, unsigned char) [40]
+                0.00    0.00   23697/8825870     ALU::inc(ADR, unsigned short, unsigned char) [38]
+                0.00    0.00   44718/8825870     ALU::rol(ADR, unsigned short, unsigned char) [41]
+                0.00    0.00   45526/8825870     ALU::ora(ADR, unsigned short, unsigned char) [37]
+                0.00    0.00  108636/8825870     ALU::sbc(ADR, unsigned short, unsigned char) [32]
+                0.00    0.00  149610/8825870     ALU::lsr(ADR, unsigned short, unsigned char) [25]
+                0.00    0.00  159778/8825870     ALU::dec(REG) [36]
+                0.00    0.00  178308/8825870     ALU::asl(ADR, unsigned short, unsigned char) [35]
+                0.00    0.00  208337/8825870     ALU::set_flag(unsigned char) [33]
+                0.00    0.00  261520/8825870     CPU::brc_rst(unsigned char, unsigned char) [29]
+                0.00    0.00  358160/8825870     ALU::inc(REG) [31]
+                0.00    0.00  386574/8825870     ALU::cmp(REG, ADR, unsigned short, unsigned char) [18]
+                0.00    0.00  399009/8825870     ALU::adc(ADR, unsigned short, unsigned char) [30]
+                0.00    0.00  508615/8825870     ALU::clr_flag(unsigned char) [23]
+                0.00    0.00  565651/8825870     CPU::brc_set(unsigned char, unsigned char) [22]
+                0.00    0.00  770486/8825870     ALU::eor(ADR, unsigned short, unsigned char) [21]
+                0.00    0.00 1593926/8825870     ALU::ana(ADR, unsigned short, unsigned char) [17]
+                0.01    0.00 3042774/8825870     ALU::ror(ADR, unsigned short, unsigned char) [16]
+[19]     0.3    0.02    0.00 8825870         MMU::fetch_reg(REG) [19]
+-----------------------------------------------
+                0.00    0.00  176142/12312696     CPU::brc_rst(unsigned char, unsigned char) [29]
+                0.00    0.00  278337/12312696     CPU::brc_set(unsigned char, unsigned char) [22]
+                0.00    0.00 1018166/12312696     CPU::decode(HEX const&) [7]
+                0.02    0.00 10840051/12312696     CPU::step(bool) [5]
+[20]     0.3    0.02    0.00 12312696         MMU::load_pc(unsigned short const&) [20]
+-----------------------------------------------
+                0.01    0.00  385243/385243      CPU::step(bool) [5]
+[21]     0.2    0.01    0.00  385243         ALU::eor(ADR, unsigned short, unsigned char) [21]
+                0.00    0.00  380809/7214285     MMU::get_addr(ADR, unsigned short, unsigned char) [15]
+                0.00    0.00  770486/8825870     MMU::fetch_reg(REG) [19]
+                0.00    0.00  380809/47835166     MMU::retreive(unsigned short) [10]
+-----------------------------------------------
+                0.01    0.00  565651/565651      CPU::step(bool) [5]
+[22]     0.2    0.01    0.00  565651         CPU::brc_set(unsigned char, unsigned char) [22]
+                0.00    0.00  278337/7214285     MMU::get_addr(ADR, unsigned short, unsigned char) [15]
+                0.00    0.00  565651/8825870     MMU::fetch_reg(REG) [19]
+                0.00    0.00  278337/12312696     MMU::load_pc(unsigned short const&) [20]
+-----------------------------------------------
+                0.01    0.00  508615/508615      CPU::step(bool) [5]
+[23]     0.2    0.01    0.00  508615         ALU::clr_flag(unsigned char) [23]
+                0.00    0.00  508615/8825870     MMU::fetch_reg(REG) [19]
+-----------------------------------------------
+                0.01    0.00   89718/89718       CPU::step(bool) [5]
+[24]     0.2    0.01    0.00   89718         MMU::ldix(REG, REG, unsigned short) [24]
+                0.00    0.00  269154/47835166     MMU::retreive(unsigned short) [10]
+                0.00    0.00   77637/42688628     CardROM::read_from_cpu(unsigned short) [11]
+-----------------------------------------------
+                0.01    0.00   76070/76070       CPU::step(bool) [5]
+[25]     0.2    0.01    0.00   76070         ALU::lsr(ADR, unsigned short, unsigned char) [25]
+                0.00    0.00  149610/8825870     MMU::fetch_reg(REG) [19]
+                0.00    0.00    2530/7214285     MMU::get_addr(ADR, unsigned short, unsigned char) [15]
+                0.00    0.00    2530/47835166     MMU::retreive(unsigned short) [10]
+-----------------------------------------------
+                0.00    0.00    4101/1213004     CPU::nmi() [42]
+                0.00    0.00   87991/1213004     CPU::step(bool) [5]
+                0.01    0.00 1120912/1213004     CPU::decode(HEX const&) [7]
+[26]     0.2    0.01    0.00 1213004         MMU::push(REG) [26]
+-----------------------------------------------
+                0.00    0.00    2734/1213002     CPU::rti() [43]
+                0.00    0.00  560441/1213002     CPU::decode(HEX const&) [7]
+                0.01    0.00  649827/1213002     CPU::step(bool) [5]
+[27]     0.2    0.01    0.00 1213002         MMU::pop(REG) [27]
+-----------------------------------------------
+                0.00    0.00 1124106/1124106     CPU::step(bool) [5]
+[28]     0.0    0.00    0.00 1124106         MMU::ldo(REG, REG, unsigned short) [28]
+                0.00    0.00 1124106/47835166     MMU::retreive(unsigned short) [10]
+-----------------------------------------------
+                0.00    0.00  261520/261520      CPU::step(bool) [5]
+[29]     0.0    0.00    0.00  261520         CPU::brc_rst(unsigned char, unsigned char) [29]
+                0.00    0.00  176142/7214285     MMU::get_addr(ADR, unsigned short, unsigned char) [15]
+                0.00    0.00  261520/8825870     MMU::fetch_reg(REG) [19]
+                0.00    0.00  176142/12312696     MMU::load_pc(unsigned short const&) [20]
+-----------------------------------------------
+                0.00    0.00  133003/133003      CPU::step(bool) [5]
+[30]     0.0    0.00    0.00  133003         ALU::adc(ADR, unsigned short, unsigned char) [30]
+                0.00    0.00  399009/8825870     MMU::fetch_reg(REG) [19]
+                0.00    0.00   78317/7214285     MMU::get_addr(ADR, unsigned short, unsigned char) [15]
+                0.00    0.00   78317/47835166     MMU::retreive(unsigned short) [10]
+                0.00    0.00      33/42688628     CardROM::read_from_cpu(unsigned short) [11]
+-----------------------------------------------
+                0.00    0.00  179080/179080      CPU::step(bool) [5]
+[31]     0.0    0.00    0.00  179080         ALU::inc(REG) [31]
+                0.00    0.00  358160/8825870     MMU::fetch_reg(REG) [19]
+-----------------------------------------------
+                0.00    0.00   36212/36212       CPU::step(bool) [5]
+[32]     0.0    0.00    0.00   36212         ALU::sbc(ADR, unsigned short, unsigned char) [32]
+                0.00    0.00  108636/8825870     MMU::fetch_reg(REG) [19]
+                0.00    0.00   31030/7214285     MMU::get_addr(ADR, unsigned short, unsigned char) [15]
+                0.00    0.00   31030/47835166     MMU::retreive(unsigned short) [10]
+-----------------------------------------------
+                0.00    0.00  208337/208337      CPU::step(bool) [5]
+[33]     0.0    0.00    0.00  208337         ALU::set_flag(unsigned char) [33]
+                0.00    0.00  208337/8825870     MMU::fetch_reg(REG) [19]
+-----------------------------------------------
+                0.00    0.00  144436/144436      CPU::step(bool) [5]
+[34]     0.0    0.00    0.00  144436         MMU::ld(REG, REG, unsigned short) [34]
+                0.00    0.00  144436/47835166     MMU::retreive(unsigned short) [10]
+                0.00    0.00   52200/42688628     CardROM::read_from_cpu(unsigned short) [11]
+                0.00    0.00    4720/4720        PPU::read_from_cpu(unsigned short) [60]
+-----------------------------------------------
+                0.00    0.00   90521/90521       CPU::step(bool) [5]
+[35]     0.0    0.00    0.00   90521         ALU::asl(ADR, unsigned short, unsigned char) [35]
+                0.00    0.00  178308/8825870     MMU::fetch_reg(REG) [19]
+                0.00    0.00    2734/7214285     MMU::get_addr(ADR, unsigned short, unsigned char) [15]
+                0.00    0.00    2734/47835166     MMU::retreive(unsigned short) [10]
+-----------------------------------------------
+                0.00    0.00   79889/79889       CPU::step(bool) [5]
+[36]     0.0    0.00    0.00   79889         ALU::dec(REG) [36]
+                0.00    0.00  159778/8825870     MMU::fetch_reg(REG) [19]
+-----------------------------------------------
+                0.00    0.00   22763/22763       CPU::step(bool) [5]
+[37]     0.0    0.00    0.00   22763         ALU::ora(ADR, unsigned short, unsigned char) [37]
+                0.00    0.00   21950/7214285     MMU::get_addr(ADR, unsigned short, unsigned char) [15]
+                0.00    0.00   45526/8825870     MMU::fetch_reg(REG) [19]
+                0.00    0.00   21950/47835166     MMU::retreive(unsigned short) [10]
+-----------------------------------------------
+                0.00    0.00   23697/23697       CPU::step(bool) [5]
+[38]     0.0    0.00    0.00   23697         ALU::inc(ADR, unsigned short, unsigned char) [38]
+                0.00    0.00   23697/7214285     MMU::get_addr(ADR, unsigned short, unsigned char) [15]
+                0.00    0.00   23697/47835166     MMU::retreive(unsigned short) [10]
+                0.00    0.00   23697/8825870     MMU::fetch_reg(REG) [19]
+-----------------------------------------------
+                0.00    0.00   41130/41130       CPU::step(bool) [5]
+[39]     0.0    0.00    0.00   41130         MMU::stix(REG, REG, unsigned short) [39]
+                0.00    0.00   82260/47835166     MMU::retreive(unsigned short) [10]
+-----------------------------------------------
+                0.00    0.00   17811/17811       CPU::step(bool) [5]
+[40]     0.0    0.00    0.00   17811         ALU::dec(ADR, unsigned short, unsigned char) [40]
+                0.00    0.00   17811/7214285     MMU::get_addr(ADR, unsigned short, unsigned char) [15]
+                0.00    0.00   17811/47835166     MMU::retreive(unsigned short) [10]
+                0.00    0.00   17811/8825870     MMU::fetch_reg(REG) [19]
+-----------------------------------------------
+                0.00    0.00   22359/22359       CPU::step(bool) [5]
+[41]     0.0    0.00    0.00   22359         ALU::rol(ADR, unsigned short, unsigned char) [41]
+                0.00    0.00   44718/8825870     MMU::fetch_reg(REG) [19]
+-----------------------------------------------
+                0.00    0.00    1367/1367        GUI::run_gui() [2]
+[42]     0.0    0.00    0.00    1367         CPU::nmi() [42]
+                0.00    0.00    4101/1213004     MMU::push(REG) [26]
+                0.00    0.00    2734/47835166     MMU::retreive(unsigned short) [10]
+                0.00    0.00    2734/42688628     CardROM::read_from_cpu(unsigned short) [11]
+                0.00    0.00    1367/8825870     MMU::fetch_reg(REG) [19]
+                0.00    0.00    4101/7638937     MMU::load_reg(REG, unsigned char const&) [52]
+-----------------------------------------------
+                0.00    0.00    1367/1367        CPU::step(bool) [5]
+[43]     0.0    0.00    0.00    1367         CPU::rti() [43]
+                0.00    0.00    2734/1213002     MMU::pop(REG) [27]
+                0.00    0.00    1367/8825870     MMU::fetch_reg(REG) [19]
+                0.00    0.00    1367/7638937     MMU::load_reg(REG, unsigned char const&) [52]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[44]     0.0    0.00    0.00       1         CPU::rst() [44]
+                0.00    0.00       2/47835166     MMU::retreive(unsigned short) [10]
+                0.00    0.00       2/42688628     CardROM::read_from_cpu(unsigned short) [11]
+                0.00    0.00       6/7638937     MMU::load_reg(REG, unsigned char const&) [52]
+-----------------------------------------------
+                0.00    0.00       6/7638937     CPU::rst() [44]
+                0.00    0.00    1367/7638937     CPU::rti() [43]
+                0.00    0.00    4101/7638937     CPU::nmi() [42]
+                0.00    0.00 1816956/7638937     ALU::loadREG(REG) [54]
+                0.00    0.00 5816507/7638937     CPU::step(bool) [5]
+[52]     0.0    0.00    0.00 7638937         MMU::load_reg(REG, unsigned char const&) [52]
+-----------------------------------------------
+                0.00    0.00 3089312/3089312     ALU::loadMEM(ADR, unsigned short, unsigned char) [13]
+[53]     0.0    0.00    0.00 3089312         MMU::store(unsigned short, unsigned char) [53]
+-----------------------------------------------
+                0.00    0.00 1816956/1816956     CPU::step(bool) [5]
+[54]     0.0    0.00    0.00 1816956         ALU::loadREG(REG) [54]
+                0.00    0.00 1816956/7638937     MMU::load_reg(REG, unsigned char const&) [52]
+-----------------------------------------------
+                0.00    0.00  722908/722908      CPU::step(bool) [5]
+[55]     0.0    0.00    0.00  722908         MMU::sto(REG, REG, unsigned short) [55]
+-----------------------------------------------
+                0.00    0.00  143987/143987      CPU::step(bool) [5]
+[56]     0.0    0.00    0.00  143987         MMU::tr(REG, REG) [56]
+-----------------------------------------------
+                0.00    0.00  134317/134317      CPU::step(bool) [5]
+[57]     0.0    0.00    0.00  134317         MMU::ld(REG, unsigned char) [57]
+-----------------------------------------------
+                0.00    0.00   39787/39787       CPU::step(bool) [5]
+[58]     0.0    0.00    0.00   39787         MMU::st(REG, REG, unsigned short) [58]
+-----------------------------------------------
+                0.00    0.00   12805/12805       CPU::step(bool) [5]
+[59]     0.0    0.00    0.00   12805         PPU::write_from_cpu(unsigned short, unsigned char) [59]
+                0.00    0.00    3635/3635        PPU::store_vram(unsigned short, unsigned char) [61]
+-----------------------------------------------
+                0.00    0.00    4720/4720        MMU::ld(REG, REG, unsigned short) [34]
+[60]     0.0    0.00    0.00    4720         PPU::read_from_cpu(unsigned short) [60]
+-----------------------------------------------
+                0.00    0.00    3635/3635        PPU::write_from_cpu(unsigned short, unsigned char) [59]
+[61]     0.0    0.00    0.00    3635         PPU::store_vram(unsigned short, unsigned char) [61]
+-----------------------------------------------
+                0.00    0.00    3053/3053        CPU::step(bool) [5]
+[62]     0.0    0.00    0.00    3053         PPU::set_ppu_ctrl(unsigned char) [62]
+-----------------------------------------------
+                0.00    0.00    1369/1369        PPU::run_ppu() [3]
+[63]     0.0    0.00    0.00    1369         Renderer::renderFrame(SDL_Rect, SDL_Texture*, unsigned int*, int) [63]
+-----------------------------------------------
+                0.00    0.00    1369/1369        PPU::run_ppu() [3]
+[64]     0.0    0.00    0.00    1369         Renderer::clear() [64]
+-----------------------------------------------
+                0.00    0.00    1369/1369        PPU::run_ppu() [3]
+[65]     0.0    0.00    0.00    1369         Renderer::display() [65]
+-----------------------------------------------
+                0.00    0.00       2/2           GUI::cleanup() [71]
+[66]     0.0    0.00    0.00       2         Renderer::freeTex(SDL_Texture*) [66]
+-----------------------------------------------
+                0.00    0.00       2/2           GUI::GUI() [72]
+[67]     0.0    0.00    0.00       2         Renderer::loadText(char const*, _TTF_Font*, SDL_Color) [67]
+-----------------------------------------------
+                0.00    0.00       1/1           GUI::GUI() [72]
+[68]     0.0    0.00    0.00       1         ALU::ALU(MMU*) [68]
+-----------------------------------------------
+                0.00    0.00       1/1           GUI::GUI() [72]
+[69]     0.0    0.00    0.00       1         CPU::CPU(MMU*) [69]
+-----------------------------------------------
+                0.00    0.00       1/1           GUI::cleanup() [71]
+[70]     0.0    0.00    0.00       1         CPU::~CPU() [70]
+                0.00    0.00       1/1           MMU::~MMU() [74]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[71]     0.0    0.00    0.00       1         GUI::cleanup() [71]
+                0.00    0.00       2/2           Renderer::freeTex(SDL_Texture*) [66]
+                0.00    0.00       1/1           Renderer::freeFont(_TTF_Font*) [82]
+                0.00    0.00       1/1           Renderer::cleanRenderer() [81]
+                0.00    0.00       1/1           CardROM::~CardROM() [79]
+                0.00    0.00       1/1           CPU::~CPU() [70]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[72]     0.0    0.00    0.00       1         GUI::GUI() [72]
+                0.00    0.00       2/2           Renderer::loadText(char const*, _TTF_Font*, SDL_Color) [67]
+                0.00    0.00       1/1           CardROM::CardROM() [78]
+                0.00    0.00       1/1           Renderer::Renderer(char const*, int, int) [84]
+                0.00    0.00       1/1           PPU::PPU(CardROM*, Renderer*) [75]
+                0.00    0.00       1/1           MMU::MMU(CardROM*, PPU*) [73]
+                0.00    0.00       1/1           ALU::ALU(MMU*) [68]
+                0.00    0.00       1/1           CPU::CPU(MMU*) [69]
+                0.00    0.00       1/1           CardROM::load_rom(char const*) [77]
+                0.00    0.00       1/1           Renderer::loadFont(char const*, int) [83]
+-----------------------------------------------
+                0.00    0.00       1/1           GUI::GUI() [72]
+[73]     0.0    0.00    0.00       1         MMU::MMU(CardROM*, PPU*) [73]
+-----------------------------------------------
+                0.00    0.00       1/1           CPU::~CPU() [70]
+[74]     0.0    0.00    0.00       1         MMU::~MMU() [74]
+-----------------------------------------------
+                0.00    0.00       1/1           GUI::GUI() [72]
+[75]     0.0    0.00    0.00       1         PPU::PPU(CardROM*, Renderer*) [75]
+                0.00    0.00       1/1           Renderer::loadTexture(int, int) [80]
+-----------------------------------------------
+                0.00    0.00       1/1           CardROM::load_rom(char const*) [77]
+[76]     0.0    0.00    0.00       1         CardROM::decode(unsigned char*) [76]
+-----------------------------------------------
+                0.00    0.00       1/1           GUI::GUI() [72]
+[77]     0.0    0.00    0.00       1         CardROM::load_rom(char const*) [77]
+                0.00    0.00       1/1           std::__cxx11::basic_stringbuf<char, std::char_traits<char>, std::allocator<char> >::~basic_stringbuf() [85]
+                0.00    0.00       1/1           CardROM::decode(unsigned char*) [76]
+-----------------------------------------------
+                0.00    0.00       1/1           GUI::GUI() [72]
+[78]     0.0    0.00    0.00       1         CardROM::CardROM() [78]
+-----------------------------------------------
+                0.00    0.00       1/1           GUI::cleanup() [71]
+[79]     0.0    0.00    0.00       1         CardROM::~CardROM() [79]
+-----------------------------------------------
+                0.00    0.00       1/1           PPU::PPU(CardROM*, Renderer*) [75]
+[80]     0.0    0.00    0.00       1         Renderer::loadTexture(int, int) [80]
+-----------------------------------------------
+                0.00    0.00       1/1           GUI::cleanup() [71]
+[81]     0.0    0.00    0.00       1         Renderer::cleanRenderer() [81]
+-----------------------------------------------
+                0.00    0.00       1/1           GUI::cleanup() [71]
+[82]     0.0    0.00    0.00       1         Renderer::freeFont(_TTF_Font*) [82]
+-----------------------------------------------
+                0.00    0.00       1/1           GUI::GUI() [72]
+[83]     0.0    0.00    0.00       1         Renderer::loadFont(char const*, int) [83]
+-----------------------------------------------
+                0.00    0.00       1/1           GUI::GUI() [72]
+[84]     0.0    0.00    0.00       1         Renderer::Renderer(char const*, int, int) [84]
+-----------------------------------------------
+                0.00    0.00       1/1           CardROM::load_rom(char const*) [77]
+[85]     0.0    0.00    0.00       1         std::__cxx11::basic_stringbuf<char, std::char_traits<char>, std::allocator<char> >::~basic_stringbuf() [85]
+-----------------------------------------------
+
+ This table describes the call tree of the program, and was sorted by
+ the total amount of time spent in each function and its children.
+
+ Each entry in this table consists of several lines.  The line with the
+ index number at the left hand margin lists the current function.
+ The lines above it list the functions that called this function,
+ and the lines below it list the functions this one called.
+ This line lists:
+     index	A unique number given to each element of the table.
+		Index numbers are sorted numerically.
+		The index number is printed next to every function name so
+		it is easier to look up where the function is in the table.
+
+     % time	This is the percentage of the `total' time that was spent
+		in this function and its children.  Note that due to
+		different viewpoints, functions excluded by options, etc,
+		these numbers will NOT add up to 100%.
+
+     self	This is the total amount of time spent in this function.
+
+     children	This is the total amount of time propagated into this
+		function by its children.
+
+     called	This is the number of times the function was called.
+		If the function called itself recursively, the number
+		only includes non-recursive calls, and is followed by
+		a `+' and the number of recursive calls.
+
+     name	The name of the current function.  The index number is
+		printed after it.  If the function is a member of a
+		cycle, the cycle number is printed between the
+		function's name and the index number.
+
+
+ For the function's parents, the fields have the following meanings:
+
+     self	This is the amount of time that was propagated directly
+		from the function into this parent.
+
+     children	This is the amount of time that was propagated from
+		the function's children into this parent.
+
+     called	This is the number of times this parent called the
+		function `/' the total number of times the function
+		was called.  Recursive calls to the function are not
+		included in the number after the `/'.
+
+     name	This is the name of the parent.  The parent's index
+		number is printed after it.  If the parent is a
+		member of a cycle, the cycle number is printed between
+		the name and the index number.
+
+ If the parents of the function cannot be determined, the word
+ `<spontaneous>' is printed in the `name' field, and all the other
+ fields are blank.
+
+ For the function's children, the fields have the following meanings:
+
+     self	This is the amount of time that was propagated directly
+		from the child into the function.
+
+     children	This is the amount of time that was propagated from the
+		child's children to the function.
+
+     called	This is the number of times the function called
+		this child `/' the total number of times the child
+		was called.  Recursive calls by the child are not
+		listed in the number after the `/'.
+
+     name	This is the name of the child.  The child's index
+		number is printed after it.  If the child is a
+		member of a cycle, the cycle number is printed
+		between the name and the index number.
+
+ If there are any cycles (circles) in the call graph, there is an
+ entry for the cycle-as-a-whole.  This entry shows who called the
+ cycle (as parents) and the members of the cycle (as children.)
+ The `+' recursive calls entry shows the number of function calls that
+ were internal to the cycle, and the calls entry for each member shows,
+ for that member, how many times it was called from other members of
+ the cycle.
+
+Copyright (C) 2012-2022 Free Software Foundation, Inc.
+
+Copying and distribution of this file, with or without modification,
+are permitted in any medium without royalty provided the copyright
+notice and this notice are preserved.
+
+Index by function name
+
+  [30] ALU::adc(ADR, unsigned short, unsigned char) [22] CPU::brc_set(unsigned char, unsigned char) [61] PPU::store_vram(unsigned short, unsigned char)
+  [17] ALU::ana(ADR, unsigned short, unsigned char) [69] CPU::CPU(MMU*) [62] PPU::set_ppu_ctrl(unsigned char)
+  [35] ALU::asl(ADR, unsigned short, unsigned char) [70] CPU::~CPU() [60] PPU::read_from_cpu(unsigned short)
+  [18] ALU::cmp(REG, ADR, unsigned short, unsigned char) [71] GUI::cleanup() [59] PPU::write_from_cpu(unsigned short, unsigned char)
+  [40] ALU::dec(ADR, unsigned short, unsigned char) [2] GUI::run_gui() [3] PPU::run_ppu()
+  [36] ALU::dec(REG)          [72] GUI::GUI()             [14] PPU::update_v(bool)
+  [21] ALU::eor(ADR, unsigned short, unsigned char) [34] MMU::ld(REG, REG, unsigned short) [75] PPU::PPU(CardROM*, Renderer*)
+  [38] ALU::inc(ADR, unsigned short, unsigned char) [57] MMU::ld(REG, unsigned char) [11] CardROM::read_from_cpu(unsigned short)
+  [31] ALU::inc(REG)          [58] MMU::st(REG, REG, unsigned short) [8] CardROM::read_from_ppu(unsigned short)
+  [25] ALU::lsr(ADR, unsigned short, unsigned char) [56] MMU::tr(REG, REG) [76] CardROM::decode(unsigned char*)
+  [37] ALU::ora(ADR, unsigned short, unsigned char) [28] MMU::ldo(REG, REG, unsigned short) [77] CardROM::load_rom(char const*)
+  [41] ALU::rol(ADR, unsigned short, unsigned char) [27] MMU::pop(REG) [78] CardROM::CardROM()
+  [16] ALU::ror(ADR, unsigned short, unsigned char) [55] MMU::sto(REG, REG, unsigned short) [79] CardROM::~CardROM()
+  [32] ALU::sbc(ADR, unsigned short, unsigned char) [24] MMU::ldix(REG, REG, unsigned short) [80] Renderer::loadTexture(int, int)
+  [13] ALU::loadMEM(ADR, unsigned short, unsigned char) [26] MMU::push(REG) [63] Renderer::renderFrame(SDL_Rect, SDL_Texture*, unsigned int*, int)
+  [54] ALU::loadREG(REG)      [39] MMU::stix(REG, REG, unsigned short) [81] Renderer::cleanRenderer()
+  [23] ALU::clr_flag(unsigned char) [53] MMU::store(unsigned short, unsigned char) [64] Renderer::clear()
+  [33] ALU::set_flag(unsigned char) [20] MMU::load_pc(unsigned short const&) [65] Renderer::display()
+  [68] ALU::ALU(MMU*)         [12] MMU::fetch_pc()        [66] Renderer::freeTex(SDL_Texture*)
+  [42] CPU::nmi()             [15] MMU::get_addr(ADR, unsigned short, unsigned char) [82] Renderer::freeFont(_TTF_Font*)
+  [44] CPU::rst()             [52] MMU::load_reg(REG, unsigned char const&) [83] Renderer::loadFont(char const*, int)
+  [43] CPU::rti()             [10] MMU::retreive(unsigned short) [67] Renderer::loadText(char const*, _TTF_Font*, SDL_Color)
+   [5] CPU::step(bool)        [19] MMU::fetch_reg(REG)    [84] Renderer::Renderer(char const*, int, int)
+   [4] CPU::clock()           [73] MMU::MMU(CardROM*, PPU*) [85] std::__cxx11::basic_stringbuf<char, std::char_traits<char>, std::allocator<char> >::~basic_stringbuf()
+   [7] CPU::decode(HEX const&) [74] MMU::~MMU()            [9] _init
+  [29] CPU::brc_rst(unsigned char, unsigned char) [6] PPU::fetch_vram(unsigned short)
