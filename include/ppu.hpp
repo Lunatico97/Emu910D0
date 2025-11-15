@@ -21,9 +21,6 @@
 #define FRAME_W 256
 #define FRAME_H 240
 
-#define PIX 3 // width of pixel
-#define PIY 2 // height of pixel
-
 class PPU
 {
     public:
@@ -54,7 +51,8 @@ class PPU
         u8 get_oam_data();
 
         // Update routines
-        void update_v(bool vt);
+        void update_horzv();
+        void update_vertv();
 
         // Memory interactors
         u8 fetch_vram(u16 addr);

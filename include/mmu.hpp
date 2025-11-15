@@ -61,9 +61,15 @@ class MMU
         u8 fetch_reg(REG r);
         u16 fetch_pc();
 
+        // Check cross-page status
+        bool cross_page(u16 pre_addr, u16 post_addr);
+
         // Memory operations
-        void store(u16 m_address, u8 value);
-        u8 retreive(u16 m_address);
+        void store(u16 m_addr, u8 value);
+        u8 retreive(u16 m_addr);
+
+        // Penalty tracker
+        u8 cycle_penalty = 0x00;
 
     private:
         // Reset MMU

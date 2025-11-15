@@ -125,8 +125,8 @@ void GUI::run_gui()
     {
         while(SDL_PollEvent(&event))
         {
-            if(event.type == SDL_QUIT) _active = false;
-            if(event.type == SDL_KEYUP)
+            if(event.type == SDL_EventType::SDL_QUIT) _active = false;
+            if(event.type == SDL_EventType::SDL_KEYUP)
             {
                 switch(event.key.keysym.sym)
                 {

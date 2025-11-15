@@ -15,8 +15,6 @@ class CPU
         CPU(MMU* mmu_ptr);
         ~CPU();
 
-        void load_catridge(CardROM* crom, const char* filename);
-
         // CPU runners
         void clock();
         void step(bool debug = 0);
@@ -44,7 +42,7 @@ class CPU
         void rts();
         void rti();
 
-        u8 cycles, penalty;
+        u8 cycles;
         MMU* mmu;
         ALU alu;
         u16 IREG;

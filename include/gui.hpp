@@ -32,7 +32,7 @@ class GUI
         void cleanup();
 
         // Global timer
-        uint32_t system_clock;
+        u32 system_clock;
 
         // Console pointer objects
         CardROM* crom;

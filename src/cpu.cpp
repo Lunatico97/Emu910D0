@@ -1,6 +1,6 @@
 #include <cpu.hpp>
 
-CPU::CPU(MMU* mmu_ptr): mmu(mmu_ptr), alu(mmu_ptr), cycles(0), penalty(0) {}
+CPU::CPU(MMU* mmu_ptr): mmu(mmu_ptr), alu(mmu_ptr), cycles(0) {}
 CPU::~CPU() { delete mmu; }
 
 void CPU::clock()
@@ -8,7 +8,8 @@ void CPU::clock()
     if(cycles == 0)
     {
         this->step();
-        cycles = CYCLE_MAP[mmu->retreive(IREG)] + penalty;
+        cycles = CYCLE_MAP[mmu->retreive(IREG)] + mmu->cycle_penalty;
+        mmu->cycle_penalty = 0x00;
     }
     cycles -= 1;
 }
@@ -16,7 +17,6 @@ void CPU::clock()
 void CPU::step(bool debug)
 {   
     HEX current;
-    penalty = 0x00;
     IREG = mmu->fetch_pc();    
     u8 l = IL_MAP[mmu->retreive(IREG)];    
     mmu->load_pc(IREG+l);
@@ -250,7 +250,7 @@ void CPU::brc_set(u8 hx_flag, u8 rel_addr)
     if(mmu->fetch_reg(ST) & hx_flag)
     {
         mmu->load_pc(mmu->get_addr(ADR::REL, 0x0000, rel_addr));
-        penalty += 0x01;
+        mmu->cycle_penalty += 0x01;
     }
     else return;
 }
@@ -259,7 +259,7 @@ void CPU::brc_rst(u8 hx_flag, u8 rel_addr)
 {
     if(mmu->fetch_reg(ST) & hx_flag) return;   
     mmu->load_pc(mmu->get_addr(ADR::REL, 0x0000, rel_addr));
-    penalty += 0x01;
+    mmu->cycle_penalty += 0x01;
 }
 
 void CPU::jsr(u16 address)
