@@ -106,8 +106,9 @@ u16 MMU::get_addr(ADR mode, u16 addr, u8 off)
         case ADR::IND: res_addr = retreive(addr) | ((retreive(addr+1) & 0x00FF) << 8); break;
         case ADR::IIX: res_addr = (retreive(addr) | ((retreive(addr+1) & 0x00FF) << 8)) + static_cast<u16>(off); break;
         case ADR::IXI: res_addr = retreive(addr+off) | ((retreive(addr+off+1) & 0x00FF) << 8) ; break;
-        case ADR::REL: if(off & D7) res_addr = fetch_pc() - ((~off+1) & 0x00FF);
-                       else res_addr = fetch_pc() + off; 
+        case ADR::REL: addr = fetch_pc();
+                       if(off & D7) res_addr = addr - ((~off+1) & 0x00FF);
+                       else res_addr = addr + off; 
                        break;
         case ADR::ZER: res_addr = static_cast<u16>(off); break;
         case ADR::ZEX: res_addr = static_cast<u8>(fetch_reg(X) + off); break;
@@ -115,7 +116,18 @@ u16 MMU::get_addr(ADR mode, u16 addr, u8 off)
         default: break;
     }
 
+    if(mode != ADR::ZER && mode != ADR::ZEX && mode != ZEY)
+    {
+        cycle_penalty += cross_page(addr, res_addr);
+    }
+
     return res_addr;
+}
+
+bool MMU::cross_page(u16 pre_addr, u16 post_addr)
+{
+    if((pre_addr & 0xFF00) != (post_addr & 0xFF00)) return true;
+    else return false;
 }
 
 void MMU::updf(REG r)
@@ -156,22 +168,22 @@ void MMU::load_pc(const u16& addr)
     *(BANK+PCH) = (addr & 0xFF00) >> 8;
 }
 
-void MMU::store(u16 m_address, u8 value)
+void MMU::store(u16 m_addr, u8 value)
 {
-    if(m_address >= 0x0000 && m_address < 0x2000) RAM[(m_address & 0x07FF)] = value;
-    else if(m_address >= 0x2000 && m_address < 0x4000) ppu->write_from_cpu((m_address & 0x2007), value);
-    else if(m_address >= 0x4000 && m_address < 0x4020) return;
-    else if(m_address >= 0x4020 && m_address < 0x8000) return;
+    if(m_addr >= 0x0000 && m_addr < 0x2000) RAM[(m_addr & 0x07FF)] = value;
+    else if(m_addr >= 0x2000 && m_addr < 0x4000) ppu->write_from_cpu((m_addr & 0x2007), value);
+    else if(m_addr >= 0x4000 && m_addr < 0x4020) return;
+    else if(m_addr >= 0x4020 && m_addr < 0x8000) return;
     else return;
     // else crom->write_from_cpu(); 
     // Right now, we use only mapper 000 that doesn't perform writes on card
 }
 
-u8 MMU::retreive(u16 m_address)
+u8 MMU::retreive(u16 m_addr)
 {
-    if(m_address >= 0x0000 && m_address < 0x2000) return RAM[(m_address & 0x07FF)];
-    else if(m_address >= 0x2000 && m_address < 0x4000) return ppu->read_from_cpu(m_address & 0x2007);
-    else if(m_address >= 0x4000 && m_address < 0x4020) return 0x00;
-    else if(m_address >= 0x4020 && m_address < 0x8000) return 0x00;
-    else return crom->read_from_cpu(m_address);
+    if(m_addr >= 0x0000 && m_addr < 0x2000) return RAM[(m_addr & 0x07FF)];
+    else if(m_addr >= 0x2000 && m_addr < 0x4000) return ppu->read_from_cpu(m_addr & 0x2007);
+    else if(m_addr >= 0x4000 && m_addr < 0x4020) return 0x00;
+    else if(m_addr >= 0x4020 && m_addr < 0x8000) return 0x00;
+    else return crom->read_from_cpu(m_addr);
 }
