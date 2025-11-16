@@ -1,4 +1,4 @@
-#include <utils.hpp>
+#include <global.hpp>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
 

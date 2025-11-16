@@ -14,31 +14,30 @@ void CPU::clock()
     cycles -= 1;
 }
 
-void CPU::step(bool debug)
+void CPU::step()
 {   
     HEX current;
     IREG = mmu->fetch_pc();    
     u8 l = IL_MAP[mmu->retreive(IREG)];    
     mmu->load_pc(IREG+l);
 
-    if(debug)
-    {
-        // Tap registers stepwise
-        std::cout << Utils::logU16("IREG", IREG);
-        std::cout << Utils::logU16("PC", mmu->fetch_pc());
-        std::cout << Utils::logU8("A", mmu->fetch_reg(A));
-        std::cout << Utils::logU8("X", mmu->fetch_reg(X));
-        std::cout << Utils::logU8("Y", mmu->fetch_reg(Y));
-        std::cout << Utils::logU8("SP", mmu->fetch_reg(SP));
-        std::cout << Utils::logU8("ST", mmu->fetch_reg(ST));
-    }
-
     for(int i=0; i<l; i++)
     {
         current.h8[i] = mmu->retreive(IREG+i); 
     }
 
-    if(debug) std::cout << Utils::logHEX(current) << std::endl;
+    if(Global::debug)
+    {
+        // Tap registers stepwise
+        logger.log("", IREG);
+        logger.log(current);
+        logger.log("A:", mmu->fetch_reg(A));
+        logger.log("X:", mmu->fetch_reg(X));
+        logger.log("Y:", mmu->fetch_reg(Y));
+        logger.log("P:", mmu->fetch_reg(ST));
+        logger.log("SP:", mmu->fetch_reg(SP), 1);
+    }
+
     decode(current);
 }
 
@@ -94,9 +93,9 @@ void CPU::decode(const HEX& hex)
         case 0x98: mmu->tr(A, Y); break;
 
         case 0x48: mmu->push(A); break;
-        case 0x68: mmu->pop(A); break;
+        case 0x68: mmu->pla(); break;
         case 0x08: mmu->push(ST); break;
-        case 0x28: mmu->pop(ST); break;
+        case 0x28: mmu->plp(); break;
 
         case 0x69: alu.adc((ADR)-1, 0x0000, hex.h8[1]); break;
         case 0x65: alu.adc(ADR::ZER, 0x0000, hex.h8[1]); break;
@@ -297,10 +296,16 @@ void CPU::rst()
 {
     mmu->load_reg(A, 0x00);
     mmu->load_reg(X, 0x00);
-    mmu->load_reg(Y, 00);
-    mmu->load_reg(ST, 0x00 | HX_NUSE);
+    mmu->load_reg(Y, 0x00);
+    mmu->load_reg(SP, 0xFD);
+    mmu->load_reg(ST, 0x00 | HX_NUSE | HX_INTD);
     mmu->load_reg(PCL, mmu->retreive(RST_VECTOR));
     mmu->load_reg(PCH, mmu->retreive(RST_VECTOR+0x0001));
+/*
+    // Force-set PC to 0xC000 to match nestest.log
+    mmu->load_reg(PCL, 0x00);
+    mmu->load_reg(PCH, 0xC0);
+*/
     cycles = 7;
 }
 

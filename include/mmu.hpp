@@ -1,6 +1,7 @@
-#include <utils.hpp>
 #include <crom.hpp>
 #include <ppu.hpp>
+#include <global.hpp>
+#include <controller.hpp>
 
 #ifndef _MMU_H_
 #define _MMU_H_
@@ -20,12 +21,16 @@ enum ADR
 class MMU
 {
     public:
-        MMU(CardROM* cptr, PPU* pptr);
+        MMU(CardROM* cptr, PPU* pptr, Controller *ctptr);
         ~MMU();
 
         // Stack Pointer
         void push(REG r);
         void pop(REG r);
+
+        // Stack Pulls
+        void pla();
+        void plp();
 
         // Implied Transfers
         void tr(REG des, REG src);
@@ -76,6 +81,7 @@ class MMU
         void reset();
 
         // References
+        Controller *ctrl;
         CardROM *crom;
         PPU *ppu;
 
