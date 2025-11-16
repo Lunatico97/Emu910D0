@@ -1,4 +1,4 @@
-#include <utils.hpp>
+#include <global.hpp>
 #include <mappers/mapper.hpp>
 
 #ifndef __CROM_H__

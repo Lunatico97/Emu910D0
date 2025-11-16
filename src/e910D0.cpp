@@ -8,6 +8,8 @@
 #include <apu.hpp>
 #include <gui.hpp>
 
+Logger logger;
+
 int main(int argc, char* argv[]) {
     GUI* gui = new GUI();
     gui->run_gui();

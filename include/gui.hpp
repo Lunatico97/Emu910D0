@@ -3,6 +3,7 @@
 #include <mmu.hpp>
 
 #include <crom.hpp>
+#include <logger.hpp>
 
 #ifndef __GUI_H__
 #define __GUI_H__
@@ -22,19 +23,15 @@ class GUI
     public:
         GUI();     
         void run_gui();
-        void draw_tile(u16 tile_addr, int x, int y, bool px);
 
     private:
-        void draw_mem();
-        void draw_stack();
-        void draw_reg_bank();
-        void draw_psw();
         void cleanup();
 
         // Global timer
         u32 system_clock;
 
         // Console pointer objects
+        Controller* controller;
         CardROM* crom;
         CPU* cpu;
         PPU* ppu;
@@ -44,8 +41,6 @@ class GUI
         bool _active;
         Renderer* rndr;
         SDL_Event event;
-        TTF_Font* sys_font;
-        SDL_Texture *sys_text, *flag_text, *reg_text;
 };
 
 #endif

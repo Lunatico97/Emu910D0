@@ -6,6 +6,12 @@ PPU::PPU(CardROM *crom, Renderer *rndr) : W(0), crom(crom), cycles(0), lines(0),
     frame = rndr->loadTexture(FRAME_W, FRAME_H);
 }
 
+PPU::~PPU()
+{
+    rndr->freeTex(frame);
+    free(frame_buf);
+}
+
 void PPU::write_from_cpu(u16 addr, u8 value)
 {
     switch(addr)
@@ -67,7 +73,7 @@ u8 PPU::fetch_vram(u16 addr)
         if ((addr & 0x03) == 0) addr &= 0x0F; 
         return PAL[addr];
     }
-    else throw(std::runtime_error(Utils::logU16("Out of bounds (R) from VRAM: ", addr)));
+    else throw(std::runtime_error("Out of bounds (R) from VRAM: " + addr));
 }
 
 void PPU::store_vram(u16 addr, u8 value)
@@ -97,7 +103,7 @@ void PPU::store_vram(u16 addr, u8 value)
         if ((addr & 0x03) == 0) addr &= 0x0F; 
         PAL[addr] = value;
     }
-    else throw(std::runtime_error(Utils::logU16("Out of bounds (W) to VRAM: ", addr)));
+    else throw(std::runtime_error("Out of bounds (W) to VRAM: " + addr));
 }
 
 void PPU::set_ppu_ctrl(u8 ctrl)

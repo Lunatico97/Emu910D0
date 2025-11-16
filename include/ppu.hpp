@@ -1,4 +1,4 @@
-#include <utils.hpp>
+#include <global.hpp>
 #include <renderer.hpp>
 #include <crom.hpp>
 
@@ -25,6 +25,7 @@ class PPU
 {
     public:
         PPU(CardROM *crom, Renderer *rndr);
+        ~PPU();
 
         // CPU Interactions
         u8 read_from_cpu(u16 addr);
@@ -44,6 +45,8 @@ class PPU
         void set_ppu_scrl(u8 pos);
         void set_ppu_addr(u8 addr);
         void set_ppu_data(u8 data);
+        void set_oam_addr(u8 addr);
+        void set_oam_data(u8 data);
 
         // Getter routines
         u8 get_ppu_stat();
@@ -69,6 +72,9 @@ class PPU
 
         // Latch
         u8 name_byte, attr_byte, palette_select, palette_bits;
+
+        // OAM
+        u8 oam_addr;
 
         // Internal registers
         u8 X;

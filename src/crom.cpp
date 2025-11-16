@@ -32,7 +32,7 @@ void CardROM::decode(u8 header[])
 
 void CardROM::load_rom(const char *filename)
 {
-    std::stringstream ss(Utils::readTextFromFile(filename));
+    std::stringstream ss(Global::readTextFromFile(filename));
     ss >> std::hex >> std::noskipws;
     u16 counter = 0x0000;
     u8 current_hex = 0x00;

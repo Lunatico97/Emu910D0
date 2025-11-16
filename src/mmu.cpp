@@ -1,9 +1,10 @@
 #include <mmu.hpp>
 
-MMU::MMU(CardROM* cptr, PPU* pptr)
+MMU::MMU(CardROM* cptr, PPU* pptr, Controller *ctptr)
 {
     reset();
     load_reg(SP, 0xFF);
+    ctrl = ctptr;
     crom = cptr;
     ppu = pptr;
 }
@@ -26,6 +27,22 @@ void MMU::pop(REG r)
     {
         load_reg(SP, fetch_reg(SP)+0x01);
         load_reg(r, retreive(SP_INDEX | fetch_reg(SP)));
+    }
+    else throw(std::runtime_error("Stack underflow !"));
+}
+
+void MMU::pla()
+{
+    pop(A);
+    updf(A);
+}
+
+void MMU::plp()
+{
+    if(fetch_reg(SP) <= 0xFF)
+    {
+        load_reg(SP, fetch_reg(SP)+0x01);
+        load_reg(ST, (fetch_reg(ST) & 0x30) | (retreive(SP_INDEX | fetch_reg(SP)) & 0xCF));
     }
     else throw(std::runtime_error("Stack underflow !"));
 }
@@ -143,8 +160,8 @@ void MMU::updf(REG r)
 
 void MMU::reset()
 {
-    for(int i = 0; i < 2048; ++i) RAM[i] = 0x00;
-    for(int i=0; i<7; i++) BANK[i] = 0x0000;
+    memset(RAM, 0x00, sizeof(RAM));
+    memset(BANK, 0x0000, sizeof(BANK));
 }
 
 u8 MMU::fetch_reg(REG r)
@@ -172,6 +189,7 @@ void MMU::store(u16 m_addr, u8 value)
 {
     if(m_addr >= 0x0000 && m_addr < 0x2000) RAM[(m_addr & 0x07FF)] = value;
     else if(m_addr >= 0x2000 && m_addr < 0x4000) ppu->write_from_cpu((m_addr & 0x2007), value);
+    else if(m_addr == CTRL_P1 || m_addr == CTRL_P2) ctrl->write_state(m_addr & 0x00001);
     else if(m_addr >= 0x4000 && m_addr < 0x4020) return;
     else if(m_addr >= 0x4020 && m_addr < 0x8000) return;
     else return;
@@ -183,6 +201,7 @@ u8 MMU::retreive(u16 m_addr)
 {
     if(m_addr >= 0x0000 && m_addr < 0x2000) return RAM[(m_addr & 0x07FF)];
     else if(m_addr >= 0x2000 && m_addr < 0x4000) return ppu->read_from_cpu(m_addr & 0x2007);
+    else if(m_addr == CTRL_P1 || m_addr == CTRL_P2) return ctrl->read_state(m_addr & 0x00001);
     else if(m_addr >= 0x4000 && m_addr < 0x4020) return 0x00;
     else if(m_addr >= 0x4020 && m_addr < 0x8000) return 0x00;
     else return crom->read_from_cpu(m_addr);
