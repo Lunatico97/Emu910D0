@@ -28,7 +28,7 @@ void ALU::sbc(ADR mode, u16 addr, u8 off)
     if(mode == -1) fetchIMD(off);
     else fetchMEM(mode, addr, off);
     TEMP1 = mmu->fetch_reg(A);
-    u16 TEMP = TEMP1 + ~TEMP2 + ((SF & HX_CARY) ? 1 : 0);
+    u16 TEMP = TEMP1 + (~TEMP2 & 0x00FF) + ((SF & HX_CARY) ? 1 : 0);
     SF &= ~(HX_CARY | HX_OVFW);
     if(TEMP > 0xFF) SF |= HX_CARY;
     TEMP1 = static_cast<u8>(TEMP); 

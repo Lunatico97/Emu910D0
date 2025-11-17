@@ -37,6 +37,16 @@ void MMU::pla()
     updf(A);
 }
 
+void MMU::php()
+{
+    if(fetch_reg(SP) > 0x00)
+    {
+        store(SP_INDEX | fetch_reg(SP), fetch_reg(ST) | 0x30);
+        load_reg(SP, fetch_reg(SP)-0x01);
+    }
+    else throw(std::runtime_error("Stack overflow !"));
+}
+
 void MMU::plp()
 {
     if(fetch_reg(SP) <= 0xFF)
@@ -160,8 +170,8 @@ void MMU::updf(REG r)
 
 void MMU::reset()
 {
-    memset(RAM, 0x00, sizeof(RAM));
-    memset(BANK, 0x0000, sizeof(BANK));
+    memset(RAM, 0x00, sizeof(u8)*RAM_SIZE);
+    memset(BANK, 0x00, sizeof(u8)*REG_BANKS);
 }
 
 u8 MMU::fetch_reg(REG r)
@@ -189,7 +199,7 @@ void MMU::store(u16 m_addr, u8 value)
 {
     if(m_addr >= 0x0000 && m_addr < 0x2000) RAM[(m_addr & 0x07FF)] = value;
     else if(m_addr >= 0x2000 && m_addr < 0x4000) ppu->write_from_cpu((m_addr & 0x2007), value);
-    else if(m_addr == CTRL_P1 || m_addr == CTRL_P2) ctrl->write_state(m_addr & 0x00001);
+    else if(m_addr == CTRL_P1 || m_addr == CTRL_P2) ctrl->write_state(m_addr & 0x0001);
     else if(m_addr >= 0x4000 && m_addr < 0x4020) return;
     else if(m_addr >= 0x4020 && m_addr < 0x8000) return;
     else return;
@@ -201,7 +211,7 @@ u8 MMU::retreive(u16 m_addr)
 {
     if(m_addr >= 0x0000 && m_addr < 0x2000) return RAM[(m_addr & 0x07FF)];
     else if(m_addr >= 0x2000 && m_addr < 0x4000) return ppu->read_from_cpu(m_addr & 0x2007);
-    else if(m_addr == CTRL_P1 || m_addr == CTRL_P2) return ctrl->read_state(m_addr & 0x00001);
+    else if(m_addr == CTRL_P1 || m_addr == CTRL_P2) return ctrl->read_state(m_addr & 0x0001);
     else if(m_addr >= 0x4000 && m_addr < 0x4020) return 0x00;
     else if(m_addr >= 0x4020 && m_addr < 0x8000) return 0x00;
     else return crom->read_from_cpu(m_addr);
