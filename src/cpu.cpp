@@ -94,7 +94,7 @@ void CPU::decode(const HEX& hex)
 
         case 0x48: mmu->push(A); break;
         case 0x68: mmu->pla(); break;
-        case 0x08: mmu->push(ST); break;
+        case 0x08: mmu->php(); break;
         case 0x28: mmu->plp(); break;
 
         case 0x69: alu.adc((ADR)-1, 0x0000, hex.h8[1]); break;
@@ -263,33 +263,34 @@ void CPU::brc_rst(u8 hx_flag, u8 rel_addr)
 
 void CPU::jsr(u16 address)
 {
-    mmu->push(PCL);
+    mmu->load_pc(mmu->fetch_pc()-0x01); // off by one for RTS
     mmu->push(PCH);
+    mmu->push(PCL);
     mmu->load_pc(address);
 }
 
 void CPU::rts()
 {
-    mmu->pop(PCH);
     mmu->pop(PCL);
+    mmu->pop(PCH);
+    mmu->load_pc(mmu->fetch_pc()+0x01); // balance for JSR
 }
 
 void CPU::brk()
 {
-    mmu->load_reg(ST, mmu->fetch_reg(ST) | HX_BREK | HX_INTD | HX_NUSE);
     mmu->push(PCL);
     mmu->push(PCH);
-    mmu->push(ST);
+    mmu->php();
+    mmu->load_reg(ST, mmu->fetch_reg(ST) | HX_INTD);
     mmu->load_reg(PCL, mmu->retreive(IRQ_VECTOR));
     mmu->load_reg(PCH, mmu->retreive(IRQ_VECTOR+0x0001));
 }
 
 void CPU::rti()
 {
-    mmu->pop(ST);
-    mmu->load_reg(ST, mmu->fetch_reg(ST) & ~HX_NUSE & ~HX_INTD);
-    mmu->pop(PCH);
+    mmu->plp();
     mmu->pop(PCL);
+    mmu->pop(PCH);
 }
 
 void CPU::rst()
@@ -301,22 +302,21 @@ void CPU::rst()
     mmu->load_reg(ST, 0x00 | HX_NUSE | HX_INTD);
     mmu->load_reg(PCL, mmu->retreive(RST_VECTOR));
     mmu->load_reg(PCH, mmu->retreive(RST_VECTOR+0x0001));
-/*
-    // Force-set PC to 0xC000 to match nestest.log
-    mmu->load_reg(PCL, 0x00);
-    mmu->load_reg(PCH, 0xC0);
-*/
     cycles = 7;
+
+    // // Force-set PC to 0xC000 to match nestest.log
+    // mmu->load_reg(PCL, 0x00);
+    // mmu->load_reg(PCH, 0xC0);
 }
 
 void CPU::irq()
 {
     if((mmu->fetch_reg(ST) & HX_INTD) != HX_INTD)
     {
-        mmu->load_reg(ST, mmu->fetch_reg(ST) & ~HX_BREK | HX_INTD | HX_NUSE);
-        mmu->push(PCL);
         mmu->push(PCH);
-        mmu->push(ST);
+        mmu->push(PCL);
+        mmu->php();
+        mmu->load_reg(ST, mmu->fetch_reg(ST) | HX_INTD);
         mmu->load_reg(PCL, mmu->retreive(IRQ_VECTOR));
         mmu->load_reg(PCH, mmu->retreive(IRQ_VECTOR+0x0001));
         cycles = 7;
@@ -325,10 +325,10 @@ void CPU::irq()
 
 void CPU::nmi()
 {
-    mmu->load_reg(ST, mmu->fetch_reg(ST) & ~HX_BREK | HX_INTD | HX_NUSE);
-    mmu->push(PCL);
     mmu->push(PCH);
-    mmu->push(ST);
+    mmu->push(PCL);
+    mmu->php();
+    mmu->load_reg(ST, mmu->fetch_reg(ST) | HX_INTD);
     mmu->load_reg(PCL, mmu->retreive(NMI_VECTOR));
     mmu->load_reg(PCH, mmu->retreive(NMI_VECTOR+0x0001));
     cycles = 7;

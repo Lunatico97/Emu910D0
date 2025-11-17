@@ -7,6 +7,8 @@
 #define _MMU_H_
 
 #define SP_INDEX 0x0100
+#define RAM_SIZE 2048
+#define REG_BANKS 7
 
 enum REG
 {
@@ -28,7 +30,8 @@ class MMU
         void push(REG r);
         void pop(REG r);
 
-        // Stack Pulls
+        // Stack Operations
+        void php();
         void pla();
         void plp();
 
@@ -85,8 +88,8 @@ class MMU
         CardROM *crom;
         PPU *ppu;
 
-        u8 BANK[7];
-        u8 RAM[2048];
+        u8 BANK[REG_BANKS];
+        u8 RAM[RAM_SIZE];
 };
 
 #endif
