@@ -240,7 +240,7 @@ void CPU::jmp(u16 address)
 
 void CPU::jmpi(u16 address)
 {
-    u16 res_addr = mmu->retreive(address) | ((mmu->retreive((address & 0xFF00) | ((address & 0x00FF)+1)) & 0x00FF) << 8);
+    u16 res_addr = mmu->retreive(address) | (static_cast<u16>((mmu->retreive((address & 0xFF00) | ((address+1) & 0x00FF)))) << 8);
     mmu->load_pc(res_addr);
 }
 
