@@ -8,25 +8,36 @@
 
 
 ## Current Status:
+- Working 6502 CPU | Keyboard Input | PPU (Background rendering only)
+- There are issues with PPU that are prioritized to be fixed soon.
+
 - Donkey Kong Title Screen
 ![Donkey Kong Title Screen](rsrc/snip6.png)
 
 - Donkey Kong Game Screen
 ![Donkey Kong Game Screen](rsrc/snip7.png)
 
-## 6502 CPU GUI [Only relevant for CPU testing phase]:
-![E910D0](rsrc/snip.png)
-
 ### Tests:
+![NES Test Menu](rsrc/snip10.png)
+- Passes all official tests in video mode at reset vector: 0xC004.
+- Matches first 5000 lines of nestest.log (upto official instruction tests) in automation mode with PC force-set at 0xC000.
 - CPU tests for every 6502 instruction are available in `tests/e910D0Tests.cpp`.
 - Replace the file with `e910D0.cpp` to run test suite.
 
 ### Commands:
+- W/A/S/D -> D-PAD
+- SPACE -> SELECT
+- ENTER -> START
+- G -> A-BUTTON
+- H -> B-BUTTON
 - NUM_6 -> PAUSE / UNPAUSE (Continuous execute)
 - NUM_7 -> STEP (Stepwise Execute)
 - NUM_8 -> IRQ (Interrupt Request)
 - NUM_9 -> NMI (Non-Maskable Interrupt)
 - NUM_0 -> RST (Reset)
+
+## 6502 CPU GUI [Only relevant for CPU testing phase]:
+![E910D0](rsrc/snip.png)
 
 ### Legend:
 - White block (Zero page memory block <$0x0000 - $0x00FF>)

@@ -130,9 +130,9 @@ u16 MMU::get_addr(ADR mode, u16 addr, u8 off)
         case ADR::ABS: res_addr = addr; break;
         case ADR::ABX: res_addr = addr + fetch_reg(X); break;
         case ADR::ABY: res_addr = addr + fetch_reg(Y); break;
-        case ADR::IND: res_addr = retreive(addr) | ((retreive(addr+1) & 0x00FF) << 8); break;
-        case ADR::IIX: res_addr = (retreive(addr) | ((retreive(addr+1) & 0x00FF) << 8)) + static_cast<u16>(off); break;
-        case ADR::IXI: res_addr = retreive(addr+off) | ((retreive(addr+off+1) & 0x00FF) << 8) ; break;
+        case ADR::IND: res_addr = retreive(addr) | (static_cast<u16>(retreive((addr+1) & 0x00FF)) << 8); break;
+        case ADR::IIX: res_addr = (retreive(addr) | (static_cast<u16>(retreive((addr+1) & 0x00FF)) << 8)) + static_cast<u16>(off); break;
+        case ADR::IXI: res_addr = retreive((addr+off) & 0x00FF) | (static_cast<u16>(retreive((addr+off+1) & 0x00FF)) << 8); break;
         case ADR::REL: addr = fetch_pc();
                        if(off & D7) res_addr = addr - ((~off+1) & 0x00FF);
                        else res_addr = addr + off; 
@@ -170,8 +170,8 @@ void MMU::updf(REG r)
 
 void MMU::reset()
 {
-    memset(RAM, 0x00, sizeof(u8)*RAM_SIZE);
-    memset(BANK, 0x00, sizeof(u8)*REG_BANKS);
+    memset(RAM, 0x00, RAM_SIZE);
+    memset(BANK, 0x00, REG_BANKS);
 }
 
 u8 MMU::fetch_reg(REG r)

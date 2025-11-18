@@ -871,7 +871,7 @@ void test_runner()
 
 int main(int argc, char* argv[]) 
 {
-    mmu = new MMU(nullptr, nullptr);
+    mmu = new MMU(nullptr, nullptr, nullptr);
     cpu = new CPU(mmu);
     test_runner();
     delete cpu;
