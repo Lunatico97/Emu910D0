@@ -167,7 +167,11 @@ void PPU::set_ppu_data(u8 data)
 u8 PPU::get_ppu_data() 
 {
     u8 value;
-    if(V.addr >= 0x3F00) value = fetch_vram(V.addr);
+    if(V.addr >= 0x3F00)
+    {
+        value = fetch_vram(V.addr);
+        ppu_data_buffer = value;
+    }
     else
     {
         value = ppu_data_buffer;
@@ -244,8 +248,8 @@ void PPU::run_ppu()
                 // Load latched data to shift registers
                 P0SHF = (P0SHF & 0xFF00) | P0L; 
                 P1SHF = (P1SHF & 0xFF00) | P1L;
-                LASHF = (LASHF & 0xFF00) | ((palette_bits & D0) ? 0xFF: 0x00);
-                HASHF = (HASHF & 0xFF00) | ((palette_bits & D1) ? 0xFF: 0x00);
+                LASHF = ((palette_bits & D0) ? 0xFF: 0x00);
+                HASHF = ((palette_bits & D1) ? 0xFF: 0x00);
                 // Fetch name table byte
                 name_byte = fetch_vram(0x2000 | (V.addr & 0x0FFF));
                 break;
@@ -340,6 +344,7 @@ void PPU::run_ppu()
             W = 0;
 
             // Render frame
+            trigger_events = true;
             rndr->renderFrame({0, 0, SCRW, SCRH}, frame, frame_buf, FRAME_W);
             rndr->display();
             rndr->clear();

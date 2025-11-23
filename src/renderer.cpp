@@ -8,7 +8,7 @@ Renderer::Renderer(const char *title, int width, int height)
 	IMG_Init(IMG_INIT_PNG) ;
 	window = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, 0) ;
 	if(window == nullptr) std::cout << SDL_GetError() << std::endl ;
-	ren = SDL_CreateRenderer(window, -1, 0) ;
+	ren = SDL_CreateRenderer(window, -1, SDL_RENDERER_PRESENTVSYNC) ;
 	if(ren == nullptr) std::cout << SDL_GetError() << std::endl ;
 	scrW = width ;
 	scrH = height ;

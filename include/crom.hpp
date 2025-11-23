@@ -4,6 +4,9 @@
 #ifndef __CROM_H__
 #define __CROM_H__
 
+#define PRG_BANK 16384
+#define CHR_BANK 8192
+
 class CardROM
 {
     public:
