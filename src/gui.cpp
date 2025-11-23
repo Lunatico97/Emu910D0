@@ -9,7 +9,7 @@ GUI::GUI():system_clock(0)
     ppu = new PPU(crom, rndr);
     mmu = new MMU(crom, ppu, controller);
     cpu = new CPU(mmu);
-    crom->load_rom("roms/nestest.nes");
+    crom->load_rom("roms/nestests/nestest.nes");
     _active = true;
     cpu->rst();
 }
@@ -29,12 +29,13 @@ void GUI::run_gui()
 
     while(_active)
     {
-        while(SDL_PollEvent(&event))
+        while(ppu->trigger_events && SDL_PollEvent(&event))
         {
             controller->handleInput(&event);
             if(event.type == SDL_EventType::SDL_QUIT) _active = false;
             if(event.type == SDL_EventType::SDL_KEYUP)
             {
+                ppu->trigger_events = true;
                 switch(event.key.keysym.sym)
                 {
                     case SDLK_6: pause = !pause; break;
@@ -50,6 +51,7 @@ void GUI::run_gui()
 
         if(!pause)
         {
+            ppu->trigger_events = false;
             ppu->run_ppu();
 
             if((system_clock % 3) == 0)

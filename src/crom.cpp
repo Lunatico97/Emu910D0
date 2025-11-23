@@ -19,8 +19,8 @@ void CardROM::decode(u8 header[])
     chr_units = header[5]; // CHR ROM SIZE
     assert(prg_units != 0);
     assert(chr_units != 0);
-    PRGROM = (u8*)calloc(prg_units*16384, sizeof(u8));
-    CHRROM = (u8*)calloc(chr_units*8192, sizeof(u8));
+    PRGROM = (u8*)calloc(prg_units*PRG_BANK, sizeof(u8));
+    CHRROM = (u8*)calloc(chr_units*CHR_BANK, sizeof(u8));
     mapper_num = (header[7] & 0xF0) | (header[6] >> 4);
     mirror_mode = (header[6] & D0);
     switch(mapper_num)
@@ -55,7 +55,7 @@ void CardROM::load_rom(const char *filename)
     std::cout << "Mirror Mode: " << (mirror_mode ? "Vertical": "Horizontal") << std::endl;
 
     *(PRGROM + 0) = current_hex;
-    u16 prg_limit = 0x000F + (prg_units*16384);
+    u16 prg_limit = 0x000F + (prg_units*PRG_BANK);
 
     while(ss >> current_hex)
     {

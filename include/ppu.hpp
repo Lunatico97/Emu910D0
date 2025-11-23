@@ -36,7 +36,7 @@ class PPU
 
         // PPU Counters
         u16 cycles, lines;
-        bool trigger_nmi;
+        bool trigger_nmi, trigger_events;
 
     private:
         // Setter routines
