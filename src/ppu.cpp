@@ -226,55 +226,58 @@ void PPU::run_ppu()
     // [Based on NesWiki diagram: https://www.nesdev.org/w/images/default/4/4f/Ppu.svg]
     if((lines >= 0 && lines < 240) || lines == 261)
     {
-        // Shift plane data for tiles
-        if(MASK_REG.bg_enabled)
+        if((cycles >= 1 && cycles <= 257) || (cycles >= 321 && cycles <= 337))
         {
-            P0SHF = P0SHF << 1;
-            P1SHF = P1SHF << 1;
-            LASHF = LASHF << 1;
-            HASHF = HASHF << 1;
+            // Shift plane data for tiles
+            if(MASK_REG.bg_enabled)
+            {
+                P0SHF = P0SHF << 1;
+                P1SHF = P1SHF << 1;
+                LASHF = LASHF << 1;
+                HASHF = HASHF << 1;
+            }
+
+            // In every cycle to draw pixel, some specific computation happens which obviously repeats every tile (8px)
+            u8 cycle_num = cycles % 8;
+            switch (cycle_num)
+            {
+                case 0x00:
+                    // Update V register horizontal
+                    if(MASK_REG.bg_enabled || MASK_REG.spr_enabled) update_horzv();
+                    break;
+
+                case 0x01:
+                    // Load latched data to shift registers
+                    P0SHF = (P0SHF & 0xFF00) | P0L; 
+                    P1SHF = (P1SHF & 0xFF00) | P1L;
+                    LASHF = (LASHF & 0xFF00) | ((palette_bits & D0) ? 0xFF : 0x00);
+                    HASHF = (HASHF & 0xFF00) | ((palette_bits & D1) ? 0xFF : 0x00);
+                    // Fetch name table byte
+                    name_byte = fetch_vram(NAME_INDEX | (V.addr & 0x0FFF));
+                    break;
+                
+                case 0x03:
+                    // Fetch attribute byte
+                    attr_byte = fetch_vram(ATRB_INDEX | (V.addr & 0x0C00) | ((V.addr >> 4) & 0x38) | ((V.addr >> 2) & 0x07));
+                    palette_select = ((V.addr & 0x02) >> 1) | ((V.addr & 0x40) >> 5);
+                    palette_bits = (attr_byte >> (palette_select * 2)) & 0x03;
+                    break;
+
+                case 0x05:
+                    // Latch plane-0 data
+                    P0L = fetch_vram(CVALS.bg_addr + (name_byte << 4) + V.fine_y);
+                    break;
+
+                case 0x07:
+                    // Latch plane-1 data
+                    P1L = fetch_vram(CVALS.bg_addr+ (name_byte << 4) + V.fine_y + 0x08);
+                    break;
+                
+                default:
+                    break;
+            }
         }
-
-        // In every cycle to draw pixel, some specific computation happens which obviously repeats every tile (8px)
-        u8 cycle_num = cycles % 8;
-        switch (cycle_num)
-        {
-            case 0x00:
-                // Update V register horizontal
-                if(MASK_REG.bg_enabled || MASK_REG.spr_enabled) update_horzv();
-                break;
-
-            case 0x01:
-                // Load latched data to shift registers
-                P0SHF = (P0SHF & 0xFF00) | P0L; 
-                P1SHF = (P1SHF & 0xFF00) | P1L;
-                LASHF = ((palette_bits & D0) ? 0xFF: 0x00);
-                HASHF = ((palette_bits & D1) ? 0xFF: 0x00);
-                // Fetch name table byte
-                name_byte = fetch_vram(0x2000 | (V.addr & 0x0FFF));
-                break;
-            
-            case 0x03:
-                // Fetch attribute byte
-                attr_byte = fetch_vram(ATRB_INDEX | (V.addr & 0x0C00) | ((V.addr >> 4) & 0x38) | ((V.addr >> 2) & 0x07));
-                palette_select = ((V.addr & 0x02) >> 1) | ((V.addr & 0x40) >> 5);
-                palette_bits = (attr_byte >> (palette_select * 2)) & 0x03;
-                break;
-
-            case 0x05:
-                // Latch plane-0 data
-                P0L = fetch_vram(CVALS.bg_addr + (name_byte << 4) + V.fine_y);
-                break;
-
-            case 0x07:
-                // Latch plane-1 data
-                P1L = fetch_vram(CVALS.bg_addr+ (name_byte << 4) + V.fine_y + 0x08);
-                break;
-            
-            default:
-                break;
-        }
-
+    
         // Render-only operations
         if(MASK_REG.bg_enabled || MASK_REG.spr_enabled)
         {
@@ -289,6 +292,11 @@ void PPU::run_ppu()
                 // Perform horizontal transfer
                 V.coarse_x = T.coarse_x;
                 V.nm_select = (V.nm_select & 0b10) | (T.nm_select & 0b01);
+            }
+
+            if(cycles == 338 || cycles == 340)
+            {
+                name_byte = fetch_vram(NAME_INDEX | (V.addr & 0x0FFF));
             }
 
             if(lines == 261 && ((cycles >= 280 && cycles <= 304)))
@@ -315,7 +323,7 @@ void PPU::run_ppu()
         u8 bg_index = 0x00;
         if(MASK_REG.bg_enabled)
         {
-            u16 bit_mask = D7 >> X;
+            u16 bit_mask = 0x8000 >> X;
             u8 color_index = (((P1SHF & bit_mask) > 0) << 1) | ((P0SHF & bit_mask) > 0);
             u8 palette_index = (((HASHF & bit_mask) > 0) << 1) | ((LASHF & bit_mask) > 0);
             bg_index = fetch_vram(PAL_INDEX | (palette_index << 2) | color_index);

@@ -10,7 +10,7 @@
 #define D1 0b00000010
 #define D0 0b00000001
 
-#define SCRW 768
+#define SCRW 640
 #define SCRH 480
 
 typedef uint8_t u8;
