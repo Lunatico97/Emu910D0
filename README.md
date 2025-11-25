@@ -9,16 +9,12 @@
 
 ## Current Status:
 - Working 6502 CPU | Keyboard Input | PPU (Background rendering only)
-- There are issues with PPU that are prioritized to be fixed soon.
 
-- Donkey Kong Title Screen
-![Donkey Kong Title Screen](rsrc/snip6.png)
-
-- Donkey Kong Game Screen
-![Donkey Kong Game Screen](rsrc/snip7.png)
+- Donkey Kong
+![Donkey Kong](rsrc/donkey_kong.gif)
 
 ### Tests:
-![NES Test Menu](rsrc/snip10.png)
+![NES Test Menu](rsrc/nestest.gif)
 - Passes all official tests in video mode at reset vector: 0xC004.
 - Matches first 5000 lines of nestest.log (upto official instruction tests) in automation mode with PC force-set at 0xC000.
 - CPU tests for every 6502 instruction are available in `tests/e910D0Tests.cpp`.

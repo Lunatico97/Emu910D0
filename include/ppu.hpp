@@ -15,7 +15,8 @@
 #define PPUDATA 0x2007
 #define OAMDMA 0x4014
 
-#define ATRB_INDEX 0x23C0 // start of last 64 bytes for name table
+#define NAME_INDEX 0x2000 // start of first name table
+#define ATRB_INDEX 0x23C0 // start of last 64 bytes for first name table
 #define PAL_INDEX 0x3F00
 
 #define FRAME_W 256
@@ -68,7 +69,7 @@ class PPU
         // Shift & Latch Registers
         u8 P0L, P1L;
         u16 P0SHF, P1SHF;
-        u8 LASHF, HASHF;
+        u16 LASHF, HASHF;
 
         // Latch
         u8 name_byte, attr_byte, palette_select, palette_bits;
