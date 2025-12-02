@@ -19,8 +19,8 @@ void PPU::write_from_cpu(u16 addr, u8 value)
         case PPUCTRL: set_ppu_ctrl(value); break;
         case PPUMASK: set_ppu_mask(value); break;
         case PPUSTATUS: break;
-        case OAMADDR: break;
-        case OAMDATA: break;
+        case OAMADDR: set_oam_addr(value); break;
+        case OAMDATA: set_oam_data(value); break;
         case PPUSCROLL: set_ppu_scrl(value); break;
         case PPUADDR: set_ppu_addr(value); break;
         case PPUDATA: set_ppu_data(value); break;
@@ -36,7 +36,7 @@ u8 PPU::read_from_cpu(u16 addr)
         case PPUMASK: break;
         case PPUSTATUS: return get_ppu_stat();
         case OAMADDR: break;
-        case OAMDATA: break;
+        case OAMDATA: get_oam_data(); break;
         case PPUSCROLL: break;
         case PPUADDR: break;
         case PPUDATA: return get_ppu_data();
@@ -61,8 +61,7 @@ u8 PPU::fetch_vram(u16 addr)
         else
         {
             // Horizontal mirror mode (Vertical arrangement)
-            if(addr >= 0x0400 && addr < 0x0800) addr &= 0x03FF;
-            addr &= 0x0BFF;
+            addr = (addr & 0x03FF) | ((addr & 0x0800) >> 1);
         }
         return NAME[addr];
     }
@@ -91,8 +90,8 @@ void PPU::store_vram(u16 addr, u8 value)
         else
         {
             // Horizontal mirror mode (Vertical arrangement)
-            if(addr >= 0x0400 && addr < 0x0800) addr &= 0x03FF;
-            addr &= 0x0BFF;
+            addr = (addr & 0x03FF) | ((addr & 0x0800) >> 1);
+
         }
         NAME[addr] = value;
     }
@@ -122,11 +121,22 @@ void PPU::set_ppu_mask(u8 mask)
     MASK_REG.byte = mask;
 }
 
+void PPU::set_oam_addr(u8 addr)
+{
+    oam_addr = addr;
+}
+
+void PPU::set_oam_data(u8 data)
+{
+    OAM[oam_addr] = data;
+    oam_addr++;
+}
+
 void PPU::set_ppu_scrl(u8 pos)
 {
     if(!W)
     {
-        // Set horizontal scroll position
+        // Set horizontal scroll position   
         X = pos & 0x07;
         T.coarse_x = (pos >> 3);
     }
@@ -187,6 +197,11 @@ u8 PPU::get_ppu_stat()
     u8 out_stat = (STAT_REG.byte & 0xE0) | (ppu_data_buffer & 0x1F);
     STAT_REG.vblank = 0;
     return out_stat;
+}
+
+u8 PPU::get_oam_data()
+{
+    return OAM[oam_addr];
 }
 
 void PPU::update_horzv()
@@ -309,7 +324,21 @@ void PPU::run_ppu()
         }
     }
 
-    // Frame timing for sprites (later...)
+    // Frame timing for sprites
+    if(lines >= 0 && lines < 240)
+    {
+        // Secondary OAM Clear
+        if(cycles >= 1 && cycles <= 64)
+        {
+            memset(SPAM, 0x00, sizeof(SPAM));
+        }
+
+        // Sprite Evaluation
+        if(cycles >= 65 && cycles < 256)
+        {
+
+        }
+    }
 
     if(lines == 241 && cycles == 1)
     {

@@ -56,7 +56,8 @@ void GUI::run_gui()
 
             if((system_clock % 3) == 0)
             {
-                cpu->clock();
+                if(mmu->dma_rqst) mmu->perform_dma(system_clock % 2);
+                else cpu->clock();
             }
 
             if(ppu->trigger_nmi)

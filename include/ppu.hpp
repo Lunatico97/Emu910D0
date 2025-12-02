@@ -13,7 +13,6 @@
 #define PPUSCROLL 0x2005
 #define PPUADDR 0x2006
 #define PPUDATA 0x2007
-#define OAMDMA 0x4014
 
 #define NAME_INDEX 0x2000 // start of first name table
 #define ATRB_INDEX 0x23C0 // start of last 64 bytes for first name table
@@ -63,8 +62,8 @@ class PPU
         void store_vram(u16 addr, u8 value);
         
         // PPU Memory
-        u8 NAME[2048], OAM[256], SPAM[32], PAL[32]; 
-        u8 ppu_data_buffer;
+        u8 NAME[2048], SPAM[32], PAL[32]; 
+        u8 ppu_data_buffer, oam_addr;
 
         // Shift & Latch Registers
         u8 P0L, P1L;
@@ -73,9 +72,6 @@ class PPU
 
         // Latch
         u8 name_byte, attr_byte, palette_select, palette_bits;
-
-        // OAM
-        u8 oam_addr;
 
         // Internal registers
         u8 X;
@@ -138,6 +134,9 @@ class PPU
         // CROM
         Renderer* rndr;
         CardROM *crom;
+
+    public:
+        u8 OAM[256];
 };
 
 #endif
