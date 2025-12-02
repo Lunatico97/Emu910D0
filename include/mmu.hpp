@@ -8,6 +8,7 @@
 
 #define SP_INDEX 0x0100
 #define RAM_SIZE 2048
+#define OAMDMA 0x4014
 #define REG_BANKS 7
 
 enum REG
@@ -72,12 +73,19 @@ class MMU
         // Check cross-page status
         bool cross_page(u16 pre_addr, u16 post_addr);
 
+        // DMA operations
+        void signal_dma(u8 src_hn8);
+        void perform_dma(bool sync_rw);
+
         // Memory operations
         void store(u16 m_addr, u8 value);
         u8 retreive(u16 m_addr);
 
         // Penalty tracker
         u8 cycle_penalty = 0x00;
+
+        // DMA signals
+        bool dma_rqst = 0, dma_sync = 0;
 
     private:
         // Reset MMU
@@ -88,8 +96,13 @@ class MMU
         CardROM *crom;
         PPU *ppu;
 
+        // Internal CPU Memory
         u8 BANK[REG_BANKS];
         u8 RAM[RAM_SIZE];
+
+        // Direct Memory Access for OAM
+        u16 dma_src, dma_off = 0x00;
+        u8 oam_data;
 };
 
 #endif
