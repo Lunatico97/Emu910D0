@@ -101,8 +101,8 @@ class MMU
         u8 RAM[RAM_SIZE];
 
         // Direct Memory Access for OAM
-        u16 dma_src, dma_off = 0x00;
-        u8 oam_data;
+        u8 oam_data, dma_off = 0x00;
+        u16 dma_src;
 };
 
 #endif

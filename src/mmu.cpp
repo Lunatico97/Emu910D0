@@ -215,7 +215,7 @@ void MMU::perform_dma(bool sync_rw)
             if(!sync_rw) oam_data = retreive(dma_src | dma_off);
             else
             {
-                ppu->OAM[dma_off] = oam_data;
+                ppu->refOAM[dma_off] = oam_data;
                 dma_off++;
 
                 if(dma_off == 0x00) 
@@ -233,7 +233,7 @@ void MMU::store(u16 m_addr, u8 value)
     if(m_addr >= 0x0000 && m_addr < 0x2000) RAM[(m_addr & 0x07FF)] = value;
     else if(m_addr >= 0x2000 && m_addr < 0x4000) ppu->write_from_cpu((m_addr & 0x2007), value);
     else if(m_addr == CTRL_P1 || m_addr == CTRL_P2) ctrl->write_state(m_addr & 0x0001);
-    // else if(m_addr == OAMDMA) this->signal_dma(value);
+    else if(m_addr == OAMDMA) this->signal_dma(value);
     else if(m_addr >= 0x4000 && m_addr < 0x4020) return;
     else if(m_addr >= 0x4020 && m_addr < 0x8000) return;
     else return;
