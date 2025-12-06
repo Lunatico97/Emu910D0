@@ -62,16 +62,30 @@ class PPU
         void store_vram(u16 addr, u8 value);
         
         // PPU Memory
-        u8 NAME[2048], SPAM[32], PAL[32]; 
+        u8 NAME[2048], OAM[256], SPAM[32], PAL[32]; 
         u8 ppu_data_buffer, oam_addr;
+
+        // OAM Counters
+        u8 spr_counter = 0x00, oam_counter = 0x00, spr_line = 0x00, oam_buffer;
 
         // Shift & Latch Registers
         u8 P0L, P1L;
         u16 P0SHF, P1SHF;
         u16 LASHF, HASHF;
+        u8 S0SHF[8], S1SHF[8];
 
         // Latch
         u8 name_byte, attr_byte, palette_select, palette_bits;
+
+        // Sprite Loader        
+        struct SPRITE 
+        {
+            u8 pos_x;
+            u8 pos_y;
+            u8 attr_data;
+            u8 tile_id;
+            u16 tile_addr;
+        } SPR;
 
         // Internal registers
         u8 X;
@@ -94,6 +108,7 @@ class PPU
             u16 bg_addr;
             u16 spr_addr;
             u8 vram_icr;
+            u8 spr_size;
             bool nmi_enabled;
         } CVALS;
 
@@ -136,7 +151,7 @@ class PPU
         CardROM *crom;
 
     public:
-        u8 OAM[256];
+        u8* refOAM = OAM;
 };
 
 #endif
