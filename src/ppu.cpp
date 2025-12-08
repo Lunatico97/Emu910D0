@@ -253,6 +253,7 @@ void PPU::run_ppu()
                 HASHF = HASHF << 1;
             }
 
+            // Shift plane data for sprites
             if(MASK_REG.spr_enabled && (cycles >= 1 && cycles <= 257))
             {
                 for(u8 i=0; i<8; i++)
@@ -341,112 +342,101 @@ void PPU::run_ppu()
     // Frame timing for sprites
     if(lines >= 0 && lines < 240)
     {
-        // Secondary OAM Clear
-        if(cycles >= 1 && cycles <= 64)
-        {
-            memset(SPAM, 0xFF, sizeof(SPAM));
-        }
-
         // Sprite Evaluation
-        if(cycles >= 65 && cycles <= 256)
+        if(cycles == 257)
         {    
-            if((cycles % 2) == 1)
-            {
-                oam_buffer = OAM[4*spr_counter + oam_counter];
-            }
-            else
-            {
-                if(spr_counter < 64)
-                {
-                    int range = lines - OAM[4*spr_counter];
-                    if(range >= 0 && range < CVALS.spr_size)
-                    { 
-                        if(spr_line < 8) 
+            // Secondary OAM Clear
+            memset(SPAM, 0xFF, sizeof(SPAM));
+
+            spr_cnt = 0x00;
+            spr_zero_loaded = false;
+
+            for(u8 i = 0; i < 0x40 && spr_cnt < 9; i++)
+			{
+				int range = lines - OAM[4*i];				
+				if(range >= 0 && range < CVALS.spr_size)
+				{
+
+                    if(i == 0) spr_zero_loaded = true;
+
+					if(spr_cnt < 8)
+					{
+						for(u8 j = 0; j < 4; j++)
                         {
-                            SPAM[4*spr_line + oam_counter] = oam_buffer;
-                            oam_counter++;
-                            if(oam_counter == 4)
-                            {
-                                oam_counter = 0;
-                                spr_counter++;
-                                spr_line++;
-                            }
+                            SPAM[4*spr_cnt+j] = OAM[4*i+j];
                         }
-                        else
-                        {
-                            STAT_REG.spr_ovf = true;
-                            if (oam_counter == 3)
-                            {
-                                oam_counter = 0;
-                                spr_counter++;
-                            }
-                            else
-                            {
-                                oam_counter++;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        if (spr_line < 8)
-                        {
-                            oam_counter = 0;
-                            spr_counter++;
-                        }
-                        else
-                        {
-                            spr_counter++;
-                            oam_counter = (oam_counter + 1) % 4;
-                        }
-                    }
-                }
-            }
+
+						spr_cnt++;
+					}				
+				}
+			} 
+
+			STAT_REG.spr_ovf = (spr_cnt > 8);
         }
 
-        if(cycles <= 257 && cycles <= 320)
+        if(cycles >= 257 && cycles < 321)
         {
-            if((cycles % 8) == 0)
+            if((cycles - 257) % 8 == 0)
             {
-                u8 spr_num = (cycles - 256) / 4;
-                u8 base_spr_addr, tile_index, tile_off;
-                SPR.pos_y = SPAM[4*spr_num];
-                SPR.tile_id = SPAM[4*spr_num+1];
-                SPR.attr_data = SPAM[4*spr_num+2];
-                SPR.pos_x = SPAM[4*spr_num+3];
+                u16 tile_addr;
+                u8 tile_index, tile_off;
+                
+                spr_cnt = (cycles - 257) / 8;
                 // For sprites: 8*8 size
-                if(CVALS.spr_size == 8)
+                if(CVALS.spr_size == 0x08)
                 {
-                    base_spr_addr = CVALS.spr_addr;
-                    tile_index = SPR.tile_id;
-                    tile_off = (lines - SPR.pos_y);
-                    // Vertical flip selection
-                    if(SPR.attr_data & D7) tile_off = 0x07 - tile_off;
+                    tile_addr = CVALS.spr_addr;
+                    tile_index = SPAM[4*spr_cnt+1];
+                    tile_off = (lines - SPAM[4*spr_cnt]);
+                    // Vertical flip
+                    if(SPAM[4*spr_cnt+2] & D7) tile_off = 0x07 - tile_off;
                 }
                 // For sprites: 8*16 size
                 else
                 {
-                    base_spr_addr = (SPR.tile_id & D0) ? 0x1000: 0x0000;
-                    tile_index = (SPR.tile_id & 0xFE);           
-                    tile_off = (lines - SPR.pos_y);
-                    // Bottom half sprite
-                    if(tile_off > 0x08)
+                   tile_addr = (SPAM[4*spr_cnt+1] & D0) ? 0x1000: 0x0000;
+                    tile_index = (SPAM[4*spr_cnt+1] & 0xFE);           
+                    tile_off = (lines - SPAM[4*spr_cnt]);
+                    
+                    // Vertical flip
+                    if(SPAM[4*spr_cnt+2] & D7)
                     {
-                        tile_off &= 0x07;
-                        tile_index += 0x01;
+                        // Top half sprite
+                        if(tile_off < 0x08) tile_index += 0x01;
+                        else tile_off &= 0x07;
+                        tile_off = 0x07 - tile_off;
                     }
-                    // Vertical flip selection
-                    if(SPR.attr_data & D7) tile_off = 0x07 - tile_off;
+                    else
+                    {
+                        // Bottom half sprite
+                        if(tile_off > 0x08) 
+                        {
+                            tile_off &= 0x07;
+                            tile_index += 0x01;
+                        }
+                    }
                 }
 
-                SPR.tile_addr = base_spr_addr + (tile_index << 4) + tile_off;
-                S0SHF[spr_num] = fetch_vram(SPR.tile_addr);
-                S1SHF[spr_num] = fetch_vram(SPR.tile_addr + 0x08);
+                tile_addr = tile_addr + (tile_index << 4) + tile_off;
+                S0SHF[spr_cnt] = fetch_vram(tile_addr);
+                S1SHF[spr_cnt] = fetch_vram(tile_addr + 0x08);
+
+                // Horizontal flip
+                if(SPAM[4*spr_cnt+2] & D6)
+                {
+                    S0SHF[spr_cnt] = ((S0SHF[spr_cnt] & D0) << 7) | ((S0SHF[spr_cnt] & D1) << 5) | ((S0SHF[spr_cnt] & D2) << 3) |
+                                     ((S0SHF[spr_cnt] & D3) << 1) | ((S0SHF[spr_cnt] & D4) >> 1) | ((S0SHF[spr_cnt] & D5) >> 3) |
+                                     ((S0SHF[spr_cnt] & D6) >> 5) | ((S0SHF[spr_cnt] & D7) >> 7);
+                    S1SHF[spr_cnt] = ((S1SHF[spr_cnt] & D0) << 7) | ((S1SHF[spr_cnt] & D1) << 5) | ((S1SHF[spr_cnt] & D2) << 3) |
+                                     ((S1SHF[spr_cnt] & D3) << 1) | ((S1SHF[spr_cnt] & D4) >> 1) | ((S1SHF[spr_cnt] & D5) >> 3) |
+                                     ((S1SHF[spr_cnt] & D6) >> 5) | ((S1SHF[spr_cnt] & D7) >> 7);
+                }
             }
         }
 
-        if(cycles <= 321 && cycles <= 340)
+        if(cycles >= 321 && cycles < 341)
         {
-            
+            oam_buffer = SPAM[0];
         }
     }
 
@@ -474,15 +464,21 @@ void PPU::run_ppu()
         // Foreground computation
         if(MASK_REG.spr_enabled)
         {
+            spr_zero_opaque = false;
+            
             for(u8 i=0; i<8; i++)
             {
                 if(SPAM[4*i+3] == 0)
                 {
-                    spr_index = (((S1SHF[i] & 0x80) > 0) << 1) | ((S0SHF[i] & 0x80) > 0);
-                    spr_priority = (SPAM[4*i+2] & D5) == 0;
+                    spr_index = (((S1SHF[i] & D7) > 0) << 1) | ((S0SHF[i] & D7) > 0);
+                    spr_priority = ((SPAM[4*i+2] & D5) == 0);
                     spr_palette_index = (SPAM[4*i+2] & 0x03) + 0x04;
 
-                    if(spr_index != 0) break;
+                    if(spr_index != 0x00)
+                    {
+                        if(i == 0) spr_zero_opaque = true;
+                        break;
+                    }
                 }
             }
         }
@@ -498,7 +494,7 @@ void PPU::run_ppu()
             final_index = bg_index;
             final_palette_index = bg_palette_index;
         }
-        if(bg_index == 0x00 && spr_index > 0x00)
+        else if(bg_index == 0x00 && spr_index > 0x00)
         {
             final_index = spr_index;
             final_palette_index = spr_palette_index;
@@ -507,6 +503,12 @@ void PPU::run_ppu()
         {
             final_index = spr_priority ? spr_index : bg_index;
             final_palette_index = spr_priority ? spr_palette_index : bg_palette_index;
+
+            if (spr_zero_loaded && spr_zero_opaque)
+            {
+                bool leftmost_contention = MASK_REG.bg_left | MASK_REG.spr_left;
+                STAT_REG.spr_hit = (cycles >= (leftmost_contention ? 9: 1) && cycles < 258);
+            }
         }
 
         // Populate pixel to frame buffer

@@ -8,10 +8,13 @@
 
 
 ## Current Status:
-- Working 6502 CPU | Keyboard Input | PPU (Background rendering only)
+- Working 6502 CPU | PPU | Keyboard Input | Mapper 0 Only
 
-- Donkey Kong
 ![Donkey Kong](rsrc/donkey_kong.gif)
+
+![Ice Climber](rsrc/ice_climber.gif)
+
+![Super Mario Bros. 1](rsrc/smb1.gif)
 
 ### Tests:
 ![NES Test Menu](rsrc/nestest.gif)
@@ -24,8 +27,8 @@
 - W/A/S/D -> D-PAD
 - SPACE -> SELECT
 - ENTER -> START
-- G -> A-BUTTON
-- H -> B-BUTTON
+- LEFT_BIG_BRACKET -> A-BUTTON
+- RIGHT_BIG_BRACKET -> B-BUTTON
 - NUM_6 -> PAUSE / UNPAUSE (Continuous execute)
 - NUM_7 -> STEP (Stepwise Execute)
 - NUM_8 -> IRQ (Interrupt Request)
