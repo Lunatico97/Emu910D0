@@ -66,7 +66,8 @@ class PPU
         u8 ppu_data_buffer, oam_addr;
 
         // OAM Counters
-        u8 spr_counter = 0x00, oam_counter = 0x00, spr_line = 0x00, oam_buffer;
+        u8 spr_cnt = 0x00, oam_buffer = 0xFF;
+        bool spr_zero_loaded, spr_zero_opaque;
 
         // Shift & Latch Registers
         u8 P0L, P1L;
@@ -76,16 +77,6 @@ class PPU
 
         // Latch
         u8 name_byte, attr_byte, palette_select, palette_bits;
-
-        // Sprite Loader        
-        struct SPRITE 
-        {
-            u8 pos_x;
-            u8 pos_y;
-            u8 attr_data;
-            u8 tile_id;
-            u16 tile_addr;
-        } SPR;
 
         // Internal registers
         u8 X;
