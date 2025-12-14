@@ -1,5 +1,6 @@
 #include <crom.hpp>
 #include <mappers/mapper000.hpp>
+#include <mappers/mapper002.hpp>
 
 CardROM::CardROM(){}
 CardROM::~CardROM()
@@ -18,7 +19,7 @@ void CardROM::decode(u8 header[])
     prg_units = header[4]; // PRG ROM SIZE
     chr_units = header[5]; // CHR ROM SIZE
     assert(prg_units != 0);
-    assert(chr_units != 0);
+    CHRRAM = (u8*)calloc(CHR_BANK, sizeof(u8));
     PRGROM = (u8*)calloc(prg_units*PRG_BANK, sizeof(u8));
     CHRROM = (u8*)calloc(chr_units*CHR_BANK, sizeof(u8));
     mapper_num = (header[7] & 0xF0) | (header[6] >> 4);
@@ -26,6 +27,7 @@ void CardROM::decode(u8 header[])
     switch(mapper_num)
     {
         case 0x00: mapper = new Mapper000(prg_units, chr_units); break;
+        case 0x02: mapper = new Mapper002(prg_units, chr_units); break;
         default: break;
     }
 }
@@ -34,7 +36,7 @@ void CardROM::load_rom(const char *filename)
 {
     std::stringstream ss(Global::readTextFromFile(filename));
     ss >> std::hex >> std::noskipws;
-    u16 counter = 0x0000;
+    u32 counter = 0x0000;
     u8 current_hex = 0x00;
     u8 header[16] = {0};  
 
@@ -55,7 +57,7 @@ void CardROM::load_rom(const char *filename)
     std::cout << "Mirror Mode: " << (mirror_mode ? "Vertical": "Horizontal") << std::endl;
 
     *(PRGROM + 0) = current_hex;
-    u16 prg_limit = 0x000F + (prg_units*PRG_BANK);
+    u32 prg_limit = 0x000F + (prg_units*PRG_BANK);
 
     while(ss >> current_hex)
     {
@@ -72,5 +74,17 @@ u8 CardROM::read_from_cpu(u16 cpu_addr)
 
 u8 CardROM::read_from_ppu(u16 ppu_addr)
 {
-    return *(CHRROM + mapper->map_ppu(ppu_addr));
+    u32 mapped_addr = mapper->map_ppu(ppu_addr);
+    return chr_units == 0 ? *(CHRRAM + mapped_addr): *(CHRROM + mapped_addr);
+}
+
+void CardROM::write_from_cpu(u16 cpu_addr, u8 data)
+{
+    mapper->map_cpu_wr(cpu_addr, data);
+}
+
+void CardROM::write_from_ppu(u16 ppu_addr, u8 data)
+{
+    mapper->map_ppu_wr(ppu_addr, data);
+    *(CHRRAM + ppu_addr) = data;
 }

@@ -236,9 +236,7 @@ void MMU::store(u16 m_addr, u8 value)
     else if(m_addr == OAMDMA) this->signal_dma(value);
     else if(m_addr >= 0x4000 && m_addr < 0x4020) return;
     else if(m_addr >= 0x4020 && m_addr < 0x8000) return;
-    else return;
-    // else crom->write_from_cpu(); 
-    // Right now, we use only mapper 000 that doesn't perform writes on card
+    else crom->write_from_cpu(m_addr, value); 
 }
 
 u8 MMU::retreive(u16 m_addr)

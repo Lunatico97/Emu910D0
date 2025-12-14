@@ -78,9 +78,9 @@ u8 PPU::fetch_vram(u16 addr)
 void PPU::store_vram(u16 addr, u8 value)
 {
     addr &= 0x3FFF;
-    if(addr >= 0x0000 && addr < 0x2000) return;
-     else if(addr >= 0x2000 && addr < 0x3000)
-     {
+    if(addr >= 0x0000 && addr < 0x2000) crom->write_from_ppu(addr, value);
+    else if(addr >= 0x2000 && addr < 0x3000)
+    {
         addr &= 0x0FFF;
         if(crom->mirror_mode)
         {
