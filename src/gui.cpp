@@ -9,7 +9,7 @@ GUI::GUI():system_clock(0)
     ppu = new PPU(crom, rndr);
     mmu = new MMU(crom, ppu, controller);
     cpu = new CPU(mmu);
-    crom->load_rom("roms/donkey_kong.nes");
+    crom->load_rom("roms/smb1.nes");
     _active = true;
     cpu->rst();
 }

@@ -1,20 +1,30 @@
 # E910D0 v1.0 [NES Emulator]
 - Author: Diwas Adhikari
 - Status: In Progress
-- Description: NES Emulator to relive my childhood memories of playing with a bootleg NES console 
-             which looked like a PS1 and had a vertical cartridge slot like a SNES :)
+- Description: NES Emulator to relive my childhood memories of playing with a bootleg NES/Famicom console 
+               which looked like a PS1 and had a vertical cartridge slot like a Famicom :)
 - Comments: This started up as being rigidly behavior-driven but, I kept on removing unnecessary
-          junk to speed up and keep stuff clean. The goal itself is to make NES games playable.
+            junk to speed up and keep stuff clean. The goal itself is to make NES games playable.
 
 
 ## Current Status:
-- Working 6502 CPU | PPU | Keyboard Input | Mapper 0 Only
+- Working 6502 CPU | PPU | Keyboard Input | Mapper 0 (NROM) & 2 (UxROM)
 
 ![Donkey Kong](rsrc/donkey_kong.gif)
 
-![Ice Climber](rsrc/ice_climber.gif)
-
-![Super Mario Bros. 1](rsrc/smb1.gif)
+### Commands:
+<table>
+    <tr> <th> Keyboard Controls </th> <th> NES Equivalent Buttons </th> </tr>
+    <tr> <td> W/A/S/D </td> <td> D-PAD </td> <tr>
+    <tr> <td> SPACE </td> <td> SELECT </td> <tr>
+    <tr> <td> [ </td> <td> START </td> <tr>
+    <tr> <td> ] </td> <td> D-PAD </td> <tr>
+    <tr> <td> NUM_6 </td> <td> PAUSE / UNPAUSE (Continuous execute) </td> <tr>
+    <tr> <td> NUM_7 </td> <td> STEP (Stepwise Execute) </td> <tr>
+    <tr> <td> NUM_8 </td> <td> IRQ (Interrupt Request) </td> <tr>
+    <tr> <td> NUM_9 </td> <td> NMI (Non-Maskable Interrupt) </td> <tr>
+    <tr> <td> NUM_0 </td> <td> RST (Reset) </td> <tr>
+</table>
 
 ### Tests:
 ![NES Test Menu](rsrc/nestest.gif)
@@ -23,29 +33,28 @@
 - CPU tests for every 6502 instruction are available in `tests/e910D0Tests.cpp`.
 - Replace the file with `e910D0.cpp` to run test suite.
 
-### Commands:
-- W/A/S/D -> D-PAD
-- SPACE -> SELECT
-- ENTER -> START
-- LEFT_BIG_BRACKET -> A-BUTTON
-- RIGHT_BIG_BRACKET -> B-BUTTON
-- NUM_6 -> PAUSE / UNPAUSE (Continuous execute)
-- NUM_7 -> STEP (Stepwise Execute)
-- NUM_8 -> IRQ (Interrupt Request)
-- NUM_9 -> NMI (Non-Maskable Interrupt)
-- NUM_0 -> RST (Reset)
+### Tested NES Games:
+- Mapper 0 (Donkey Kong, Ice Climber, Super Mario Bros. 1, Excite Bike, Kung Fu)
 
-## 6502 CPU GUI [Only relevant for CPU testing phase]:
-![E910D0](rsrc/snip.png)
+<table>
+    <tr>
+        <td> <img src="rsrc/ice_climber.gif" alt="Ice Climber"> </td>
+        <td> <img src="rsrc/smb1.gif" alt="Super Mario Bros. 1"> </td>
+    <tr>
+</table>
 
-### Legend:
-- White block (Zero page memory block <$0x0000 - $0x00FF>)
-- Blue block (Bottom stack <$0x01F0 - $0x01FF>)
-- Top right block 
-( Status Flags | Yellow block - General Purpose Registers | Magenta block - Special Purpose Registers)
+- Mapper 2 (Megaman, Castlevania, Contra, Metal Gear)
 
-![Sprite Loaded From Cartridge](rsrc/snip2.gif)
+<table>
+    <tr>
+        <td> <img src="rsrc/megaman.png" alt="Megaman"> </td>
+        <td> <img src="rsrc/castlevania.png" alt="Castlevania"> </td>
+    <tr>
+    <tr>
+        <td> <img src="rsrc/contra.png" src="Contra"> </td>
+        <td> <img src="rsrc/metal_gear.png" src="Metal Gear"> </td>
+    <tr>
+</table>
 
-[The sprite is directly loaded from CHR-ROM data just to make sure I see Mario !] 
 
 
