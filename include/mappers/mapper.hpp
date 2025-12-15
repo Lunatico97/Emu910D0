@@ -3,6 +3,9 @@
 #ifndef __MAPPER_H__
 #define __MAPPER_H__
 
+#define PRG_BANK 16384
+#define CHR_BANK 8192
+
 class Mapper
 {
     public:

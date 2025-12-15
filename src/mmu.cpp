@@ -235,7 +235,7 @@ void MMU::store(u16 m_addr, u8 value)
     else if(m_addr == CTRL_P1 || m_addr == CTRL_P2) ctrl->write_state(m_addr & 0x0001);
     else if(m_addr == OAMDMA) this->signal_dma(value);
     else if(m_addr >= 0x4000 && m_addr < 0x4020) return;
-    else if(m_addr >= 0x4020 && m_addr < 0x8000) return;
+    else if(m_addr >= 0x4020 && m_addr < 0x6000) return;
     else crom->write_from_cpu(m_addr, value); 
 }
 
@@ -245,6 +245,6 @@ u8 MMU::retreive(u16 m_addr)
     else if(m_addr >= 0x2000 && m_addr < 0x4000) return ppu->read_from_cpu(m_addr & 0x2007);
     else if(m_addr == CTRL_P1 || m_addr == CTRL_P2) return ctrl->read_state(m_addr & 0x0001);
     else if(m_addr >= 0x4000 && m_addr < 0x4020) return 0x00;
-    else if(m_addr >= 0x4020 && m_addr < 0x8000) return 0x00;
+    else if(m_addr >= 0x4020 && m_addr < 0x6000) return 0x00;
     else return crom->read_from_cpu(m_addr);
 }

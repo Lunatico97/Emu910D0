@@ -21,7 +21,7 @@
 class GUI
 {
     public:
-        GUI();     
+        GUI(const char *rom_path);     
         void run_gui();
 
     private:

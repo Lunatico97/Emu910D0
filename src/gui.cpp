@@ -1,6 +1,6 @@
 #include <gui.hpp>
 
-GUI::GUI():system_clock(0)
+GUI::GUI(const char *rom_path): system_clock(0), _active(true)
 {
     if(Global::debug) logger.init("bin/e910D0.log");
     controller = new Controller();
@@ -9,8 +9,7 @@ GUI::GUI():system_clock(0)
     ppu = new PPU(crom, rndr);
     mmu = new MMU(crom, ppu, controller);
     cpu = new CPU(mmu);
-    crom->load_rom("roms/smb1.nes");
-    _active = true;
+    crom->load_rom(rom_path);
     cpu->rst();
 }
 

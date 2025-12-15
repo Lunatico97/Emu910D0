@@ -8,18 +8,25 @@
 
 
 ## Current Status:
-- Working 6502 CPU | PPU | Keyboard Input | Mapper 0 (NROM) & 2 (UxROM)
+- Working 6502 CPU | PPU | Keyboard Input | Mapper 0 (NROM), 2 (UxROM) & 3 (CNROM)
+- Build & Run: `./buildE910D0.sh _.nes` | Run: `e910D0 _.nes`
 
 ![Donkey Kong](rsrc/donkey_kong.gif)
 
 ### Commands:
+
 <table>
     <tr> <th> Keyboard Controls </th> <th> NES Equivalent Buttons </th> </tr>
     <tr> <td> W/A/S/D </td> <td> D-PAD </td> <tr>
     <tr> <td> SPACE </td> <td> SELECT </td> <tr>
-    <tr> <td> [ </td> <td> START </td> <tr>
-    <tr> <td> ] </td> <td> D-PAD </td> <tr>
-    <tr> <td> NUM_6 </td> <td> PAUSE / UNPAUSE (Continuous execute) </td> <tr>
+    <tr> <td> ENTER </td> <td> START </td> <tr>
+    <tr> <td> [ </td> <td> A-BUTTON </td> <tr>
+    <tr> <td> ] </td> <td> B-BUTTON </td> <tr>
+</table>
+
+<table>
+    <tr> <th> Keyboard Controls </th> <th> NES Commands </th> </tr>
+    <td> NUM_6 </td> <td> PAUSE / UNPAUSE (Continuous execute) </td> <tr>
     <tr> <td> NUM_7 </td> <td> STEP (Stepwise Execute) </td> <tr>
     <tr> <td> NUM_8 </td> <td> IRQ (Interrupt Request) </td> <tr>
     <tr> <td> NUM_9 </td> <td> NMI (Non-Maskable Interrupt) </td> <tr>
@@ -56,5 +63,15 @@
     <tr>
 </table>
 
+- Mapper 3 (Milon's Secret Castle, Adventure Island, Track & Field, Tengen's Tetris)
 
+<table>
+    <tr>
+        <td> <img src="rsrc/milons_secret_castle.png" alt="Milon's Secret Castle"> </td>
+        <td> <img src="rsrc/adventure_island.png" alt="Adventure Island"> </td>
+    <tr>
+        <td> <img src="rsrc/track_and_field.png" alt="Track & Field"> </td>
+        <td> <img src="rsrc/tetris_tengen.png" alt="Tengen's Tetris"> </td>
+    <tr>
+</table>
 
