@@ -11,7 +11,13 @@
 Logger logger;
 
 int main(int argc, char* argv[]) {
-    GUI* gui = new GUI();
+    if(argc < 2)
+    {
+        std::cerr << "Error: ROM filepath not provided ! [ e910D0 _.nes ]\n" ;
+        return -1;
+    }
+
+    GUI* gui = new GUI(argv[1]);
     gui->run_gui();
     
     // APU *apu = new APU();

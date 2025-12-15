@@ -11,9 +11,9 @@ class Mapper000: public Mapper
 
         u32 map_cpu(u16 cpu_addr)
         {
-            assert(cpu_addr >= 0x8000 && cpu_addr <= 0xFFFF);
-            u16 addr_mask = prg_units == 1 ? 0x3FFF: 0x7FFF;
-            return (cpu_addr & addr_mask);
+            assert(cpu_addr >= 0x6000 && cpu_addr <= 0xFFFF);
+            if(cpu_addr >= 0x6000 && cpu_addr <= 0x7FFF) return (cpu_addr & 0x1FFF);
+            else return (cpu_addr & (prg_units*PRG_BANK - 1));
         }
 
         u32 map_ppu(u16 ppu_addr)
