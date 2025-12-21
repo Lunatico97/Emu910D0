@@ -53,15 +53,17 @@ u8 PPU::fetch_vram(u16 addr)
     else if(addr >= 0x2000 && addr < 0x3000)
     {
         addr &= 0x0FFF;
-        if(crom->mirror_mode)
+        switch(crom->get_mirror_mode())
         {
+            // Single screen - 0
+            case 0x00: addr &= 0x3FFF; break;
+            // Single screen - 1
+            case 0x01: addr = 0x4000 | (addr & 0x3FFF); break;
             // Vertical mirror mode (Horizontal arrangement)
-            addr &= 0x07FF;
-        }
-        else
-        {
+            case 0x02: addr &= 0x07FF; break;
             // Horizontal mirror mode (Vertical arrangement)
-            addr = (addr & 0x03FF) | ((addr & 0x0800) >> 1);
+            case 0x03: addr = (addr & 0x03FF) | ((addr & 0x0800) >> 1); break;
+
         }
         return NAME[addr];
     }
@@ -82,15 +84,18 @@ void PPU::store_vram(u16 addr, u8 value)
     else if(addr >= 0x2000 && addr < 0x3000)
     {
         addr &= 0x0FFF;
-        if(crom->mirror_mode)
+        switch(crom->get_mirror_mode())
         {
+            // Single screen - 0
+            case 0x00: addr &= 0x03FF; break;
+            // Single screen - 1
+            case 0x01: addr = 0x0400 | (addr & 0x03FF); break;
             // Vertical mirror mode (Horizontal arrangement)
-            addr &= 0x07FF;
-        }
-        else
-        {
+            case 0x02: addr &= 0x07FF; break;
             // Horizontal mirror mode (Vertical arrangement)
-            addr = (addr & 0x03FF) | ((addr & 0x0800) >> 1);
+            case 0x03: addr = (addr & 0x03FF) | ((addr & 0x0800) >> 1); break;
+            // Default
+            default: break;
 
         }
         NAME[addr] = value;
@@ -235,8 +240,7 @@ void PPU::update_vertv()
 
 void PPU::run_ppu()
 {
-    bool visible_element = (lines >= 0 && lines < 240) && (cycles >= 1 && cycles <= 256);
-    cycles += 0x0001;
+    bool visible_element = (lines > 0 && lines < 240) && (cycles >= 1 && cycles <= 257);
 
     // Frame timing for background 
     // [Based on NesWiki diagram: https://www.nesdev.org/w/images/default/4/4f/Ppu.svg]
@@ -517,6 +521,7 @@ void PPU::run_ppu()
     }
 
     // Reset cycles and lines
+    cycles += 0x0001;
     if(cycles == 340)
     {
         cycles = 0x0000;

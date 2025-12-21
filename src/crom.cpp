@@ -1,5 +1,6 @@
 #include <crom.hpp>
 #include <mappers/mapper000.hpp>
+#include <mappers/mapper001.hpp>
 #include <mappers/mapper002.hpp>
 #include <mappers/mapper003.hpp>
 
@@ -20,15 +21,17 @@ void CardROM::decode(u8 header[])
     prg_units = header[4]; // PRG ROM SIZE
     chr_units = header[5]; // CHR ROM SIZE
     assert(prg_units != 0);
-    PRGRAM = (u8*)calloc(2048, sizeof(u8));
+    PRGRAM = (u8*)calloc(8192, sizeof(u8));
     CHRRAM = (u8*)calloc(CHR_BANK, sizeof(u8));
     PRGROM = (u8*)calloc(prg_units*PRG_BANK, sizeof(u8));
     CHRROM = (u8*)calloc(chr_units*CHR_BANK, sizeof(u8));
     mapper_num = (header[7] & 0xF0) | (header[6] >> 4);
     mirror_mode = (header[6] & D0);    
+    persistence = (header[6] & D1);
     switch(mapper_num)
     {
         case 0x00: mapper = new Mapper000(prg_units, chr_units); break;
+        case 0x01: mapper = new Mapper001(prg_units, chr_units); break;
         case 0x02: mapper = new Mapper002(prg_units, chr_units); break;
         case 0x03: mapper = new Mapper003(prg_units, chr_units, PRGROM); break;
         default: break;
@@ -85,11 +88,17 @@ u8 CardROM::read_from_ppu(u16 ppu_addr)
 void CardROM::write_from_cpu(u16 cpu_addr, u8 data)
 {
     if(cpu_addr >= 0x6000 && cpu_addr <= 0x7FFF) *(PRGRAM + mapper->map_cpu(cpu_addr)) = data;
-    else mapper->map_cpu_wr(cpu_addr, data);
+    else mapper->map_cpu_wr(cpu_addr, data); 
 }
 
 void CardROM::write_from_ppu(u16 ppu_addr, u8 data)
 {
     mapper->map_ppu_wr(ppu_addr, data);
     *(CHRRAM + ppu_addr) = data;
+}
+
+u8 CardROM::get_mirror_mode()
+{
+    if(mapper->mirror_mode != 0xFF) return mapper->mirror_mode;
+    else return !mirror_mode + 0x02;
 }
