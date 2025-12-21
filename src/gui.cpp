@@ -25,6 +25,7 @@ void GUI::cleanup()
 void GUI::run_gui()
 {
     bool pause = false;
+    controller->configure();
 
     while(_active)
     {
@@ -37,6 +38,7 @@ void GUI::run_gui()
                 ppu->trigger_events = true;
                 switch(event.key.keysym.sym)
                 {
+                    case SDLK_ESCAPE: _active = false; break;
                     case SDLK_6: pause = !pause; break;
                     case SDLK_7: cpu->step(); break;
                     case SDLK_8: cpu->irq(); break;

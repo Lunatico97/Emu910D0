@@ -10,6 +10,9 @@ class Controller
 {
     public:
         Controller();
+        ~Controller();
+        
+        void configure();
         u8 read_state(bool strobe);
         void write_state(bool strobe);
         void handleInput(SDL_Event *event);
@@ -17,6 +20,8 @@ class Controller
     private:
         // Order of input state: [A, B, SL, ST, U, D, L, R]
         u8 inst_state[2], state[2];
+        bool gamepad_input = false;
+        SDL_GameController* gamepad;
 };
 
 #endif
