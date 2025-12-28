@@ -108,7 +108,6 @@ class Mapper001: public Mapper
         {
             bool chr_mode, prg_disabled;
             u8 prg_select, chr_select1, chr_select2;
-            u16 prg_off, chr_off;
         } asic_vals;
 
         u8 prg_units, chr_units;

@@ -8,7 +8,9 @@
 
 
 ## Current Status:
-- Working 6502 CPU | PPU | Keyboard & Gamepad Input | Mapper 0 (NROM), 1 (SxROM), 2 (UxROM) & 3 (CNROM)
+- Working 6502 CPU | PPU | Primitive 3-channel APU (Pulse 1, Pulse 2 & Triangular Wave)
+- Keyboard & Gamepad Support
+- Mapper 0 (NROM), 1 (SxROM), 2 (UxROM) & 3 (CNROM)
 - Build & Run: `./buildE910D0.sh _.nes` | Run: `e910D0 _.nes`
 
 ![Donkey Kong](rsrc/donkey_kong.gif)
@@ -27,7 +29,8 @@
 <table>
     <tr> <th> Keyboard Controls </th> <th> NES Commands </th> </tr>
     <tr> <td> ESCAPE </td> <td> EXIT </td> <tr/>
-    <td> NUM_6 </td> <td> PAUSE / UNPAUSE (Continuous execute) </td> <tr>
+    <tr> <td> NUM_5 </td> <td> MUTE </td> <tr/>
+    <tr> <td> NUM_6 </td> <td> PAUSE / UNPAUSE (Continuous execute) </td> <tr>
     <tr> <td> NUM_7 </td> <td> STEP (Stepwise Execute) </td> <tr>
     <tr> <td> NUM_8 </td> <td> IRQ (Interrupt Request) </td> <tr>
     <tr> <td> NUM_9 </td> <td> NMI (Non-Maskable Interrupt) </td> <tr>
@@ -88,4 +91,11 @@
         <td> <img src="rsrc/tetris_tengen.png" alt="Tengen's Tetris"> </td>
     <tr>
 </table>
+
+### Primitive APU Status 
+- Megaman (Elecman)
+
+<audio controls autoplay>
+  <source src="rsrc/megaman-elecman.mp3" type="audio/mpeg">
+</audio> 
 
