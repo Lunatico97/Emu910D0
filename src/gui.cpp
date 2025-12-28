@@ -5,11 +5,13 @@ GUI::GUI(const char *rom_path): system_clock(0), _active(true)
     if(Global::debug) logger.init("bin/e910D0.log");
     controller = new Controller();
     crom = new CardROM();
+    apu = new APU();
     rndr = new Renderer("E910D0", SCRW, SCRH);
     ppu = new PPU(crom, rndr);
-    mmu = new MMU(crom, ppu, controller);
+    mmu = new MMU(crom, ppu, apu, controller);
     cpu = new CPU(mmu);
     crom->load_rom(rom_path);
+    apu->init();
     cpu->rst();
 }
 
@@ -20,6 +22,7 @@ void GUI::cleanup()
     delete rndr;
     delete ppu;
     delete cpu;
+    delete apu;
 }
 
 void GUI::run_gui()
@@ -39,6 +42,7 @@ void GUI::run_gui()
                 switch(event.key.keysym.sym)
                 {
                     case SDLK_ESCAPE: _active = false; break;
+                    case SDLK_5: apu->toggle_apu(); break;
                     case SDLK_6: pause = !pause; break;
                     case SDLK_7: cpu->step(); break;
                     case SDLK_8: cpu->irq(); break;

@@ -1,6 +1,7 @@
 #include <renderer.hpp>
 #include <cpu.hpp>
 #include <mmu.hpp>
+#include <apu.hpp>
 
 #include <crom.hpp>
 #include <logger.hpp>
@@ -36,6 +37,7 @@ class GUI
         CPU* cpu;
         PPU* ppu;
         MMU* mmu;
+        APU* apu;
 
         // Graphic status & pointer objects
         bool _active;

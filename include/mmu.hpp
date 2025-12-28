@@ -1,5 +1,6 @@
 #include <crom.hpp>
 #include <ppu.hpp>
+#include <apu.hpp>
 #include <global.hpp>
 #include <controller.hpp>
 
@@ -24,7 +25,7 @@ enum ADR
 class MMU
 {
     public:
-        MMU(CardROM* cptr, PPU* pptr, Controller *ctptr);
+        MMU(CardROM* cptr, PPU* pptr, APU* aptr, Controller *ctptr);
         ~MMU();
 
         // Stack Pointer
@@ -95,6 +96,7 @@ class MMU
         Controller *ctrl;
         CardROM *crom;
         PPU *ppu;
+        APU* apu;
 
         // Internal CPU Memory
         u8 BANK[REG_BANKS];

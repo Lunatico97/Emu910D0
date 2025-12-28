@@ -1,26 +1,116 @@
 #include <global.hpp>
+#include <SDL2/SDL_audio.h>
 
 #ifndef _APU_H_
 #define _APU_H_
 
+#define APUP1DC 0x4000
+#define APUP1SW 0x4001
+#define APUP1TM 0x4002
+#define APUP1LC 0x4003
+
+#define APUP2DC 0x4004
+#define APUP2SW 0x4005
+#define APUP2TM 0x4006
+#define APUP2LC 0x4007
+
+#define APUTGLN 0x4008
+#define APUTGTM 0x400A
+#define APUTGLC 0x400B
+
+#define APUSTAT 0x4015
+#define APUFCNT 0x4017
+
 class APU
 {
     public:
-        enum GENERATOR
-        {
-            SINE = 0,
-            TRIG, PULSE, NOISE
-        };
-
-    public:
         APU();
-        void generate_pwm(const u8& frequency, const u8& duration, const GENERATOR& gen);
+        ~APU();
+
+        // APU Controls
+        void init();
+        void toggle_apu();
+
+        // R/W Operations
+        u8 read_from_cpu(u16 cpu_addr);
+        void write_from_cpu(u16 cpu_addr, u8 data);
     
     private:
-        static void sine_stream(void* data, u8 *stream, int len);
-        static void trig_stream(void* data, u8 *stream, int len);
-        static void pulse_stream(void* data, u8 *stream, int len);
-        static void noise_stream(void* data, u8 *stream, int len);
+        // Pulse Channel
+        struct PULSE_CH {
+            u16 timer; // 11-bit timer
+            u16 counter;
+            u8 duty_cycle;
+            u8 sequencer;
+            u8 volume;
+            u8 length;
+            u8 period;
+            u8 decay;
+            u8 shift;
+            bool lc_halt;
+            bool const_vol;
+            bool swp_en;
+            bool neg_en;
+        };
+
+        // Triangular Channel
+        struct TRIG_CH {
+            u16 timer; // 11-bit timer
+            u16 counter;
+            u8 length;
+            u8 sequencer = 0x0F;
+            u8 step = 0x00;
+            u8 linear_set;
+            u8 linear_cnt;
+            bool lc_halt;
+            bool ln_set;
+        };
+
+        // Callbacks
+        static void apu_callback(void *data, u8* stream, int len);
+        static void clock_pwm(PULSE_CH *pulse_ch);
+        static void clock_trig(TRIG_CH& trig_ch);
+
+        // Pulse Channel
+        void set_pulse_duty(u8 index, u8 data); 
+        void set_pulse_lcnt(u8 index, u8 data);
+        void set_pulse_sweep(u8 index, u8 data);
+        void set_pulse_timer(u8 index, u8 data);
+
+        // Triangular Channel
+        void set_trig_linc(u8 data);
+        void set_trig_lcnt(u8 data);
+        void set_trig_timer(u8 data);
+
+        // APU Common Internals
+        void set_apu_stat(u8 data);
+        void set_apu_fcnt(u8 data);
+
+        // Status register
+        struct {
+            bool dmc_en = false;
+            bool wno_en = false;
+            bool tri_en = false;
+            bool pu1_en = false;
+            bool pu0_en = false;
+        } apu_stat;
+
+        // Frame counter
+        struct {
+            u8 frame;
+            bool step_mode;
+            bool irq_flag;
+        } apu_fcnt;
+
+        // Audio Thread Data
+        struct APU_DATA {
+            PULSE_CH pulse_ch[2];
+            TRIG_CH trig_ch;
+        } apu_data;
+        
+        SDL_AudioDeviceID device_id;
+        SDL_AudioSpec spec;
+        bool mute_apu = true;
 };
 
 #endif
