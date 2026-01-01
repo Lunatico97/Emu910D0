@@ -9,16 +9,6 @@
 #ifndef __GUI_H__
 #define __GUI_H__
 
-#define FTPT 16
-#define CLR_RED {255, 0, 0, 255}
-#define CLR_GREEN {0, 255, 0, 255}
-#define CLR_BLUE {0, 0, 255, 255}
-#define CLR_CYAN {0, 255, 255, 255}
-#define CLR_YELLOW {255, 255, 0, 255} 
-#define CLR_MAGENTA {255, 0, 255, 255}
-#define CLR_WHITE {255, 255, 255, 255}
-#define CLR_GREY {127, 127, 127, 255}
-
 class GUI
 {
     public:
