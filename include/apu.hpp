@@ -18,6 +18,10 @@
 #define APUTGTM 0x400A
 #define APUTGLC 0x400B
 
+#define APUNSEN 0x400C
+#define APUNSTM 0x400E
+#define APUNSLC 0x400F
+
 #define APUSTAT 0x4015
 #define APUFCNT 0x4017
 
@@ -30,6 +34,7 @@ class APU
         // APU Controls
         void init();
         void toggle_apu();
+        void clock_apu_fcnt();
 
         // R/W Operations
         u8 read_from_cpu(u16 cpu_addr);
@@ -66,10 +71,24 @@ class APU
             bool ln_set;
         };
 
+        struct NOISE_CH {
+            u16 lfsr = 0x0001; // 15-bit LFSR
+            u16 counter;
+            u16 timer;
+            u8 length;
+            u8 volume;
+            u8 decay;
+            u8 steps;
+            bool mode;
+            bool lc_halt;
+            bool const_vol;
+        };
+
         // Callbacks
         static void apu_callback(void *data, u8* stream, int len);
-        static void clock_pwm(PULSE_CH *pulse_ch);
-        static void clock_trig(TRIG_CH& trig_ch);
+        static void clock_pwm(PULSE_CH* pulse_ch, bool qtr_frame, bool half_frame);
+        static void clock_tri(TRIG_CH& trig_ch,  bool qtr_frame, bool half_frame);
+        static void clock_wno(NOISE_CH& trig_ch,  bool qtr_frame, bool half_frame);
 
         // Pulse Channel
         void set_pulse_duty(u8 index, u8 data); 
@@ -81,6 +100,11 @@ class APU
         void set_trig_linc(u8 data);
         void set_trig_lcnt(u8 data);
         void set_trig_timer(u8 data);
+
+        // Noise Channel
+        void set_noise_envl(u8 data);
+        void set_noise_lcnt(u8 data);
+        void set_noise_timer(u8 data);
 
         // APU Common Internals
         void set_apu_stat(u8 data);
@@ -97,15 +121,18 @@ class APU
 
         // Frame counter
         struct {
-            u8 frame;
+            u16 frame_cnt;
             bool step_mode;
             bool irq_flag;
         } apu_fcnt;
 
         // Audio Thread Data
         struct APU_DATA {
+            bool half_frame = false;
+            bool quarter_frame = false;
             PULSE_CH pulse_ch[2];
             TRIG_CH trig_ch;
+            NOISE_CH noise_ch;
         } apu_data;
         
         SDL_AudioDeviceID device_id;

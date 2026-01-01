@@ -8,7 +8,7 @@
 
 
 ## Current Status:
-- Working 6502 CPU | PPU | Primitive 3-channel APU (Pulse 1, Pulse 2 & Triangular Wave)
+- Working 6502 CPU | PPU | 4-channel interleaving APU (Pulse 1, Pulse 2, Triangular & Noise)
 - Keyboard & Gamepad Support
 - Mapper 0 (NROM), 1 (SxROM), 2 (UxROM) & 3 (CNROM)
 - Build & Run: `./buildE910D0.sh _.nes` | Run: `e910D0 _.nes`
@@ -91,11 +91,3 @@
         <td> <img src="rsrc/tetris_tengen.png" alt="Tengen's Tetris"> </td>
     <tr>
 </table>
-
-### Primitive APU Status 
-- Megaman (Elecman)
-
-<audio controls autoplay>
-  <source src="rsrc/megaman-elecman.mp3" type="audio/mpeg">
-</audio> 
-

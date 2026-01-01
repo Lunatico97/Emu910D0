@@ -413,7 +413,7 @@ void PPU::run_ppu()
                     else
                     {
                         // Bottom half sprite
-                        if(tile_off > 0x08) 
+                        if(tile_off >= 0x08) 
                         {
                             tile_off &= 0x07;
                             tile_index += 0x01;
@@ -536,7 +536,7 @@ void PPU::run_ppu()
 
             // Render frame
             trigger_events = true;
-            rndr->renderFrame({0, 0, SCRW, SCRH}, frame, frame_buf, FRAME_W);
+            rndr->renderFrame({0, 0, PPFW, PPFH}, frame, frame_buf, FRAME_W);
             rndr->display();
             rndr->clear();
         }
