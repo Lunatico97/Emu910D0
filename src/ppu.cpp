@@ -2,6 +2,11 @@
 
 PPU::PPU(CardROM *crom, Renderer *rndr) : W(0), crom(crom), cycles(0), lines(0), rndr(rndr), trigger_nmi(false) 
 {
+    W = 0;
+    X = 0x00;
+    T.addr = 0x0000;
+    oam_addr = 0x00;
+    ppu_data_buffer = 0x00;
     frame_buf = (u32*)calloc(FRAME_W*FRAME_H, sizeof(u32));
     frame = rndr->loadTexture(FRAME_W, FRAME_H);
 }
@@ -36,7 +41,7 @@ u8 PPU::read_from_cpu(u16 addr)
         case PPUMASK: break;
         case PPUSTATUS: return get_ppu_stat();
         case OAMADDR: break;
-        case OAMDATA: get_oam_data(); break;
+        case OAMDATA: return get_oam_data();
         case PPUSCROLL: break;
         case PPUADDR: break;
         case PPUDATA: return get_ppu_data();
@@ -56,14 +61,15 @@ u8 PPU::fetch_vram(u16 addr)
         switch(crom->get_mirror_mode())
         {
             // Single screen - 0
-            case 0x00: addr &= 0x3FFF; break;
+            case 0x00: addr &= 0x03FF; break;
             // Single screen - 1
-            case 0x01: addr = 0x4000 | (addr & 0x3FFF); break;
+            case 0x01: addr = 0x0400 | (addr & 0x03FF); break;
             // Vertical mirror mode (Horizontal arrangement)
             case 0x02: addr &= 0x07FF; break;
             // Horizontal mirror mode (Vertical arrangement)
             case 0x03: addr = (addr & 0x03FF) | ((addr & 0x0800) >> 1); break;
-
+            // Default
+            default: break;
         }
         return NAME[addr];
     }
@@ -96,7 +102,6 @@ void PPU::store_vram(u16 addr, u8 value)
             case 0x03: addr = (addr & 0x03FF) | ((addr & 0x0800) >> 1); break;
             // Default
             default: break;
-
         }
         NAME[addr] = value;
     }
@@ -119,7 +124,7 @@ void PPU::set_ppu_ctrl(u8 ctrl)
     CVALS.spr_addr = (ctrl & D3) ? 0x1000: 0x0000;
     CVALS.vram_icr = (ctrl & D2) ? 0x20: 0x01;
     T.nm_select = (ctrl & 0x03);
-    if(!old_nmi && CVALS.nmi_enabled && STAT_REG.vblank) trigger_nmi = true;
+    // if(!old_nmi && CVALS.nmi_enabled && STAT_REG.vblank) trigger_nmi = true;
 }
 
 void PPU::set_ppu_mask(u8 mask)
@@ -398,7 +403,7 @@ void PPU::run_ppu()
                 // For sprites: 8*16 size
                 else
                 {
-                   tile_addr = (SPAM[4*spr_cnt+1] & D0) ? 0x1000: 0x0000;
+                    tile_addr = (SPAM[4*spr_cnt+1] & D0) ? 0x1000: 0x0000;
                     tile_index = (SPAM[4*spr_cnt+1] & 0xFE);           
                     tile_off = (lines - SPAM[4*spr_cnt]);
                     
@@ -517,6 +522,7 @@ void PPU::run_ppu()
 
         // Populate pixel to frame buffer
         u8 color_select = fetch_vram(PAL_INDEX | (final_palette_index << 2) | final_index);
+        color_select &= (MASK_REG.greyscale ? 0x30 : 0x3F);
         frame_buf[lines*FRAME_W+(cycles-1)] = RGB_PAL[color_select];
     }
 

@@ -15,7 +15,7 @@
 
 ![Donkey Kong](rsrc/donkey_kong.gif)
 
-### Commands:
+## Commands:
 
 <table>
     <tr> <th> Keyboard Controls </th> <th> NES Equivalent / Gamepad Buttons </th> </tr>
@@ -37,14 +37,14 @@
     <tr> <td> NUM_0 </td> <td> RST (Reset) </td> <tr>
 </table>
 
-### Tests:
+## Tests:
 ![NES Test Menu](rsrc/nestest.gif)
 - Passes all official tests in video mode at reset vector: 0xC004.
 - Matches first 5000 lines of nestest.log (upto official instruction tests) in automation mode with PC force-set at 0xC000.
 - CPU tests for every 6502 instruction are available in `tests/e910D0Tests.cpp`.
 - Replace the file with `e910D0.cpp` to run test suite.
 
-### Tested NES Games:
+## Tested NES Games:
 - Mapper 0 (Donkey Kong, Ice Climber, Super Mario Bros. 1, Excite Bike, Kung Fu)
 
 <table>
@@ -54,7 +54,7 @@
     <tr>
 </table>
 
-- Mapper 1 (Metroid, The Legend of Zelda, Megaman 2, Snow Bros.) [MMC1 - ASIC]
+- Mapper 1 (Metroid, The Legend of Zelda, Megaman 2, Snow Bros., Tetris, Castlevania 2, Zelda II: The Adventures of Link) [MMC1 - ASIC]
 
 <table>
     <tr>
@@ -91,3 +91,7 @@
         <td> <img src="rsrc/tetris_tengen.png" alt="Tengen's Tetris"> </td>
     <tr>
 </table>
+
+## References:
+- [NES Dev Wiki](https://www.nesdev.org/wiki/NES_reference_guide)
+
