@@ -10,6 +10,8 @@ CardROM::~CardROM()
     delete mapper;
     free(PRGROM);
     free(CHRROM);
+    free(PRGRAM);
+    free(CHRRAM);
 }
 
 void CardROM::decode(u8 header[])

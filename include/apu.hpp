@@ -47,14 +47,19 @@ class APU
             u16 counter;
             u8 duty_cycle;
             u8 sequencer;
-            u8 volume;
             u8 length;
-            u8 period;
-            u8 decay;
             u8 shift;
+            u8 env_out;
+            u8 env_dcy;
+            u8 env_vol;
+            u8 env_dvr;
+            u8 swp_dvr;
+            u8 swp_hfs;
+            bool env_set;
+            bool swp_set;
+            bool swp_en;
             bool lc_halt;
             bool const_vol;
-            bool swp_en;
             bool neg_en;
         };
 
@@ -76,10 +81,12 @@ class APU
             u16 counter;
             u16 timer;
             u8 length;
-            u8 volume;
-            u8 decay;
-            u8 steps;
+            u8 env_out;
+            u8 env_dcy;
+            u8 env_vol;
+            u8 env_dvr;
             bool mode;
+            bool env_set;
             bool lc_halt;
             bool const_vol;
         };
@@ -107,6 +114,7 @@ class APU
         void set_noise_timer(u8 data);
 
         // APU Common Internals
+        u8 get_apu_stat();
         void set_apu_stat(u8 data);
         void set_apu_fcnt(u8 data);
 
@@ -115,8 +123,7 @@ class APU
             bool dmc_en = false;
             bool wno_en = false;
             bool tri_en = false;
-            bool pu1_en = false;
-            bool pu0_en = false;
+            bool pul_en[2] = {false, false};
         } apu_stat;
 
         // Frame counter

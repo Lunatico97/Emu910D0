@@ -22,18 +22,8 @@ APU::~APU()
 
 u8 APU::read_from_cpu(u16 cpu_addr)
 {
-    switch(cpu_addr)
-    {
-        case APUP1DC: break;
-        case APUP1SW: break;
-        case APUP1TM: break;
-        case APUP1LC: break;
-        case APUSTAT: break;
-        case APUFCNT: break;
-        default: break;
-    }
-
-    return 0x00;
+    if(cpu_addr == APUSTAT) return get_apu_stat();
+    else return 0x00;
 }
 
 void APU::write_from_cpu(u16 cpu_addr, u8 data)
@@ -116,11 +106,23 @@ void APU::clock_pwm(PULSE_CH *pulse_ch, bool qtr_frame, bool half_frame)
 		if(qtr_frame)
 		{
 			// Envelope & Decay
-			// if(!pulse_ch[index].const_vol && !pulse_ch[index].lc_halt)
-			// {
-			// 	if(pulse_ch[index].volume <= 0x00) pulse_ch[index].volume = 0x0F;
-			// 	else pulse_ch[index].volume -= pulse_ch[index].decay;
-			// }
+			if(pulse_ch[index].env_set)
+			{
+				pulse_ch[index].env_dvr = pulse_ch[index].env_vol;
+				pulse_ch[index].env_dcy = 0x0F;
+				pulse_ch[index].env_set = false;
+			}
+			else 
+			{
+				if(pulse_ch[index].env_dvr == 0x00)
+				{
+					if(!pulse_ch[index].lc_halt && pulse_ch[index].env_dcy == 0x00) pulse_ch[index].env_dcy = 0x0F;
+					else pulse_ch[index].env_dcy--;
+				}
+				else pulse_ch[index].env_dvr--;
+			}
+			// Volume source
+			pulse_ch[index].env_out = pulse_ch[index].const_vol ? pulse_ch[index].env_vol : pulse_ch[index].env_dcy;
 		}
 
 		if(half_frame)
@@ -131,11 +133,24 @@ void APU::clock_pwm(PULSE_CH *pulse_ch, bool qtr_frame, bool half_frame)
 				pulse_ch[index].length--;
 			}
 			// Sweep pulse wave
-			if(pulse_ch[index].swp_en)
+			if(pulse_ch[index].swp_set)
 			{
-				u8 amt = pulse_ch[index].timer >> pulse_ch[index].shift;
-				if(!pulse_ch[index].neg_en) pulse_ch[index].timer += amt;
-				else pulse_ch[index].timer += (index == 0) ? ~amt : (~amt + 1); 
+				pulse_ch[index].swp_dvr = pulse_ch[index].swp_hfs;
+				pulse_ch[index].swp_set = false;
+			}
+			else if(pulse_ch[index].swp_dvr == 0x00)
+			{
+				pulse_ch[index].swp_dvr = pulse_ch[index].swp_hfs;
+				if(pulse_ch[index].swp_en && pulse_ch[index].shift > 0x00)
+				{
+					u16 offset = (pulse_ch[index].timer >> pulse_ch[index].shift);
+					if(!pulse_ch[index].neg_en) pulse_ch[index].timer += offset;
+					else pulse_ch[index].timer += (index == 0) ? ~offset : (~offset + 1);
+				}
+			}
+			else
+			{
+				pulse_ch[index].swp_dvr--;
 			}
 		}	
 	}
@@ -209,7 +224,24 @@ void APU::clock_wno(NOISE_CH& noise_ch,  bool qtr_frame, bool half_frame)
 
 	if(qtr_frame)
 	{
-
+		// Envelope & Decay
+		if(noise_ch.env_set)
+		{
+			noise_ch.env_dvr = noise_ch.env_vol;
+			noise_ch.env_dcy = 0x0F;
+			noise_ch.env_set = false;
+		}
+		else 
+		{
+			if(noise_ch.env_dvr == 0x00)
+			{
+				if(!noise_ch.lc_halt && noise_ch.env_dcy == 0x00) noise_ch.env_dcy = 0x0F;
+				else noise_ch.env_dcy--;
+			}
+			else noise_ch.env_dvr--;
+		}
+		// Volume source
+		noise_ch.env_out = noise_ch.const_vol ? noise_ch.env_vol : noise_ch.env_dcy;
 	}
 
 	if(half_frame)
@@ -240,41 +272,41 @@ void APU::apu_callback(void* data, u8 *stream, int len)
             cycle_accumulator -= 1.0f;
         }
 
-        u8 pulse1 = apu_data->pulse_ch[0].length == 0x00 ? 0x00 : apu_data->pulse_ch[0].volume*(waveform[apu_data->pulse_ch[0].duty_cycle][apu_data->pulse_ch[0].sequencer]);
-		u8 pulse2 = apu_data->pulse_ch[1].length == 0x00 ? 0x00 : apu_data->pulse_ch[1].volume*(waveform[apu_data->pulse_ch[1].duty_cycle][apu_data->pulse_ch[1].sequencer]);
+        u8 pulse1 = (apu_data->pulse_ch[0].length == 0x00 || apu_data->pulse_ch[0].timer < 0x08 || apu_data->pulse_ch[0].timer > 0x07FF) ? 0x00 : apu_data->pulse_ch[0].env_out*(waveform[apu_data->pulse_ch[0].duty_cycle][apu_data->pulse_ch[0].sequencer]);
+		u8 pulse2 = (apu_data->pulse_ch[1].length == 0x00 || apu_data->pulse_ch[1].timer < 0x08 || apu_data->pulse_ch[1].timer > 0x07FF) ? 0x00 : apu_data->pulse_ch[1].env_out*(waveform[apu_data->pulse_ch[1].duty_cycle][apu_data->pulse_ch[1].sequencer]);
 		u8 trig = (apu_data->trig_ch.length == 0x00 || apu_data->trig_ch.linear_cnt == 0x00) ? 0x00 : apu_data->trig_ch.sequencer;
-		u8 noise = apu_data->noise_ch.length == 0x00 ? 0x00 : apu_data->noise_ch.volume*(apu_data->noise_ch.lfsr & D0);
+		u8 noise = apu_data->noise_ch.length == 0x00 ? 0x00 : apu_data->noise_ch.env_out*(apu_data->noise_ch.lfsr & D0);
 		stream[i] = (pulse1 + pulse2) + 0.00851*trig + noise;
     }
 }
 
 void APU::set_pulse_duty(u8 index, u8 data)
 {
+	apu_data.pulse_ch[index].env_set = true;
 	apu_data.pulse_ch[index].duty_cycle = (data & 0xC0) >> 6;
 	apu_data.pulse_ch[index].lc_halt = (data & D5);
 	apu_data.pulse_ch[index].const_vol = (data & D4);
-	if(apu_data.pulse_ch[index].const_vol) apu_data.pulse_ch[index].volume = (data & 0x0F);
-	else apu_data.pulse_ch[index].decay = (data & 0x0F);
+	apu_data.pulse_ch[index].env_vol = (data & 0x0F);
 }
 
 void APU::set_pulse_lcnt(u8 index, u8 data)
 {
-	apu_data.pulse_ch[index].timer = (apu_data.pulse_ch[index].timer & 0x0F) | (static_cast<u16>(data & 0x07) << 8);
-	apu_data.pulse_ch[1].length = apu_stat.pu1_en ? APU_LC[(data & 0xF8) >> 3] : 0x00;
-	apu_data.pulse_ch[0].length = apu_stat.pu0_en ? APU_LC[(data & 0xF8) >> 3] : 0x00;
+	apu_data.pulse_ch[index].timer = (apu_data.pulse_ch[index].timer & 0x00FF) | (static_cast<u16>(data & 0x07) << 8);
+	apu_data.pulse_ch[index].length = apu_stat.pul_en[index] ? APU_LC[(data & 0xF8) >> 3] : 0x00;
 }
 
 void APU::set_pulse_sweep(u8 index, u8 data)
 {
+	apu_data.pulse_ch[index].swp_set = true;
 	apu_data.pulse_ch[index].swp_en = (data & D7);
 	apu_data.pulse_ch[index].neg_en = (data & D3);
 	apu_data.pulse_ch[index].shift = (data & 0x07);
-	apu_data.pulse_ch[index].period = (data & 0x70) >> 4;
+	apu_data.pulse_ch[index].swp_hfs = (data & 0x70) >> 4;
 }
 
 void APU::set_pulse_timer(u8 index, u8 data)
 {
-	apu_data.pulse_ch[index].timer = (apu_data.pulse_ch[index].timer & 0xF0) | data ; 
+	apu_data.pulse_ch[index].timer = (apu_data.pulse_ch[index].timer & 0x0700) | data ; 
 }
 
 void APU::set_trig_linc(u8 data)
@@ -285,22 +317,22 @@ void APU::set_trig_linc(u8 data)
 
 void APU::set_trig_lcnt(u8 data)
 {
-	apu_data.trig_ch.timer = (apu_data.trig_ch.timer & 0x0F) | (static_cast<u16>(data & 0x07) << 8);
+	apu_data.trig_ch.timer = (apu_data.trig_ch.timer & 0x00FF) | (static_cast<u16>(data & 0x07) << 8);
 	apu_data.trig_ch.length = apu_stat.tri_en ? APU_LC[(data & 0xF8) >> 3] : 0x00;
 	apu_data.trig_ch.ln_set = true;
 }
 
 void APU::set_trig_timer(u8 data)
 {
-	apu_data.trig_ch.timer = (apu_data.trig_ch.timer & 0xF0) | data ; 
+	apu_data.trig_ch.timer = (apu_data.trig_ch.timer & 0x0700) | data ; 
 }
 
 void APU::set_noise_envl(u8 data)
 {
+	apu_data.noise_ch.env_set = true;
 	apu_data.noise_ch.lc_halt = (data & D7);
 	apu_data.noise_ch.const_vol = (data & D4);
-	if(apu_data.noise_ch.const_vol) apu_data.noise_ch.volume = (data & 0x0F);
-	else apu_data.noise_ch.decay = (data & 0x0F);
+	apu_data.noise_ch.env_vol = (data & 0x0F);
 }
 
 void APU::set_noise_lcnt(u8 data)
@@ -312,7 +344,12 @@ void APU::set_noise_timer(u8 data)
 {
 	apu_data.noise_ch.mode = (data & D7);
 	apu_data.noise_ch.timer = APU_TM[(data & 0x0F)]; 
-	apu_data.noise_ch.steps = (data & D7) > 0 ? 0x005D : 0x7FFF;
+}
+
+u8 APU::get_apu_stat()
+{
+	return (apu_data.noise_ch.length > 0 ? D3: 0x00) | (apu_data.trig_ch.length > 0 ? D2: 0x00) |
+	       (apu_data.pulse_ch[1].length > 0 ? D1: 0x00) | (apu_data.pulse_ch[0].length > 0 ? D0: 0x00);
 }
 
 void APU::set_apu_stat(u8 data)
@@ -320,10 +357,10 @@ void APU::set_apu_stat(u8 data)
 	apu_stat.dmc_en = (data & D4);
 	apu_stat.wno_en = (data & D3);
 	apu_stat.tri_en = (data & D2);
-	apu_stat.pu1_en = (data & D1);
-	apu_stat.pu0_en = (data & D0);
-	apu_data.pulse_ch[1].lc_halt = !apu_stat.pu1_en;
-	apu_data.pulse_ch[0].lc_halt = !apu_stat.pu0_en;
+	apu_stat.pul_en[1] = (data & D1);
+	apu_stat.pul_en[0] = (data & D0);
+	apu_data.pulse_ch[1].lc_halt = !apu_stat.pul_en[1];
+	apu_data.pulse_ch[0].lc_halt = !apu_stat.pul_en[0];
 }
 
 void APU::set_apu_fcnt(u8 data)
