@@ -249,3 +249,15 @@ u8 MMU::retreive(u16 m_addr)
     else if(m_addr >= 0x4018 && m_addr < 0x6000) return 0x00;
     else return crom->read_from_cpu(m_addr);
 }
+
+void MMU::peek_mmu(bool *mmu_up)
+{
+    ImGui::Begin("Registers", mmu_up, ImGuiWindowFlags_NoResize); 
+    ImGui::TextColored({1.0f, 0.0f, 0.0f, 0.5f}, "PC: %x", fetch_pc());
+    ImGui::TextColored({1.0f, 0.0f, 0.0f, 0.5f}, "SP: %x", fetch_reg(SP));
+    ImGui::Text("ST: %x", fetch_reg(ST));
+    ImGui::Text("A: %x", fetch_reg(A));
+    ImGui::Text("X: %x", fetch_reg(X));
+    ImGui::Text("Y: %x", fetch_reg(Y));
+    ImGui::End();
+}

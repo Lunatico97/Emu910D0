@@ -12,7 +12,9 @@
 - Keyboard & Gamepad Support
 - Mapper 0 (NROM), 1 (SxROM), 2 (UxROM) & 3 (CNROM)
 - Build & Run: `./buildE910D0.sh _.nes` | Run: `e910D0 _.nes`
+- Minimalistic User Interface
 
+![Emu910D0](rsrc/snip8.png)
 ![Donkey Kong](rsrc/donkey_kong.gif)
 
 ## Commands:

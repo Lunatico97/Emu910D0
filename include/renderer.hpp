@@ -1,6 +1,9 @@
 #include <global.hpp>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
+#include <imgui/imgui.h>
+#include <imgui/imgui_impl_sdl2.h>
+#include <imgui/imgui_impl_sdlrenderer2.h>
 
 #ifndef __RENDERER_H__
 #define __RENDERER_H__
@@ -16,6 +19,8 @@
 class Renderer
 {
     public:
+	    SDL_Window* window;
+        SDL_Renderer *ren;
         Renderer(const char *title, int width, int height);
 		SDL_Texture* loadTexture(const char *location);
 		SDL_Texture *loadTexture(const int width, const int height);
@@ -37,9 +42,13 @@ class Renderer
 		void display();
 		void clear();
 
+		// Widget &  UI [IMGUI Integration with SDL2 Backend]
+		void init_wxs();
+		void set_frame();
+		void fit_frame();
+		void cleanup();
+
     private:
-        SDL_Window* window;
-        SDL_Renderer *ren;
 		int scrW, scrH;
 };
 

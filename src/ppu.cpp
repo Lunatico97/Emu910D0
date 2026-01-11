@@ -543,10 +543,32 @@ void PPU::run_ppu()
             // Render frame
             trigger_events = true;
             rndr->renderFrame({0, 0, PPFW, PPFH}, frame, frame_buf, FRAME_W);
-            rndr->display();
-            rndr->clear();
         }
         lines += 0x0001;
     }
+}
+
+void PPU::peek_ppu(bool* ppu_up)
+{
+    ImGui::Begin("Palette RAM", ppu_up);
+    ImVec2 p = ImGui::GetCursorScreenPos();
+    float sz = 20.0f;       // Size of each color square
+    float spacing = 2.0f;  // Gap between squares
+    int rows = 8;
+    int cols = 4;
+
+    for (int i = 0; i < 32; i++) 
+    {
+        int row = i / cols;
+        int col = i % cols;
+        ImVec2 p_min = ImVec2(p.x + col * (sz + spacing), p.y + row * (sz + spacing));
+        ImVec2 p_max = ImVec2(p_min.x + sz, p_min.y + sz);
+
+        // Draw the color square
+        ImU32 color = IM_COL32((u8)(RGB_PAL[PAL[i]] >> 24), (u8)(RGB_PAL[PAL[i]] >> 16), (u8)(RGB_PAL[PAL[i]] >> 8), (u8)RGB_PAL[PAL[i]]);
+        ImGui::GetWindowDrawList()->AddRectFilled(p_min, p_max, color);
+    }    
+
+    ImGui::End();
 }
 

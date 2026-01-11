@@ -33,6 +33,7 @@ class PPU
 
         // PPU Cycle
         void run_ppu();
+        void peek_ppu(bool* ppu_up);
 
         // PPU Counters
         u16 cycles, lines;
