@@ -88,6 +88,9 @@ class MMU
         // DMA signals
         bool dma_rqst = 0, dma_sync = 0;
 
+        // Peek
+        void peek_mmu(bool *mmu_up);
+
     private:
         // Reset MMU
         void reset();

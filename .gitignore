@@ -4,3 +4,6 @@
 *.exe
 *.o
 *.nes
+*.ini
+.vscode/*
+include/imgui/*

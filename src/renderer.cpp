@@ -140,3 +140,32 @@ void Renderer::cleanRenderer()
 	SDL_Quit() ;
 	std::cout << "!!! SDL 2.0 Quitted Successfully !!!" << std::endl ;
 }
+
+void Renderer::init_wxs()
+{
+	ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    ImGui::StyleColorsDark();
+    ImGui_ImplSDL2_InitForSDLRenderer(window, ren);
+    ImGui_ImplSDLRenderer2_Init(ren);
+}
+
+void Renderer::set_frame()
+{
+    ImGui_ImplSDLRenderer2_NewFrame();
+    ImGui_ImplSDL2_NewFrame();
+    ImGui::NewFrame();
+}
+
+void Renderer::fit_frame()
+{
+    ImGui::Render();
+	ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData(), ren);
+}
+
+void Renderer::cleanup()
+{
+    ImGui_ImplSDLRenderer2_Shutdown();
+    ImGui_ImplSDL2_Shutdown();
+    ImGui::DestroyContext();
+}
