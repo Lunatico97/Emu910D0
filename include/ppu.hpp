@@ -58,9 +58,11 @@ class PPU
         void update_horzv();
         void update_vertv();
 
-        // Memory interactors
+        // PPU Interactions
         u8 fetch_vram(u16 addr);
+        u8 fetch_palette(u16 addr);
         void store_vram(u16 addr, u8 value);
+        void store_palette(u16 addr, u8 value);
         
         // PPU Memory
         u8 NAME[2048], OAM[256], SPAM[32], PAL[32]; 
@@ -144,6 +146,7 @@ class PPU
 
     public:
         u8* refOAM = OAM;
+        u8* refoam_addr = &oam_addr;
 };
 
 #endif

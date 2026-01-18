@@ -99,6 +99,18 @@ void CardROM::write_from_ppu(u16 ppu_addr, u8 data)
     *(CHRRAM + ppu_addr) = data;
 }
 
+void CardROM::persist_ram(const char *rom, bool on_load)
+{
+    if(persistence)
+    {
+        std::string save_path = "saves/";
+        save_path += rom;
+        save_path += ".sav";
+        if(on_load) Global::readDataFromFile(save_path.c_str(), PRGRAM, 0x2000);
+        else Global::writeDataToFile(save_path.c_str(), PRGRAM, 0x2000);
+    }
+}
+
 u8 CardROM::get_mirror_mode()
 {
     if(mapper->mirror_mode != 0xFF) return mapper->mirror_mode;

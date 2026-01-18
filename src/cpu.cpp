@@ -12,6 +12,7 @@ void CPU::clock()
         mmu->cycle_penalty = 0x00;
     }
     cycles -= 1;
+    if(Global::debug) accumulator += 1;
 }
 
 void CPU::step()
@@ -35,7 +36,8 @@ void CPU::step()
         logger.log("X:", mmu->fetch_reg(X));
         logger.log("Y:", mmu->fetch_reg(Y));
         logger.log("P:", mmu->fetch_reg(ST));
-        logger.log("SP:", mmu->fetch_reg(SP), 1);
+        logger.log("SP:", mmu->fetch_reg(SP));
+        logger.log("CYC:", accumulator, 1);
     }
 
     decode(current);
@@ -48,42 +50,42 @@ void CPU::decode(const HEX& hex)
     switch(hex.h8[0])
     {
         case 0xEA: break;
-        case 0xA9: mmu->ld(A, hex.h8[1]); break;
-        case 0xA5: mmu->ldo(A, NON, h16); break;
-        case 0xB5: mmu->ldo(A, X, h16); break;
-        case 0xAD: mmu->ld(A, NON, h16); break;
-        case 0xBD: mmu->ld(A, X, h16); break;
-        case 0xB9: mmu->ld(A, Y, h16); break;
-        case 0xA1: mmu->ldi(A, X, h16); break;
-        case 0xB1: mmu->ldix(A, Y, h16); break;
+        case 0xA9: mmu->lda(A, (ADR)-1, 0x0000, hex.h8[1]); break;
+        case 0xA5: mmu->lda(A, ADR::ZER, 0x0000, hex.h8[1]); break;
+        case 0xB5: mmu->lda(A, ADR::ZEX, 0x0000, hex.h8[1]); break;
+        case 0xAD: mmu->lda(A, ADR::ABS, h16, 0x00); break;
+        case 0xBD: mmu->lda(A, ADR::ABX, h16, 0x00); break;
+        case 0xB9: mmu->lda(A, ADR::ABY, h16, 0x00); break;
+        case 0xA1: mmu->lda(A, ADR::IXI, h16, mmu->fetch_reg(X)); break;
+        case 0xB1: mmu->lda(A, ADR::IIX, h16, mmu->fetch_reg(Y)); break;
 
-        case 0xA2: mmu->ld(X, hex.h8[1]); break;
-        case 0xA6: mmu->ldo(X, NON, h16); break;
-        case 0xB6: mmu->ldo(X, Y, h16); break;
-        case 0xAE: mmu->ld(X, NON, h16); break;
-        case 0xBE: mmu->ld(X, Y, h16); break;
+        case 0xA2: mmu->lda(X, (ADR)-1, 0x0000, hex.h8[1]); break;
+        case 0xA6: mmu->lda(X, ADR::ZER, 0x0000, hex.h8[1]); break;
+        case 0xB6: mmu->lda(X, ADR::ZEY, 0x0000, hex.h8[1]); break;
+        case 0xAE: mmu->lda(X, ADR::ABS, h16, 0x00); break;
+        case 0xBE: mmu->lda(X, ADR::ABY, h16, 0x00); break;
 
-        case 0xA0: mmu->ld(Y, hex.h8[1]); break;
-        case 0xA4: mmu->ldo(Y, NON, h16); break;
-        case 0xB4: mmu->ldo(Y, X, h16); break;
-        case 0xAC: mmu->ld(Y, NON, h16); break;
-        case 0xBC: mmu->ld(Y, X, h16); break;
+        case 0xA0: mmu->lda(Y, (ADR)-1, 0x0000, hex.h8[1]); break;
+        case 0xA4: mmu->lda(Y, ADR::ZER, 0x0000, hex.h8[1]); break;
+        case 0xB4: mmu->lda(Y, ADR::ZEX, 0x0000, hex.h8[1]); break;
+        case 0xAC: mmu->lda(Y, ADR::ABS, h16, 0x00); break;
+        case 0xBC: mmu->lda(Y, ADR::ABX, h16, 0x00); break;
 
-        case 0x85: mmu->sto(A, NON, h16); break;
-        case 0x95: mmu->sto(A, X, h16); break;
-        case 0x8D: mmu->st(A, NON, h16); break;
-        case 0x9D: mmu->st(A, X, h16); break;
-        case 0x99: mmu->st(A, Y, h16); break;
-        case 0x81: mmu->sti(A, X, h16); break;
-        case 0x91: mmu->stix(A, Y, h16); break;
+        case 0x85: mmu->sta(A, ADR::ZER, 0x0000, hex.h8[1]); break;
+        case 0x95: mmu->sta(A, ADR::ZEX, 0x0000, hex.h8[1]); break;
+        case 0x8D: mmu->sta(A, ADR::ABS, h16, 0x00); break;
+        case 0x9D: mmu->sta(A, ADR::ABX, h16, 0x00); break;
+        case 0x99: mmu->sta(A, ADR::ABY, h16, 0x00); break;
+        case 0x81: mmu->sta(A, ADR::IXI, h16, mmu->fetch_reg(X)); break;
+        case 0x91: mmu->sta(A, ADR::IIX, h16, mmu->fetch_reg(Y)); break;
 
-        case 0x86: mmu->sto(X, NON, h16); break;
-        case 0x96: mmu->sto(X, Y, h16); break;
-        case 0x8E: mmu->st(X, NON, h16); break;
+        case 0x86: mmu->sta(X, ADR::ZER, 0x0000, hex.h8[1]); break;
+        case 0x96: mmu->sta(X, ADR::ZEY, 0x0000, hex.h8[1]); break;
+        case 0x8E: mmu->sta(X, ADR::ABS, h16, 0x00); break;
 
-        case 0x84: mmu->sto(Y, NON, h16); break;
-        case 0x94: mmu->sto(Y, X, h16); break;
-        case 0x8C: mmu->st(Y, NON, h16); break;
+        case 0x84: mmu->sta(Y, ADR::ZER, 0x0000, hex.h8[1]); break;
+        case 0x94: mmu->sta(Y, ADR::ZEX, 0x0000, hex.h8[1]); break;
+        case 0x8C: mmu->sta(Y, ADR::ABS, h16, 0x00); break;
 
         case 0xAA: mmu->tr(X, A); break;
         case 0xA8: mmu->tr(Y, A); break;
@@ -248,8 +250,10 @@ void CPU::brc_set(u8 hx_flag, u8 rel_addr)
 {
     if(mmu->fetch_reg(ST) & hx_flag)
     {
-        mmu->load_pc(mmu->get_addr(ADR::REL, 0x0000, rel_addr));
+        u16 res_addr = mmu->get_addr(ADR::REL, 0x0000, rel_addr);
+        mmu->cycle_penalty += mmu->cross_page(mmu->fetch_pc(), res_addr);
         mmu->cycle_penalty += 0x01;
+        mmu->load_pc(res_addr);
     }
     else return;
 }
@@ -257,8 +261,10 @@ void CPU::brc_set(u8 hx_flag, u8 rel_addr)
 void CPU::brc_rst(u8 hx_flag, u8 rel_addr)
 {
     if(mmu->fetch_reg(ST) & hx_flag) return;   
-    mmu->load_pc(mmu->get_addr(ADR::REL, 0x0000, rel_addr));
+    u16 res_addr = mmu->get_addr(ADR::REL, 0x0000, rel_addr);
+    mmu->cycle_penalty += mmu->cross_page(mmu->fetch_pc(), res_addr);
     mmu->cycle_penalty += 0x01;
+    mmu->load_pc(res_addr);
 }
 
 void CPU::jsr(u16 address)
@@ -295,11 +301,8 @@ void CPU::rti()
 
 void CPU::rst()
 {
-    mmu->load_reg(A, 0x00);
-    mmu->load_reg(X, 0x00);
-    mmu->load_reg(Y, 0x00);
-    mmu->load_reg(SP, 0xFD);
-    mmu->load_reg(ST, 0x00 | HX_NUSE | HX_INTD);
+    mmu->load_reg(SP, mmu->fetch_reg(SP)-0x03);
+    mmu->load_reg(ST, mmu->fetch_reg(ST) | HX_INTD);
     mmu->load_reg(PCL, mmu->retreive(RST_VECTOR));
     mmu->load_reg(PCH, mmu->retreive(RST_VECTOR+0x0001));
     cycles = 7;
@@ -332,4 +335,14 @@ void CPU::nmi()
     mmu->load_reg(PCL, mmu->retreive(NMI_VECTOR));
     mmu->load_reg(PCH, mmu->retreive(NMI_VECTOR+0x0001));
     cycles = 7;
+}
+
+void CPU::pow()
+{
+    mmu->load_reg(A, 0x00);
+    mmu->load_reg(X, 0x00);
+    mmu->load_reg(Y, 0x00);
+    mmu->load_reg(SP, 0x00);
+    mmu->load_reg(ST, 0x00 | HX_NUSE);
+    this->rst();
 }

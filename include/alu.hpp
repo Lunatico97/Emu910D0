@@ -55,7 +55,7 @@ class ALU
 
         // Registers
         void fetchIMD(u8 off);
-        void fetchMEM(ADR mode, u16 addr, u8 off);
+        void fetchMEM(ADR mode, u16 addr, u8 off, bool cp_check = false);
         void loadMEM(ADR mode, u16 addr, u8 off);
         void fetchREG(REG r);
         void loadREG(REG r);

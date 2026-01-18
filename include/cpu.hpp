@@ -23,6 +23,7 @@ class CPU
         void rst();
         void nmi();
         void irq();
+        void pow();
 
         // Decoder
         void decode(const HEX& hex);
@@ -42,6 +43,7 @@ class CPU
         void rts();
         void rti();
 
+        u16 accumulator = 0x0000;
         u8 cycles;
         MMU* mmu;
         ALU alu;

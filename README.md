@@ -3,12 +3,10 @@
 - Status: In Progress
 - Description: NES Emulator to relive my childhood memories of playing with a bootleg NES/Famicom console 
                which looked like a PS1 and had a vertical cartridge slot like a Famicom :)
-- Comments: This started up as being rigidly behavior-driven but, I kept on removing unnecessary
-            junk to speed up and keep stuff clean. The goal itself is to make NES games playable.
 
 
 ## Current Status:
-- Working 6502 CPU | PPU | 4-channel interleaving APU (Pulse 1, Pulse 2, Triangular & Noise)
+- Working burst-cycle 6502 CPU | PPU | 4-channel interleaving APU (Pulse 1, Pulse 2, Triangular & Noise)
 - Keyboard & Gamepad Support
 - Mapper 0 (NROM), 1 (SxROM), 2 (UxROM) & 3 (CNROM)
 - Build & Run: `./buildE910D0.sh _.nes` | Run: `e910D0 _.nes`
@@ -41,13 +39,13 @@
 
 ## Tests:
 ![NES Test Menu](rsrc/nestest.gif)
-- Passes all official tests in video mode at reset vector: 0xC004.
+- Passes all official tests for kevtrix's test ROM in video mode at reset vector: 0xC004.
 - Matches first 5000 lines of nestest.log (upto official instruction tests) in automation mode with PC force-set at 0xC000.
 - CPU tests for every 6502 instruction are available in `tests/e910D0Tests.cpp`.
 - Replace the file with `e910D0.cpp` to run test suite.
 
 ## Tested NES Games:
-- Mapper 0 (Donkey Kong, Ice Climber, Super Mario Bros. 1, Excite Bike, Kung Fu)
+- Mapper 0 (Donkey Kong, Ice Climber, Super Mario Bros. 1, Excite Bike, Kung Fu, Wrecking Crew)
 
 <table>
     <tr>
@@ -56,7 +54,7 @@
     <tr>
 </table>
 
-- Mapper 1 (Metroid, The Legend of Zelda, Megaman 2, Snow Bros., Tetris, Castlevania 2, Zelda II: The Adventures of Link) [MMC1 - ASIC]
+- Mapper 1 (Metroid, The Legend of Zelda, Megaman 2, Snow Bros., Tetris, Castlevania II - Simon's Quest, Zelda II: The Adventure  of Link, Dr. Mario, Snake: Rattle n' Roll) [MMC1 - ASIC]
 
 <table>
     <tr>
@@ -82,7 +80,7 @@
     <tr>
 </table>
 
-- Mapper 3 (Milon's Secret Castle, Adventure Island, Track & Field, Tengen's Tetris)
+- Mapper 3 (Milon's Secret Castle, Adventure Island, Track & Field, Tengen's Tetris, Solomon's Key)
 
 <table>
     <tr>

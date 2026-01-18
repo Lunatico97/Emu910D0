@@ -15,6 +15,7 @@ class CardROM
         void write_from_cpu(u16 cpu_addr, u8 data);
         void write_from_ppu(u16 ppu_addr, u8 data);
         void load_rom(const char *filename);
+        void persist_ram(const char *rom, bool on_load = false);
 
     private:
         void decode(u8 header[]);
