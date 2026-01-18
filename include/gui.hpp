@@ -49,6 +49,7 @@ class GUI
         NES* nes_state;
         SDL_Event event;
         Controller* controller;
+        char *current_rom;
         bool _active, _pause, _rom_ld;
         bool _mmu_vw, _ppu_vw, _rom_vw;
 };

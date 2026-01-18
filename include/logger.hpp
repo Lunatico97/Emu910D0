@@ -37,10 +37,10 @@ struct Logger
         filelogger.close();
     }
 
-    void log(const std::string& msg, const u8& value, bool newline)
+    void log(const std::string& msg, const u16 value, bool newline)
     {
         std::ofstream filelogger(logpath, std::ios_base::out | std::ios_base::app);
-        filelogger << std::uppercase << msg << std::hex << std::setfill('0') << std::setw(2) << (value & 0xFF) << "\n";
+        filelogger << "CYC:" << value << "\n";
         filelogger.close();
     }
 

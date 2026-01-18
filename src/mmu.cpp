@@ -14,22 +14,14 @@ MMU::~MMU() {}
 
 void MMU::push(REG r)
 {
-    if(fetch_reg(SP) > 0x00)
-    {
-        store(SP_INDEX | fetch_reg(SP), fetch_reg(r));
-        load_reg(SP, fetch_reg(SP)-0x01);
-    }
-    else throw(std::runtime_error("Stack overflow !"));
+    store(SP_INDEX | fetch_reg(SP), fetch_reg(r));
+    load_reg(SP, fetch_reg(SP)-0x01);
 }
 
 void MMU::pop(REG r)
 {
-    if(fetch_reg(SP) <= 0xFF)
-    {
-        load_reg(SP, fetch_reg(SP)+0x01);
-        load_reg(r, retreive(SP_INDEX | fetch_reg(SP)));
-    }
-    else throw(std::runtime_error("Stack underflow !"));
+    load_reg(SP, fetch_reg(SP)+0x01);
+    load_reg(r, retreive(SP_INDEX | fetch_reg(SP)));
 }
 
 void MMU::pla()
@@ -40,22 +32,14 @@ void MMU::pla()
 
 void MMU::php()
 {
-    if(fetch_reg(SP) > 0x00)
-    {
-        store(SP_INDEX | fetch_reg(SP), fetch_reg(ST) | 0x30);
-        load_reg(SP, fetch_reg(SP)-0x01);
-    }
-    else throw(std::runtime_error("Stack overflow !"));
+    store(SP_INDEX | fetch_reg(SP), fetch_reg(ST) | 0x30);
+    load_reg(SP, fetch_reg(SP)-0x01);
 }
 
 void MMU::plp()
 {
-    if(fetch_reg(SP) <= 0xFF)
-    {
-        load_reg(SP, fetch_reg(SP)+0x01);
-        load_reg(ST, (fetch_reg(ST) & 0x30) | (retreive(SP_INDEX | fetch_reg(SP)) & 0xCF));
-    }
-    else throw(std::runtime_error("Stack underflow !"));
+    load_reg(SP, fetch_reg(SP)+0x01);
+    load_reg(ST, (fetch_reg(ST) & 0x30) | (retreive(SP_INDEX | fetch_reg(SP)) & 0xCF));
 }
 
 void MMU::tr(REG des, REG src)
@@ -64,65 +48,23 @@ void MMU::tr(REG des, REG src)
     if(des != SP) updf(des);
 }
 
-void MMU::ld(REG des, u8 value)
+void MMU::lda(REG des, ADR mode, u16 addr, u8 off)
 {
-    load_reg(des, value);
-    updf(des);
+    if(mode == -1) load_reg(des, off);
+    else
+    {
+        u16 res_addr = retreive(get_addr(mode, addr, off, 1));
+        load_reg(des, res_addr);
+    } 
+    updf(des);  
 }
 
-void MMU::ld(REG des, REG off, u16 addr)
+void MMU::sta(REG src, ADR mode, u16 addr, u8 off)
 {
-    if(off != REG::NON) load_reg(des, retreive(addr + fetch_reg(off)));
-    else load_reg(des, retreive(addr));
-    updf(des);
+    store(get_addr(mode, addr, off), fetch_reg(src));
 }
 
-void MMU::st(REG src, REG off, u16 addr)
-{
-    if(off != REG::NON) store(addr + fetch_reg(off), fetch_reg(src));
-    else store(addr, fetch_reg(src));
-}
-
-void MMU::ldo(REG des, REG off, u16 addr)
-{
-    if(off != REG::NON) load_reg(des, retreive(static_cast<u8>((addr & 0x00FF) + fetch_reg(off))));
-    else load_reg(des, retreive(addr & 0x00FF));
-    updf(des);
-}
-
-void MMU::sto(REG src, REG off, u16 addr)
-{
-    if(off != REG::NON) store(static_cast<u8>((addr & 0x00FF) + fetch_reg(off)), fetch_reg(src));
-    else store((addr & 0x00FF), fetch_reg(src));
-}
-
-void MMU::ldi(REG des, REG off, u16 addr)
-{
-    u16 act_addr = get_addr(ADR::IXI, addr, fetch_reg(off));
-    load_reg(des, retreive(act_addr));
-    updf(des);
-}
-
-void MMU::sti(REG src, REG off, u16 addr)
-{
-    u16 act_addr = get_addr(ADR::IXI, addr, fetch_reg(off));
-    store(act_addr, fetch_reg(src));
-}
-
-void MMU::ldix(REG des, REG off, u16 addr)
-{
-    u16 base_addr = get_addr(ADR::IND, addr, 0x00);
-    load_reg(des, retreive(base_addr + fetch_reg(off)));
-    updf(des);
-}
-
-void MMU::stix(REG src, REG off, u16 addr)
-{
-    u16 base_addr = get_addr(ADR::IND, addr, 0x00);
-    store(base_addr + fetch_reg(off), fetch_reg(src));
-}
-
-u16 MMU::get_addr(ADR mode, u16 addr, u8 off)
+u16 MMU::get_addr(ADR mode, u16 addr, u8 off, bool cp_check)
 {
     u16 res_addr;
 
@@ -132,9 +74,11 @@ u16 MMU::get_addr(ADR mode, u16 addr, u8 off)
         case ADR::ABX: res_addr = addr + fetch_reg(X); break;
         case ADR::ABY: res_addr = addr + fetch_reg(Y); break;
         case ADR::IND: res_addr = retreive(addr) | (static_cast<u16>(retreive((addr+1) & 0x00FF)) << 8); break;
-        case ADR::IIX: res_addr = (retreive(addr) | (static_cast<u16>(retreive((addr+1) & 0x00FF)) << 8)) + static_cast<u16>(off); break;
+        case ADR::IIX: addr = (retreive(addr) | (static_cast<u16>(retreive((addr+1) & 0x00FF)) << 8));
+                       res_addr = addr + static_cast<u16>(off); 
+                       break;
         case ADR::IXI: res_addr = retreive((addr+off) & 0x00FF) | (static_cast<u16>(retreive((addr+off+1) & 0x00FF)) << 8); break;
-        case ADR::REL: addr = fetch_pc();
+        case ADR::REL: addr = fetch_pc();                      
                        if(off & D7) res_addr = addr - ((~off+1) & 0x00FF);
                        else res_addr = addr + off; 
                        break;
@@ -144,7 +88,7 @@ u16 MMU::get_addr(ADR mode, u16 addr, u8 off)
         default: break;
     }
 
-    if(mode != ADR::ZER && mode != ADR::ZEX && mode != ZEY)
+    if(cp_check && (mode == ADR::ABX || mode == ADR::ABY || mode == ADR::IIX))
     {
         cycle_penalty += cross_page(addr, res_addr);
     }
@@ -199,6 +143,7 @@ void MMU::load_pc(const u16& addr)
 void MMU::signal_dma(u8 src_hn8)
 {
     dma_src = static_cast<u16>(src_hn8) << 8;
+    oam_des = *ppu->refoam_addr;
     dma_rqst = true;
     dma_off = 0x00;
 }
@@ -216,10 +161,11 @@ void MMU::perform_dma(bool sync_rw)
             if(!sync_rw) oam_data = retreive(dma_src | dma_off);
             else
             {
-                ppu->refOAM[dma_off] = oam_data;
+                ppu->refOAM[oam_des] = oam_data;
+                oam_des++;
                 dma_off++;
 
-                if(dma_off == 0x00) 
+                if(dma_off == 0x00)
                 {
                     dma_rqst = false;
                     dma_sync = false;
@@ -252,12 +198,40 @@ u8 MMU::retreive(u16 m_addr)
 
 void MMU::peek_mmu(bool *mmu_up)
 {
-    ImGui::Begin("Registers", mmu_up, ImGuiWindowFlags_NoResize); 
-    ImGui::TextColored({1.0f, 0.0f, 0.0f, 0.5f}, "PC: %x", fetch_pc());
-    ImGui::TextColored({1.0f, 0.0f, 0.0f, 0.5f}, "SP: %x", fetch_reg(SP));
-    ImGui::Text("ST: %x", fetch_reg(ST));
-    ImGui::Text("A: %x", fetch_reg(A));
-    ImGui::Text("X: %x", fetch_reg(X));
-    ImGui::Text("Y: %x", fetch_reg(Y));
+    ImGui::SetNextWindowPos({0.0f, SCRH-200.0f});
+    ImGui::SetNextWindowSize({SCRW, 200.0f});
+    ImGui::Begin("Memory Viewer", mmu_up, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse); 
+
+    // Registers
+    ImGui::BeginGroup();
+    ImGui::TextUnformatted("Registers");
+    ImGui::BulletText("PC: %04x", fetch_pc());
+    ImGui::BulletText("SP: %02x", fetch_reg(SP));
+    ImGui::BulletText("ST: %02x", fetch_reg(ST));
+    ImGui::BulletText("A: %02x", fetch_reg(A));
+    ImGui::BulletText("X: %02x", fetch_reg(X));
+    ImGui::BulletText("Y: %02x", fetch_reg(Y));
+    ImGui::EndGroup();
+
+    // Zero-page RAM
+    ImGui::SameLine(0.0f, 50.0f);
+    ImGui::BeginGroup();
+    ImGui::TextUnformatted("Zero-page RAM");
+    if(ImGui::BeginTable("zero-ram", 16, ImGuiTableFlags_Borders))
+    {
+        for(u8 row = 0; row < 0x10; row++)
+        {
+            ImGui::TableNextRow();
+            for (u8 column = 0; column < 0x10; column++)
+            {
+                ImGui::TableSetColumnIndex(column);
+                ImGui::Text("%02x", RAM[row*0x10+column]);
+            }
+        }   
+
+        ImGui::EndTable();
+    }
+    ImGui::EndGroup();
+
     ImGui::End();
 }

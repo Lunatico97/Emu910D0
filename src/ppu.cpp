@@ -73,14 +73,15 @@ u8 PPU::fetch_vram(u16 addr)
         }
         return NAME[addr];
     }
-    else if(addr >= 0x3000 && addr < 0x3F00) return fetch_vram(addr-0x1000);
-    else if(addr >= 0x3F00 && addr < 0x4000)
-    {
-        addr = addr & 0x1F;
-        if ((addr & 0x03) == 0) addr &= 0x0F; 
-        return PAL[addr];
-    }
-    else throw(std::runtime_error("Out of bounds (R) from VRAM: " + addr));
+    else return fetch_vram(addr-0x1000);
+}
+
+u8 PPU::fetch_palette(u16 addr)
+{
+    assert(addr >= 0x3F00 && addr < 0x4000);
+    addr &= 0x1F;
+    if ((addr & 0x03) == 0) addr &= 0x0F; 
+    return PAL[addr];
 }
 
 void PPU::store_vram(u16 addr, u8 value)
@@ -105,14 +106,15 @@ void PPU::store_vram(u16 addr, u8 value)
         }
         NAME[addr] = value;
     }
-    else if(addr >= 0x3000 && addr < 0x3F00) store_vram(addr-0x1000, value);
-    else if(addr >= 0x3F00 && addr < 0x4000)
-    {
-        addr = addr & 0x1F;
-        if ((addr & 0x03) == 0) addr &= 0x0F; 
-        PAL[addr] = value;
-    }
-    else throw(std::runtime_error("Out of bounds (W) to VRAM: " + addr));
+    else store_vram(addr-0x1000, value);
+}
+
+void PPU::store_palette(u16 addr, u8 value)
+{
+    assert(addr >= 0x3F00 && addr < 0x4000);
+    addr = addr & 0x1F;
+    if ((addr & 0x03) == 0) addr &= 0x0F; 
+    PAL[addr] = value;
 }
 
 void PPU::set_ppu_ctrl(u8 ctrl)
@@ -124,7 +126,7 @@ void PPU::set_ppu_ctrl(u8 ctrl)
     CVALS.spr_addr = (ctrl & D3) ? 0x1000: 0x0000;
     CVALS.vram_icr = (ctrl & D2) ? 0x20: 0x01;
     T.nm_select = (ctrl & 0x03);
-    // if(!old_nmi && CVALS.nmi_enabled && STAT_REG.vblank) trigger_nmi = true;
+    if(!old_nmi && CVALS.nmi_enabled && STAT_REG.vblank) trigger_nmi = true;
 }
 
 void PPU::set_ppu_mask(u8 mask)
@@ -181,7 +183,8 @@ void PPU::set_ppu_addr(u8 addr)
  
 void PPU::set_ppu_data(u8 data)
 {
-   store_vram(V.addr, data);
+   if(V.addr >= 0x3F00) store_palette(V.addr, data);
+   else store_vram(V.addr, data);
    V.addr += CVALS.vram_icr;
 }
 
@@ -190,8 +193,8 @@ u8 PPU::get_ppu_data()
     u8 value;
     if(V.addr >= 0x3F00)
     {
-        value = fetch_vram(V.addr);
-        ppu_data_buffer = value;
+        value = fetch_palette(V.addr);
+        ppu_data_buffer = fetch_vram(V.addr); // access "shadowed" memory to load buffer
     }
     else
     {
@@ -516,19 +519,19 @@ void PPU::run_ppu()
             if (spr_zero_loaded && spr_zero_opaque)
             {
                 bool leftmost_contention = MASK_REG.bg_left | MASK_REG.spr_left;
-                STAT_REG.spr_hit = (cycles >= (leftmost_contention ? 9: 1) && cycles < 258);
+                STAT_REG.spr_hit = (cycles >= (leftmost_contention ? 9: 1) && cycles < 257);
             }
         }
 
         // Populate pixel to frame buffer
-        u8 color_select = fetch_vram(PAL_INDEX | (final_palette_index << 2) | final_index);
+        u8 color_select = fetch_palette(PAL_INDEX | (final_palette_index << 2) | final_index);
         color_select &= (MASK_REG.greyscale ? 0x30 : 0x3F);
         frame_buf[lines*FRAME_W+(cycles-1)] = RGB_PAL[color_select];
     }
 
     // Reset cycles and lines
     cycles += 0x0001;
-    if(cycles == 340)
+    if(cycles == 341)
     {
         cycles = 0x0000;
         if(lines == 261)
@@ -550,21 +553,20 @@ void PPU::run_ppu()
 
 void PPU::peek_ppu(bool* ppu_up)
 {
-    ImGui::Begin("Palette RAM", ppu_up);
+    ImGui::SetNextWindowPos({0.0f, SCRH-200.0f});
+    ImGui::SetNextWindowSize({SCRW, 200.0f});
+    ImGui::Begin("PPU Viewer", ppu_up, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
     ImVec2 p = ImGui::GetCursorScreenPos();
-    float sz = 20.0f;       // Size of each color square
-    float spacing = 2.0f;  // Gap between squares
-    int rows = 8;
-    int cols = 4;
+    float size = 20.0f;
+    int cols = 16;
 
     for (int i = 0; i < 32; i++) 
     {
         int row = i / cols;
         int col = i % cols;
-        ImVec2 p_min = ImVec2(p.x + col * (sz + spacing), p.y + row * (sz + spacing));
-        ImVec2 p_max = ImVec2(p_min.x + sz, p_min.y + sz);
+        ImVec2 p_min = ImVec2(p.x + col * (size + 4.0f), p.y + row * (size + 4.0f));
+        ImVec2 p_max = ImVec2(p_min.x + size, p_min.y + size);
 
-        // Draw the color square
         ImU32 color = IM_COL32((u8)(RGB_PAL[PAL[i]] >> 24), (u8)(RGB_PAL[PAL[i]] >> 16), (u8)(RGB_PAL[PAL[i]] >> 8), (u8)RGB_PAL[PAL[i]]);
         ImGui::GetWindowDrawList()->AddRectFilled(p_min, p_max, color);
     }    

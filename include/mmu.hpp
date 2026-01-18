@@ -40,27 +40,10 @@ class MMU
         // Implied Transfers
         void tr(REG des, REG src);
 
-        // Immediate Transfers
-        void ld(REG des, u8 value);
-
         // Addressed Transfers
-        void ld(REG des, REG off, u16 addr);
-        void st(REG des, REG off, u16 addr);
-
-        // Zero-Addressed Transfers
-        void ldo(REG des, REG off, u16 addr);
-        void sto(REG des, REG off, u16 addr);
-
-        // Indexed Indirect Transfers
-        void ldi(REG des, REG off, u16 addr);
-        void sti(REG des, REG off, u16 addr);
-
-        // Indirect Indexed Transfers
-        void ldix(REG des, REG off, u16 addr);
-        void stix(REG des, REG off, u16 addr);
-
-        // Addressing
-        u16 get_addr(ADR mode, u16 addr, u8 off);
+        u16 get_addr(ADR mode, u16 addr, u8 off, bool cp_check = false);
+        void lda(REG des, ADR mode, u16 addr, u8 off);
+        void sta(REG des, ADR mode, u16 addr, u8 off);
 
         // Flags
         void updf(REG r);
@@ -106,7 +89,7 @@ class MMU
         u8 RAM[RAM_SIZE];
 
         // Direct Memory Access for OAM
-        u8 oam_data, dma_off = 0x00;
+        u8 oam_data, oam_des = 0x00, dma_off = 0x00;
         u16 dma_src;
 };
 

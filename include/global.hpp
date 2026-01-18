@@ -19,7 +19,8 @@ namespace Global
     static bool debug = false;
     static const char* rom_path = "./roms/";
 
-    static std::string readTextFromFile(const char* filepath) {
+    static std::string readTextFromFile(const char* filepath) 
+    {
         std::ifstream inputFile(filepath);
         if (inputFile.is_open()) 
         {
@@ -35,7 +36,34 @@ namespace Global
         }
     }
 
-    static std::string trim(const std::string& str) {
+    static void readDataFromFile(const char *filepath, u8* data, u16 size)
+    {
+        std::ifstream inputFile(filepath, std::ios::binary);
+        if (inputFile.is_open()) 
+        {
+            inputFile.read(reinterpret_cast<char*>(data), size);
+        } 
+        else 
+        {
+            std::cerr << "Error: Could not open file: '" << filepath << "'\n";
+        }
+    }
+
+    static void writeDataToFile(const char *filepath, u8* data, u16 size)
+    {
+        std::ofstream outputFile(filepath, std::ios::binary | std::ios::trunc);
+        if (outputFile.is_open()) 
+        {
+            outputFile.write(reinterpret_cast<const char*>(data), size);
+        } 
+        else 
+        {
+            std::cerr << "Error: Could not create file: '" << filepath << "'\n";
+        }
+    }
+
+    static std::string trim(const std::string& str) 
+    {
         size_t first = str.find_first_not_of(" \t\n\r\f\v");
         if (std::string::npos == first) 
         {

@@ -13,7 +13,7 @@ void ALU::update_flags()
 void ALU::adc(ADR mode, u16 addr, u8 off)
 {
     if(mode == -1) fetchIMD(off);
-    else fetchMEM(mode, addr, off);
+    else fetchMEM(mode, addr, off, 1);
     TEMP1 = mmu->fetch_reg(A);   
     u16 TEMP = TEMP1 + TEMP2 + ((SF & HX_CARY) ? 1 : 0);
     SF &= ~(HX_CARY | HX_OVFW);
@@ -26,7 +26,7 @@ void ALU::adc(ADR mode, u16 addr, u8 off)
 void ALU::sbc(ADR mode, u16 addr, u8 off)
 {
     if(mode == -1) fetchIMD(off);
-    else fetchMEM(mode, addr, off);
+    else fetchMEM(mode, addr, off, 1);
     TEMP1 = mmu->fetch_reg(A);
     u16 TEMP = TEMP1 + (~TEMP2 & 0x00FF) + ((SF & HX_CARY) ? 1 : 0);
     SF &= ~(HX_CARY | HX_OVFW);
@@ -39,7 +39,7 @@ void ALU::sbc(ADR mode, u16 addr, u8 off)
 void ALU::ana(ADR mode, u16 addr, u8 off)
 {
     if(mode == -1) fetchIMD(off);
-    else fetchMEM(mode, addr, off);
+    else fetchMEM(mode, addr, off, 1);
     TEMP1 = mmu->fetch_reg(A);
     TEMP1 &= TEMP2;
     loadREG(A); 
@@ -48,7 +48,7 @@ void ALU::ana(ADR mode, u16 addr, u8 off)
 void ALU::eor(ADR mode, u16 addr, u8 off)
 {
     if(mode == -1) fetchIMD(off);
-    else fetchMEM(mode, addr, off);
+    else fetchMEM(mode, addr, off, 1);
     TEMP1 = mmu->fetch_reg(A);
     TEMP1 ^= TEMP2;
     loadREG(A);
@@ -57,7 +57,7 @@ void ALU::eor(ADR mode, u16 addr, u8 off)
 void ALU::ora(ADR mode, u16 addr, u8 off)
 {
     if(mode == -1) fetchIMD(off);
-    else fetchMEM(mode, addr, off);
+    else fetchMEM(mode, addr, off, 1);
     TEMP1 = mmu->fetch_reg(A);
     TEMP1 |= TEMP2;
     loadREG(A);
@@ -66,7 +66,7 @@ void ALU::ora(ADR mode, u16 addr, u8 off)
 void ALU::cmp(REG r, ADR mode, u16 addr, u8 off)
 {
    if(mode == -1) fetchIMD(off);
-    else fetchMEM(mode, addr, off);
+    else fetchMEM(mode, addr, off, 1);
     TEMP1 = mmu->fetch_reg(r);
     SF &= ~HX_CARY;
     if(TEMP1 >= TEMP2) SF |= HX_CARY; /* A >= M => C = 1 */
@@ -182,9 +182,9 @@ void ALU::fetchIMD(u8 off)
     SF = mmu->fetch_reg(ST);
 }
 
-void ALU::fetchMEM(ADR mode, u16 addr, u8 off)
+void ALU::fetchMEM(ADR mode, u16 addr, u8 off, bool cp_check)
 {
-    TEMP2 = mmu->retreive(mmu->get_addr(mode, addr, off));
+    TEMP2 = mmu->retreive(mmu->get_addr(mode, addr, off, cp_check));
     SF = mmu->fetch_reg(ST);
 }
 

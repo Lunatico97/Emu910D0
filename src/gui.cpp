@@ -29,8 +29,10 @@ void GUI::load_rom(const char *rom_file)
 
     nes_state->system_clock = 0;
     nes_state->rom = Global::rom_path;
+    current_rom = strdup(rom_file);
     nes_state->crom->load_rom(nes_state->rom.append(rom_file).c_str());
-    nes_state->cpu->rst();
+    nes_state->crom->persist_ram(current_rom, true);
+    nes_state->cpu->pow();
     nes_state->apu->init();
     _rom_ld = true;
 }
@@ -39,10 +41,12 @@ void GUI::eject_rom()
 {
     if(nes_state != nullptr)
     {
+        nes_state->crom->persist_ram(current_rom);
         _mmu_vw = false;
         _ppu_vw = false;
         _rom_vw = false;
         _rom_ld = false;
+        free(current_rom);
         delete nes_state->apu;
         delete nes_state->cpu;
         delete nes_state->ppu;
