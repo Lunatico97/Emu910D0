@@ -1,11 +1,13 @@
 #include <ppu.hpp>
 
-PPU::PPU(CardROM *crom, Renderer *rndr) : W(0), crom(crom), cycles(0), lines(0), rndr(rndr), trigger_nmi(false) 
+PPU::PPU(CardROM *crom, Renderer *rndr) : W(0), crom(crom), cycles(0), lines(0), rndr(rndr), trigger_nmi(false)
 {
     W = 0;
     X = 0x00;
     T.addr = 0x0000;
     oam_addr = 0x00;
+    frame_toggle = false;
+    trigger_events = false;
     ppu_data_buffer = 0x00;
     frame_buf = (u32*)calloc(FRAME_W*FRAME_H, sizeof(u32));
     frame = rndr->loadTexture(FRAME_W, FRAME_H);
@@ -348,6 +350,11 @@ void PPU::run_ppu()
                 V.fine_y = T.fine_y;
                 V.nm_select = (V.nm_select & 0b01) | (T.nm_select & 0b10);
             }
+
+            if(lines == 261 && cycles == 339) 
+            {
+                if(!frame_toggle) cycles += 0x0001;
+            }
         }
     }
 
@@ -458,6 +465,15 @@ void PPU::run_ppu()
         if(CVALS.nmi_enabled) trigger_nmi = true; // Trigger NMI if enabled
     }
 
+    if(lines == 261 && cycles == 1)
+    {
+        // Clear VBLANK period, sprite hit and sprite overflow flag
+        STAT_REG.spr_hit = 0;
+        STAT_REG.spr_ovf = 0;
+        STAT_REG.vblank = 0;
+        W = 0;
+    }
+
     // Formulate pixels to render the frame
     if(visible_element)
     {
@@ -534,20 +550,15 @@ void PPU::run_ppu()
     if(cycles == 341)
     {
         cycles = 0x0000;
-        if(lines == 261)
-        {
-            // Clear VBLANK period, sprite hit and sprite overflow flag
-            lines = 0x0000;
-            STAT_REG.spr_hit = 0;
-            STAT_REG.spr_ovf = 0;
-            STAT_REG.vblank = 0;
-            W = 0;
-
+        lines += 0x0001;
+        if(lines == 262)
+        {            
             // Render frame
+            lines = 0x0000;
             trigger_events = true;
+            frame_toggle = !frame_toggle;
             rndr->renderFrame({0, 0, PPFW, PPFH}, frame, frame_buf, FRAME_W);
         }
-        lines += 0x0001;
     }
 }
 

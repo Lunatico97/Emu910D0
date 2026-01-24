@@ -1,16 +1,16 @@
 # E910D0 v1.0 [NES Emulator]
 - Author: Diwas Adhikari
-- Status: In Progress
+- Programmed in C++ using SDL v2.0.20
 - Description: NES Emulator to relive my childhood memories of playing with a bootleg NES/Famicom console 
                which looked like a PS1 and had a vertical cartridge slot like a Famicom :)
 
 
 ## Current Status:
-- Working burst-cycle 6502 CPU | PPU | 4-channel interleaving APU (Pulse 1, Pulse 2, Triangular & Noise)
+- Burst-cycle 6502 CPU | PPU | 4-channel interleaving APU (Pulse 1, Pulse 2, Triangular & Noise)
 - Keyboard & Gamepad Support
 - Mapper 0 (NROM), 1 (SxROM), 2 (UxROM) & 3 (CNROM)
+- Minimalistic User Interface using ImGUI v1.92.5
 - Build & Run: `./buildE910D0.sh _.nes` | Run: `e910D0 _.nes`
-- Minimalistic User Interface
 
 ![Emu910D0](rsrc/snip8.png)
 ![Donkey Kong](rsrc/donkey_kong.gif)
@@ -39,8 +39,9 @@
 
 ## Tests:
 ![NES Test Menu](rsrc/nestest.gif)
-- Passes all official tests for kevtrix's test ROM in video mode at reset vector: 0xC004.
-- Matches first 5000 lines of nestest.log (upto official instruction tests) in automation mode with PC force-set at 0xC000.
+- Passes all tests for kevtris's `nestest.nes` ROM in video mode at reset vector: 0xC004.
+- Passes most of blargg's CPU branch, timing and sync tests with PPU. 
+- Matches first 5000 lines of `nestest.log` (upto official instruction tests) in automation mode with PC force-set at 0xC000.
 - CPU tests for every 6502 instruction are available in `tests/e910D0Tests.cpp`.
 - Replace the file with `e910D0.cpp` to run test suite.
 
@@ -54,7 +55,7 @@
     <tr>
 </table>
 
-- Mapper 1 (Metroid, The Legend of Zelda, Megaman 2, Snow Bros., Tetris, Castlevania II - Simon's Quest, Zelda II: The Adventure  of Link, Dr. Mario, Snake: Rattle n' Roll) [MMC1 - ASIC]
+- Mapper 1 (Metroid, The Legend of Zelda, Megaman 2, Snow Bros., Tetris, Castlevania II - Simon's Quest, Zelda II: The Adventure  of Link, Dr. Mario, Snake: Rattle n' Roll, Ninja Gaiden) [MMC1 - ASIC]
 
 <table>
     <tr>
