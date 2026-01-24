@@ -80,6 +80,7 @@ class PPU
 
         // Latch
         u8 name_byte, attr_byte, palette_select, palette_bits;
+        bool frame_toggle;
 
         // Internal registers
         u8 X;
