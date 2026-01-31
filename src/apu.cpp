@@ -348,7 +348,9 @@ void APU::set_noise_timer(u8 data)
 
 u8 APU::get_apu_stat()
 {
-	return (apu_data.noise_ch.length > 0 ? D3: 0x00) | (apu_data.trig_ch.length > 0 ? D2: 0x00) |
+	bool prev_irq = frame_irq;
+	frame_irq = false;
+	return (prev_irq ? D6: 0x00) | (apu_data.noise_ch.length > 0 ? D3: 0x00) | (apu_data.trig_ch.length > 0 ? D2: 0x00) |
 	       (apu_data.pulse_ch[1].length > 0 ? D1: 0x00) | (apu_data.pulse_ch[0].length > 0 ? D0: 0x00);
 }
 
@@ -366,14 +368,14 @@ void APU::set_apu_stat(u8 data)
 void APU::set_apu_fcnt(u8 data)
 {
 	apu_fcnt.step_mode = (data & D7);
-	apu_fcnt.irq_flag = (data & D6);
+	apu_fcnt.irq_inb = (data & D6);
 	apu_fcnt.frame_cnt = 0x0000;
+	frame_irq = apu_fcnt.irq_inb ? false : frame_irq;
 }
 
 void APU::clock_apu_fcnt()
 {
 	apu_fcnt.frame_cnt += 0x0001;
-	// printf("FC: %d\n", apu_fcnt.frame_cnt);
 	if(apu_fcnt.step_mode)
 	{
 		// 4-step frame mode
@@ -393,10 +395,10 @@ void APU::clock_apu_fcnt()
 		else if(apu_fcnt.frame_cnt == QUARTER_FRAME*4)
 		{
 			// quarter & half frame with irq & reset
+		    frame_irq = !apu_fcnt.irq_inb;
 			apu_data.quarter_frame = true;
 			apu_data.half_frame = true;
 			apu_fcnt.frame_cnt = 0x0000;
-			apu_fcnt.irq_flag = true;
 		}
 	}
 	else

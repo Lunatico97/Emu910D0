@@ -8,3 +8,4 @@
 *.sav
 .vscode/*
 include/imgui/*
+x86_64_mingw32/*

@@ -79,6 +79,11 @@ void GUI::run_nes()
             nes_state->ppu->trigger_nmi = false;
         }
 
+        if(nes_state->apu->frame_irq)
+        {
+            nes_state->cpu->irq();
+        }
+
         nes_state->system_clock++;
     }
 }
@@ -100,7 +105,7 @@ void GUI::run_gui()
             controller->handleInput(&event);
             ImGui_ImplSDL2_ProcessEvent(&event);
             if(event.type == SDL_EventType::SDL_QUIT) _active = false;
-            if(event.type == SDL_EventType::SDL_KEYUP)
+            if(event.type == SDL_EventType::SDL_KEYUP && _rom_ld)
             {
                 nes_state->ppu->trigger_events = true;
                 switch(event.key.keysym.sym)
@@ -145,18 +150,18 @@ void GUI::create_rom_loader(bool *rom_up)
     ImGui::SetNextWindowPos({0.0f, 20.0f});
     ImGui::SetNextWindowSize({240.0f, 200.f});
     ImGui::Begin("Load ROM", rom_up, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
-    std::vector<const char*> roms = Global::scan_files(Global::rom_path, "nes");
+    std::vector<std::string> roms = Global::scan_files(Global::rom_path, "nes");
     if(ImGui::BeginListBox("##ROMS", {-FLT_MIN, 140.0f}))
     {
         for(int i=0; i<roms.size(); i++)
         {
-            if(ImGui::Selectable(roms[i], index == i)) index = i;
+            if(ImGui::Selectable(roms[i].c_str(), index == i)) index = i;
         }
         ImGui::EndListBox();
     }
     if(ImGui::Button("Load"))
     {
-        this->load_rom(roms[index]);
+        this->load_rom(roms[index].c_str());
     }
     ImGui::End();
 }

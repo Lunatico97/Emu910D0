@@ -37,6 +37,7 @@ class APU
         void clock_apu_fcnt();
 
         // R/W Operations
+        bool frame_irq = false;
         u8 read_from_cpu(u16 cpu_addr);
         void write_from_cpu(u16 cpu_addr, u8 data);
     
@@ -130,7 +131,7 @@ class APU
         struct {
             u16 frame_cnt;
             bool step_mode;
-            bool irq_flag;
+            bool irq_inb;
         } apu_fcnt;
 
         // Audio Thread Data

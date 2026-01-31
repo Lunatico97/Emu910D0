@@ -1,0 +1,81 @@
+# Project: Emu910D0
+# Makefile created by Dev-C++ 5.11
+
+CPP      = g++.exe
+CC       = gcc.exe
+WINDRES  = windres.exe
+RES      = obj/Emu910D0_private.res
+OBJ      = obj/alu.o obj/apu.o obj/controller.o obj/cpu.o obj/crom.o obj/e910D0.o obj/gui.o obj/mmu.o obj/ppu.o obj/renderer.o obj/imgui.o obj/imgui_demo.o obj/imgui_draw.o obj/imgui_impl_sdl2.o obj/imgui_impl_sdlrenderer2.o obj/imgui_tables.o obj/imgui_widgets.o $(RES)
+LINKOBJ  = obj/alu.o obj/apu.o obj/controller.o obj/cpu.o obj/crom.o obj/e910D0.o obj/gui.o obj/mmu.o obj/ppu.o obj/renderer.o obj/imgui.o obj/imgui_demo.o obj/imgui_draw.o obj/imgui_impl_sdl2.o obj/imgui_impl_sdlrenderer2.o obj/imgui_tables.o obj/imgui_widgets.o $(RES)
+LIBS     = -L"D:/Dev-Cpp/MinGW64/lib" -L"D:/Dev-Cpp/MinGW64/x86_64-w64-mingw32/lib" -static-libgcc -L"D:/Emu910D0/x86_64_mingw32/lib" -lmingw32 -lSDL2main -lSDL2
+INCS     = -I"D:/Dev-Cpp/MinGW64/include" -I"D:/Dev-Cpp/MinGW64/x86_64-w64-mingw32/include" -I"D:/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.9.2/include" -I"D:/Emu910D0/include" -I"D:/Emu910D0/x86_64_mingw32/include"
+CXXINCS  = -I"D:/Dev-Cpp/MinGW64/include" -I"D:/Dev-Cpp/MinGW64/x86_64-w64-mingw32/include" -I"D:/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.9.2/include" -I"D:/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.9.2/include/c++" -I"D:/Emu910D0/include" -I"D:/Emu910D0/x86_64_mingw32/include"
+BIN      = bin/Emu910D0.exe
+CXXFLAGS = $(CXXINCS) -std=c++11 -ffast-math -O2
+CFLAGS   = $(INCS) 
+RM       = rm.exe -f
+
+.PHONY: all all-before all-after clean clean-custom
+
+all: all-before $(BIN) all-after
+
+clean: clean-custom
+	${RM} $(OBJ) $(BIN)
+
+$(BIN): $(OBJ)
+	$(CPP) $(LINKOBJ) -o $(BIN) $(LIBS)
+
+obj/alu.o: src/alu.cpp
+	$(CPP) -c src/alu.cpp -o obj/alu.o $(CXXFLAGS)
+
+obj/apu.o: src/apu.cpp
+	$(CPP) -c src/apu.cpp -o obj/apu.o $(CXXFLAGS)
+
+obj/controller.o: src/controller.cpp
+	$(CPP) -c src/controller.cpp -o obj/controller.o $(CXXFLAGS)
+
+obj/cpu.o: src/cpu.cpp
+	$(CPP) -c src/cpu.cpp -o obj/cpu.o $(CXXFLAGS)
+
+obj/crom.o: src/crom.cpp
+	$(CPP) -c src/crom.cpp -o obj/crom.o $(CXXFLAGS)
+
+obj/e910D0.o: src/e910D0.cpp
+	$(CPP) -c src/e910D0.cpp -o obj/e910D0.o $(CXXFLAGS)
+
+obj/gui.o: src/gui.cpp
+	$(CPP) -c src/gui.cpp -o obj/gui.o $(CXXFLAGS)
+
+obj/mmu.o: src/mmu.cpp
+	$(CPP) -c src/mmu.cpp -o obj/mmu.o $(CXXFLAGS)
+
+obj/ppu.o: src/ppu.cpp
+	$(CPP) -c src/ppu.cpp -o obj/ppu.o $(CXXFLAGS)
+
+obj/renderer.o: src/renderer.cpp
+	$(CPP) -c src/renderer.cpp -o obj/renderer.o $(CXXFLAGS)
+
+obj/imgui.o: include/imgui/imgui.cpp
+	$(CPP) -c include/imgui/imgui.cpp -o obj/imgui.o $(CXXFLAGS)
+
+obj/imgui_demo.o: include/imgui/imgui_demo.cpp
+	$(CPP) -c include/imgui/imgui_demo.cpp -o obj/imgui_demo.o $(CXXFLAGS)
+
+obj/imgui_draw.o: include/imgui/imgui_draw.cpp
+	$(CPP) -c include/imgui/imgui_draw.cpp -o obj/imgui_draw.o $(CXXFLAGS)
+
+obj/imgui_impl_sdl2.o: include/imgui/imgui_impl_sdl2.cpp
+	$(CPP) -c include/imgui/imgui_impl_sdl2.cpp -o obj/imgui_impl_sdl2.o $(CXXFLAGS)
+
+obj/imgui_impl_sdlrenderer2.o: include/imgui/imgui_impl_sdlrenderer2.cpp
+	$(CPP) -c include/imgui/imgui_impl_sdlrenderer2.cpp -o obj/imgui_impl_sdlrenderer2.o $(CXXFLAGS)
+
+obj/imgui_tables.o: include/imgui/imgui_tables.cpp
+	$(CPP) -c include/imgui/imgui_tables.cpp -o obj/imgui_tables.o $(CXXFLAGS)
+
+obj/imgui_widgets.o: include/imgui/imgui_widgets.cpp
+	$(CPP) -c include/imgui/imgui_widgets.cpp -o obj/imgui_widgets.o $(CXXFLAGS)
+
+obj/Emu910D0_private.res: Emu910D0_private.rc 
+	$(WINDRES) -i Emu910D0_private.rc --input-format=rc -o obj/Emu910D0_private.res -O coff  --include-dir D:/Emu910D0/rsrc
+

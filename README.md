@@ -10,12 +10,12 @@
 - Keyboard & Gamepad Support
 - Mapper 0 (NROM), 1 (SxROM), 2 (UxROM) & 3 (CNROM)
 - Minimalistic User Interface using ImGUI v1.92.5
-- Build & Run: `./buildE910D0.sh _.nes` | Run: `e910D0 _.nes`
+- Platform Support: Linux & Windows
 
 ![Emu910D0](rsrc/snip8.png)
 ![Donkey Kong](rsrc/donkey_kong.gif)
 
-## Commands:
+## Controls:
 
 <table>
     <tr> <th> Keyboard Controls </th> <th> NES Equivalent / Gamepad Buttons </th> </tr>
@@ -92,6 +92,21 @@
         <td> <img src="rsrc/tetris_tengen.png" alt="Tengen's Tetris"> </td>
     <tr>
 </table>
+
+## How to compile ?
+- The steps listed below are "easy-to-follow" process for setting up and compiling the source code with available scripts.
+- Else, you can quickly setup your own target paths for dependencies and prepare custom makefile for compiling the project.
+- For Linux,
+  1. Run `apt-get install libsdl2-dev` to fetch SDL v2.0.20 library.
+  2. Download source files for [Dear ImGui v1.92.5](https://github.com/ocornut/imgui/tree/v1.92.5). 
+  3. Put files with SDL2 renderer backend files in `./include/imgui` folder.
+  2. Build & Run: `./buildE910D0.sh _.nes` | Run: `e910D0 _.nes`
+- For Windows, 
+  1. Download [SDL v2.0.20](https://github.com/libsdl-org/SDL/releases/tag/release-2.0.20) package for MinGW compilation.
+  2. Unzip it and place the contents inside `./x86_64_mingw32` folder.
+  3. Download source files for [Dear ImGui v1.92.5](https://github.com/ocornut/imgui/tree/v1.92.5). 
+  4. Put those files with SDL2 renderer backend files in `./include/imgui` folder.
+  3. Build & Run: Use `Emu910D0.dev` to setup and build project in Dev C++ IDE | Run: `Emu910D0.exe _.nes`
 
 ## References:
 - [NES Dev Wiki](https://www.nesdev.org/wiki/NES_reference_guide)
