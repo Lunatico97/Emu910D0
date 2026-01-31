@@ -3,6 +3,7 @@
 #include <mappers/mapper001.hpp>
 #include <mappers/mapper002.hpp>
 #include <mappers/mapper003.hpp>
+#include <mappers/mapper004.hpp>
 
 CardROM::CardROM(){}
 CardROM::~CardROM()
@@ -36,43 +37,33 @@ void CardROM::decode(u8 header[])
         case 0x01: mapper = new Mapper001(prg_units, chr_units); break;
         case 0x02: mapper = new Mapper002(prg_units, chr_units); break;
         case 0x03: mapper = new Mapper003(prg_units, chr_units, PRGROM); break;
+        case 0x04: mapper = new Mapper004(prg_units, chr_units); break;
         default: break;
     }
 }
 
 void CardROM::load_rom(const char *filename)
 {
-    std::stringstream ss(Global::readTextFromFile(filename));
-    ss >> std::hex >> std::noskipws;
-    u32 counter = 0x0000;
-    u8 current_hex = 0x00;
-    u8 header[16] = {0};  
-
-    while(ss >> current_hex)
-    {
-        if(counter < 0x0010)
-        {
-            header[counter] = current_hex;
-            counter += 0x0001;
-        }
-        else break;
+    std::ifstream fs(filename, std::ios::binary);
+    if(!fs.is_open())
+	{
+        std::cerr << "Error: Could not open file: '" << filename << "'\n";
+        return;
     }
+        
+    u8 header[16] = {0};  
+    fs.read(reinterpret_cast<char*>(header), 16);
 
     decode(header);
+    std::cout << "ROM: " << filename << "\n";
     std::cout << "PRG Banks: [ " << static_cast<int>(prg_units) << " ]\n";  
     std::cout << "CHR Banks: [ " << static_cast<int>(chr_units) << " ]\n";  
     std::cout << "Mapper: [ " << static_cast<int>(mapper_num) << " ]\n";
     std::cout << "Mirror Mode: " << (mirror_mode ? "Vertical": "Horizontal") << std::endl;
 
-    *(PRGROM + 0) = current_hex;
-    u32 prg_limit = 0x000F + (prg_units*PRG_BANK);
-
-    while(ss >> current_hex)
-    {
-        if(counter < prg_limit) *(PRGROM + (counter-0x000F)) = current_hex; 
-        else *(CHRROM + (counter-prg_limit)) = current_hex; 
-        counter += 0x0001;
-    } 
+    fs.read(reinterpret_cast<char*>(PRGROM), prg_units*PRG_BANK);
+    fs.read(reinterpret_cast<char*>(CHRROM), chr_units*CHR_BANK);
+    fs.close();
 }
 
 u8 CardROM::read_from_cpu(u16 cpu_addr)

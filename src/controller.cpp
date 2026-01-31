@@ -1,6 +1,12 @@
 #include <controller.hpp>
 
-Controller::Controller() {}
+Controller::Controller() 
+{
+	inst_state[0] = 0x00;
+	inst_state[1] = 0x00;
+	state[0] = 0x00;
+	state[1] = 0x00;
+}
 
 Controller::~Controller()
 {

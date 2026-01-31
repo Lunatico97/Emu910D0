@@ -17,7 +17,7 @@
 namespace Global
 {
     static bool debug = false;
-    static const char* rom_path = "./roms/";
+    static const char* rom_path = "roms/";
 
     static std::string readTextFromFile(const char* filepath) 
     {
@@ -80,22 +80,19 @@ namespace Global
         return length;
     }
 
-    static std::vector<const char*> scan_files(const char *directory, const char *ext)
+    static std::vector<std::string> scan_files(const char *directory, const char *ext)
     {
-        std::vector<const char*> files;
+        std::vector<std::string> files;
         DIR* dptr = opendir(directory);
         if(dptr) 
         {
             dirent* dirent = readdir(dptr);
-            while(dirent) 
+            while(dirent != NULL) 
             {
-                if(dirent->d_type != DT_DIR)
+                std::string filename = dirent->d_name;
+                if(filename.find(ext, (get_length(dirent->d_name)-get_length(ext))) != std::string::npos)
                 {
-                    std::string filename = dirent->d_name;
-                    if(filename.find(ext, (get_length(dirent->d_name)-get_length(ext))) != std::string::npos)
-                    {
-                        files.push_back(dirent->d_name);
-                    }
+                    files.push_back(dirent->d_name);
                 }
                 dirent = readdir(dptr);
             }
