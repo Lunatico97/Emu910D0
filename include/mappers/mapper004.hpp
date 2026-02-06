@@ -5,8 +5,9 @@ class Mapper004: public Mapper
     public:
         Mapper004(u8 prg, u8 chr)
         {
-            prg_units = prg;
+            prg_units = prg*2;
             chr_units = chr;
+            memset(bank_reg, 0x00, 8);
         }
 
         u32 map_cpu(u16 cpu_addr)
@@ -25,17 +26,9 @@ class Mapper004: public Mapper
                     default: break;
                 }
 
-                if(cpu_addr >= 0x8000 && cpu_addr < 0xC000)
-                {
-                    prg_addr = (asic_vals.prg_select)*(PRG_BANK/2);
-                    prg_offset = cpu_addr & 0x1FFF;
-                }
-                else
-                {
-                    prg_addr = (asic_vals.prg_select)*PRG_BANK;
-                    prg_offset = cpu_addr & 0x3FFF;
-                }
-
+                prg_addr = asic_vals.prg_select*8192;
+                prg_offset = cpu_addr & 0x1FFF;
+                
                 return prg_addr + prg_offset;
             }
         }
@@ -60,12 +53,14 @@ class Mapper004: public Mapper
             if(ppu_addr >= 0x0000 && ppu_addr < 0x1000)
             {
                 chr_addr = (asic_vals.chr_select)*1024;
-                chr_offset = ppu_addr & 0x07FF;
+                if(asic_vals.chr_mode) chr_offset = ppu_addr & 0x03FF;
+                else chr_offset = ppu_addr & 0x07FF;
             }
             else
             {
                 chr_addr = (asic_vals.chr_select)*1024;
-                chr_offset = ppu_addr & 0x03FF;
+                if(asic_vals.chr_mode) chr_offset = ppu_addr & 0x07FF;
+                else chr_offset = ppu_addr & 0x03FF;
             }
 
             return chr_addr + chr_offset;
@@ -84,12 +79,12 @@ class Mapper004: public Mapper
         }
     
     private:
-        void configure(u8 asic_index, u8 data, bool parity)
+        void configure(u8 asic_index, u8 data, bool even)
         {
             switch(asic_index)
             {
                 case 0x00: 
-                    if(parity)
+                    if(even)
                     {
                         asic_vals.bank_select = (data & 0x07);
                         asic_vals.prg_mode = (data & D6);
@@ -104,7 +99,7 @@ class Mapper004: public Mapper
                     break;
 
                 case 0x01: 
-                    if(parity)
+                    if(even)
                     {
                         mirror_mode = (data & D0) + 0x02;
                     }
@@ -116,7 +111,7 @@ class Mapper004: public Mapper
                     break;
 
                 case 0x02: 
-                    if(parity)
+                    if(even)
                     {
                         asic_vals.irq_reload = data;
                     }
@@ -128,7 +123,7 @@ class Mapper004: public Mapper
                     break;
 
                 case 0x03: 
-                    if(parity)
+                    if(even)
                     {
                         asic_vals.irq_en = false;
                     }

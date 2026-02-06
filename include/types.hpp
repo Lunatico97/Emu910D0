@@ -10,10 +10,12 @@
 #define D1 0b00000010
 #define D0 0b00000001
 
-#define SCRW 640
-#define SCRH 480
-#define PPFW 640
-#define PPFH 480
+#define SCRW 800
+#define SCRH 600
+#define PPFW 800
+#define PPFH 580
+#define PPFX 0
+#define PPFY 20
 
 typedef uint8_t u8;
 typedef uint16_t u16;

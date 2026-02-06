@@ -46,7 +46,7 @@ void CardROM::load_rom(const char *filename)
 {
     std::ifstream fs(filename, std::ios::binary);
     if(!fs.is_open())
-	{
+    {
         std::cerr << "Error: Could not open file: '" << filename << "'\n";
         return;
     }

@@ -52,7 +52,7 @@
     <tr>
         <td> <img src="rsrc/ice_climber.gif" alt="Ice Climber"> </td>
         <td> <img src="rsrc/smb1.gif" alt="Super Mario Bros. 1"> </td>
-    <tr>
+    </tr>
 </table>
 
 - Mapper 1 (Metroid, The Legend of Zelda, Megaman 2, Snow Bros., Tetris, Castlevania II - Simon's Quest, Zelda II: The Adventure  of Link, Dr. Mario, Snake: Rattle n' Roll, Ninja Gaiden) [MMC1 - ASIC]
@@ -61,11 +61,11 @@
     <tr>
         <td> <img src="rsrc/metroid.png" alt="Metroid"> </td>
         <td> <img src="rsrc/megaman2.png" alt="Megaman 2"> </td>
-    <tr>
+    </tr>
     <tr>
         <td> <img src="rsrc/tloz.png" src="The Legend of Zelda"> </td>
         <td> <img src="rsrc/snowbros.png" src="Snow Bros."> </td>
-    <tr>
+    </tr>
 </table>
 
 - Mapper 2 (Megaman, Castlevania, Contra, Metal Gear)
@@ -74,11 +74,11 @@
     <tr>
         <td> <img src="rsrc/megaman.png" alt="Megaman"> </td>
         <td> <img src="rsrc/castlevania.png" alt="Castlevania"> </td>
-    <tr>
+    </tr>
     <tr>
         <td> <img src="rsrc/contra.png" src="Contra"> </td>
         <td> <img src="rsrc/metal_gear.png" src="Metal Gear"> </td>
-    <tr>
+    </tr>
 </table>
 
 - Mapper 3 (Milon's Secret Castle, Adventure Island, Track & Field, Tengen's Tetris, Solomon's Key)
@@ -87,10 +87,19 @@
     <tr>
         <td> <img src="rsrc/milons_secret_castle.png" alt="Milon's Secret Castle"> </td>
         <td> <img src="rsrc/adventure_island.png" alt="Adventure Island"> </td>
-    <tr>
+    </tr>
         <td> <img src="rsrc/track_and_field.png" alt="Track & Field"> </td>
         <td> <img src="rsrc/tetris_tengen.png" alt="Tengen's Tetris"> </td>
+    </tr>
+</table>
+
+- Mapper 4 (Super Mario Bros. 2, Felix The Cat, Super Mario Bros. 3, Jackie Chan's Action Kung Fu) [MMC3 - ASIC (In Progress)]
+
+<table>
     <tr>
+        <td> <img src="rsrc/smb2.png" alt="Super Mario Bros. 2"> </td>
+        <td> <img src="rsrc/felix_the_cat.png" alt="Felix The Cat"> </td>
+    </tr>
 </table>
 
 ## How to compile ?
@@ -100,13 +109,14 @@
   1. Run `apt-get install libsdl2-dev` to fetch SDL v2.0.20 library.
   2. Download source files for [Dear ImGui v1.92.5](https://github.com/ocornut/imgui/tree/v1.92.5). 
   3. Put files with SDL2 renderer backend files in `./include/imgui` folder.
-  2. Build & Run: `./buildE910D0.sh _.nes` | Run: `e910D0 _.nes`
+  4. Build & Run: `./buildE910D0.sh _.nes` | Run: `e910D0 _.nes`
 - For Windows, 
   1. Download [SDL v2.0.20](https://github.com/libsdl-org/SDL/releases/tag/release-2.0.20) package for MinGW compilation.
   2. Unzip it and place the contents inside `./x86_64_mingw32` folder.
   3. Download source files for [Dear ImGui v1.92.5](https://github.com/ocornut/imgui/tree/v1.92.5). 
   4. Put those files with SDL2 renderer backend files in `./include/imgui` folder.
-  3. Build & Run: Use `Emu910D0.dev` to setup and build project in Dev C++ IDE | Run: `Emu910D0.exe _.nes`
+  4. Place the SDL2 dll(s) to `./bin` folder.
+  5. Build & Run: Use `Emu910D0.dev` to setup and build project in Dev C++ IDE | Run: `Emu910D0.exe _.nes`
 
 ## References:
 - [NES Dev Wiki](https://www.nesdev.org/wiki/NES_reference_guide)

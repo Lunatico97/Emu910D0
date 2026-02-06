@@ -8,6 +8,7 @@ class Mapper001: public Mapper
             prg_units = prg;
             chr_units = chr;
             shift_reg = 0x10;
+            memset(asic_reg, 0x00, 4);
         }
 
         u32 map_cpu(u16 cpu_addr)
