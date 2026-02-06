@@ -3,9 +3,12 @@
 *.dll
 *.exe
 *.o
+*.rc
+*.res
 *.nes
 *.ini
 *.sav
+*.layout
 .vscode/*
 include/imgui/*
 x86_64_mingw32/*

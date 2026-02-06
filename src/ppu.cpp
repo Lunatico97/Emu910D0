@@ -250,7 +250,7 @@ void PPU::update_vertv()
 
 void PPU::run_ppu()
 {
-    bool visible_element = (lines > 0 && lines < 240) && (cycles >= 1 && cycles <= 257);
+    bool visible_element = (lines > 0 && lines < 240) && (cycles >= 0 && cycles < 255);
 
     // Frame timing for background 
     // [Based on NesWiki diagram: https://www.nesdev.org/w/images/default/4/4f/Ppu.svg]
@@ -371,26 +371,26 @@ void PPU::run_ppu()
             spr_zero_loaded = false;
 
             for(u8 i = 0; i < 0x40 && spr_cnt < 9; i++)
-			{
-				int range = lines - OAM[4*i];				
-				if(range >= 0 && range < CVALS.spr_size)
-				{
+            {
+                int range = lines - OAM[4*i];               
+                if(range >= 0 && range < CVALS.spr_size)
+                {
 
                     if(i == 0) spr_zero_loaded = true;
 
-					if(spr_cnt < 8)
-					{
-						for(u8 j = 0; j < 4; j++)
+                    if(spr_cnt < 8)
+                    {
+                        for(u8 j = 0; j < 4; j++)
                         {
                             SPAM[4*spr_cnt+j] = OAM[4*i+j];
                         }
 
-						spr_cnt++;
-					}				
-				}
-			} 
+                        spr_cnt++;
+                    }               
+                }
+            } 
 
-			STAT_REG.spr_ovf = (spr_cnt > 8);
+            STAT_REG.spr_ovf = (spr_cnt > 8);
         }
 
         if(cycles >= 257 && cycles < 321)
@@ -510,6 +510,13 @@ void PPU::run_ppu()
                 }
             }
         }
+        
+        // Left-most contention
+        if(cycles >= 0 && cycles < 9)
+        {
+            bg_index = MASK_REG.bg_left ? bg_index : 0x00;
+            spr_index = MASK_REG.spr_left ? spr_index : 0x00;       
+        }
 
         // Priority (Depth & Collision)
         if(bg_index == 0x00 && spr_index == 0x00)
@@ -534,15 +541,14 @@ void PPU::run_ppu()
 
             if (spr_zero_loaded && spr_zero_opaque)
             {
-                bool leftmost_contention = MASK_REG.bg_left | MASK_REG.spr_left;
-                STAT_REG.spr_hit = (cycles >= (leftmost_contention ? 9: 1) && cycles < 257);
+                STAT_REG.spr_hit = (cycles >= ((MASK_REG.bg_left | MASK_REG.spr_left) ? 8 : 0) && cycles < 256);
             }
         }
 
         // Populate pixel to frame buffer
         u8 color_select = fetch_palette(PAL_INDEX | (final_palette_index << 2) | final_index);
         color_select &= (MASK_REG.greyscale ? 0x30 : 0x3F);
-        frame_buf[lines*FRAME_W+(cycles-1)] = RGB_PAL[color_select];
+        frame_buf[lines*FRAME_W+cycles] = RGB_PAL[color_select];
     }
 
     // Reset cycles and lines
@@ -557,7 +563,7 @@ void PPU::run_ppu()
             lines = 0x0000;
             trigger_events = true;
             frame_toggle = !frame_toggle;
-            rndr->renderFrame({0, 0, PPFW, PPFH}, frame, frame_buf, FRAME_W);
+            rndr->renderFrame({PPFX, PPFY, PPFW, PPFH}, frame, frame_buf, FRAME_W);
         }
     }
 }
@@ -584,4 +590,3 @@ void PPU::peek_ppu(bool* ppu_up)
 
     ImGui::End();
 }
-
