@@ -98,11 +98,11 @@
 <table>
     <tr>
         <td> <img src="rsrc/smb2.png" alt="Super Mario Bros. 2"> </td>
-        <td> <img src="rsrc/smb3.png" alt="Super Mario Bros. 3"> </td>
+        <td> <img src="rsrc/smb3.PNG" alt="Super Mario Bros. 3"> </td>
     </tr>
     <tr>
         <td> <img src="rsrc/felix_the_cat.png" alt="Felix The Cat"> </td>
-        <td> <img src="rsrc/jackie_chan.png" alt="Jackie Chan's Action Kung Fu"> </td>
+        <td> <img src="rsrc/jackie_chan.PNG" alt="Jackie Chan's Action Kung Fu"> </td>
     </tr>
 </table>
 
