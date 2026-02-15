@@ -33,6 +33,8 @@ class Mapper003: public Mapper
         {
             assert(ppu_addr >= 0x0000 && ppu_addr < 0x2000);
         }
+        
+        void clock_irq(u16 ppu_addr) { return; }
     
     private:
         u8 prg_units, chr_units;

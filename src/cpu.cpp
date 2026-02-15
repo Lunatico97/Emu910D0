@@ -7,9 +7,9 @@ void CPU::clock()
 {
     if(cycles == 0)
     {
-        this->step();
+    	this->step();
         cycles = CYCLE_MAP[mmu->retreive(IREG)] + mmu->cycle_penalty;
-        mmu->cycle_penalty = 0x00;
+        mmu->cycle_penalty = 0x00;	
     }
     cycles -= 1;
     if(Global::debug) accumulator += 1;

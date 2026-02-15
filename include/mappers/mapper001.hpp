@@ -81,6 +81,8 @@ class Mapper001: public Mapper
         {
             assert(ppu_addr >= 0x0000 && ppu_addr < 0x2000);
         }
+        
+        void clock_irq(u16 ppu_addr) { return; }
     
     private:
         void configure(u8 asic_index)

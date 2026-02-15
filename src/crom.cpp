@@ -107,3 +107,9 @@ u8 CardROM::get_mirror_mode()
     if(mapper->mirror_mode != 0xFF) return mapper->mirror_mode;
     else return !mirror_mode + 0x02;
 }
+
+void CardROM::clock_irq(u16 ppu_addr)
+{
+	mapper->clock_irq(ppu_addr);
+	map_irq = mapper->fire_irq;
+}

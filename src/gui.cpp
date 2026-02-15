@@ -69,7 +69,7 @@ void GUI::run_nes()
             else
             {
                 nes_state->cpu->clock();
-                nes_state->apu->clock_apu_fcnt();
+                nes_state->apu->clock_apu_fcnt(); 
             }
         }
 
@@ -79,10 +79,11 @@ void GUI::run_nes()
             nes_state->ppu->trigger_nmi = false;
         }
 
-        if(nes_state->apu->frame_irq)
+        if(nes_state->apu->frame_irq || nes_state->crom->map_irq)
         {
-            nes_state->cpu->irq();
-        }
+        	nes_state->cpu->irq();
+        	nes_state->crom->map_irq = false;
+		}
 
         nes_state->system_clock++;
     }

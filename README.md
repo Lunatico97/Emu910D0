@@ -8,7 +8,7 @@
 ## Current Status:
 - Burst-cycle 6502 CPU | PPU | 4-channel interleaving APU (Pulse 1, Pulse 2, Triangular & Noise)
 - Keyboard & Gamepad Support
-- Mapper 0 (NROM), 1 (SxROM), 2 (UxROM) & 3 (CNROM)
+- Mapper 0 (NROM), 1 (SxROM), 2 (UxROM), 3 (CNROM) & 4 (TxROM)
 - Minimalistic User Interface using ImGUI v1.92.5
 - Platform Support: Linux & Windows
 
@@ -93,12 +93,16 @@
     </tr>
 </table>
 
-- Mapper 4 (Super Mario Bros. 2, Felix The Cat, Super Mario Bros. 3, Jackie Chan's Action Kung Fu) [MMC3 - ASIC (In Progress)]
+- Mapper 4 (Super Mario Bros. 2, Super Mario Bros. 3, Felix The Cat, Jackie Chan's Action Kung Fu, Megaman 3, Kirby's Adventure) [MMC3 - ASIC]
 
 <table>
     <tr>
         <td> <img src="rsrc/smb2.png" alt="Super Mario Bros. 2"> </td>
+        <td> <img src="rsrc/smb3.png" alt="Super Mario Bros. 3"> </td>
+    </tr>
+    <tr>
         <td> <img src="rsrc/felix_the_cat.png" alt="Felix The Cat"> </td>
+        <td> <img src="rsrc/jackie_chan.png" alt="Jackie Chan's Action Kung Fu"> </td>
     </tr>
 </table>
 
