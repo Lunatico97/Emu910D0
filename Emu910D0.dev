@@ -1,7 +1,7 @@
 [Project]
 FileName=Emu910D0.dev
 Name=Emu910D0
-Type=0
+Type=1
 Ver=2
 ObjFiles=
 Includes=D:\Emu910D0\include;D:\Emu910D0\x86_64_mingw32\include

@@ -473,6 +473,11 @@ void PPU::run_ppu()
         STAT_REG.vblank = 0;
         W = 0;
     }
+    
+    if(lines < 240 && cycles == 260)
+    {
+    	crom->clock_irq(V.addr);
+	}
 
     // Formulate pixels to render the frame
     if(visible_element)

@@ -8,6 +8,7 @@ class Mapper004: public Mapper
             prg_units = prg*2;
             chr_units = chr;
             memset(bank_reg, 0x00, 8);
+            asic_vals.irq_a12 = 0;
         }
 
         u32 map_cpu(u16 cpu_addr)
@@ -77,6 +78,30 @@ class Mapper004: public Mapper
         {
             assert(ppu_addr >= 0x0000 && ppu_addr < 0x2000);
         }
+        
+        void clock_irq(u16 ppu_addr)
+        {			
+//        	bool a12_high = (ppu_addr & 0x1000) > 0;
+//        	if(!asic_vals.irq_a12 && a12_high && asic_vals.a12_lcnt >= 3)
+//        	{
+        		// rising edge
+        		fire_irq = asic_vals.irq_en && asic_vals.irq_counter == 0x00;
+				if(asic_vals.irq_counter == 0x00 || asic_vals.irq_reload) 
+				{
+					asic_vals.irq_counter = asic_vals.irq_latch;
+					asic_vals.irq_reload = false;
+				}
+				else
+				{
+					asic_vals.irq_counter--;
+				}
+//			}
+			
+//			if(a12_high) asic_vals.a12_lcnt = 0;
+//			else asic_vals.a12_lcnt++;
+//			
+//			asic_vals.irq_a12 = a12_high;
+		}
     
     private:
         void configure(u8 asic_index, u8 data, bool even)
@@ -111,21 +136,15 @@ class Mapper004: public Mapper
                     break;
 
                 case 0x02: 
-                    if(even)
-                    {
-                        asic_vals.irq_reload = data;
-                    }
-                    else
-                    {
-                        asic_vals.irq_counter = 0x00;
-                        // reload at next rising edge of PPU address (cycle 260 of current scanline)                     
-                    }
+                    if(even) asic_vals.irq_latch = data;
+                    else asic_vals.irq_reload = true;                   
                     break;
 
                 case 0x03: 
                     if(even)
                     {
                         asic_vals.irq_en = false;
+                        fire_irq = false;
                     }
                     else
                     {
@@ -139,13 +158,14 @@ class Mapper004: public Mapper
 
         struct
         {
-            bool prg_mode, chr_mode, prg_en, prg_wp, irq_en;
+            bool prg_mode, chr_mode, prg_en, prg_wp, irq_en, irq_a12;
             u8 bank_select, prg_select, chr_select;
-            u8 irq_reload, irq_counter;
+            u8 irq_latch, irq_reload, irq_counter, a12_lcnt;
         } asic_vals;
 
         u8 bank_reg[8];
         u8 prg_units, chr_units;
         u16 prg_offset, chr_offset;
         u32 prg_addr, chr_addr;
+        u8 edges = 0;
 };
