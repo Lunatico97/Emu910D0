@@ -575,12 +575,60 @@ void PPU::run_ppu()
 
 void PPU::peek_ppu(bool* ppu_up)
 {
-    ImGui::SetNextWindowPos({0.0f, SCRH-200.0f});
-    ImGui::SetNextWindowSize({SCRW, 200.0f});
+    ImGui::SetNextWindowPos({SCRW-300.0f, 0.0f});
+    ImGui::SetNextWindowSize({300.0f, SCRH-200.0f});
     ImGui::Begin("PPU Viewer", ppu_up, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
+
+    // Control
+    ImGui::BeginGroup();
+    ImGui::TextUnformatted("Control");
+    ImGui::BulletText("BGADDR: 0x%04x", CVALS.bg_addr);
+    ImGui::BulletText("SPADDR: 0x%04x", CVALS.spr_addr);
+    ImGui::BulletText("SPSIZE: 8*%dpx", CVALS.spr_size);
+    ImGui::BulletText("VRINCR: %d", CVALS.vram_icr);
+    ImGui::BulletText("NMI: %d", CVALS.nmi_enabled);
+    ImGui::EndGroup();
+
+    // Video
+    ImGui::SameLine(150.0f, 0.0f);
+    ImGui::BeginGroup();
+    ImGui::TextUnformatted("Video");
+    ImGui::BulletText("VRAM: 0x%04x", V.addr);
+    ImGui::BulletText("TRAM: 0x%04x", T.addr);
+    ImGui::BulletText("Nametable: %d", V.nm_select);
+    ImGui::BulletText("Coarse: (%d,%d)", V.coarse_x, V.coarse_y);
+    ImGui::BulletText("Fine: (%d,%d)", X, V.fine_y);
+    ImGui::EndGroup();
+
+    // Status
+    ImGui::Spacing();
+    ImGui::BeginGroup();
+    ImGui::TextUnformatted("Mask");
+    ImGui::BulletText("MASK: 0x%02x", MASK_REG.byte);
+    ImGui::BulletText("BGENAB: %d", MASK_REG.bg_enabled);
+    ImGui::BulletText("SPENAB: %d", MASK_REG.spr_enabled);
+    ImGui::BulletText("BGLEFT: %d", MASK_REG.bg_left);
+    ImGui::BulletText("SPLEFT: %d", MASK_REG.spr_left);
+    ImGui::EndGroup();
+    
+    // Mask
+    ImGui::SameLine(150.0f, 0.0f);
+    ImGui::BeginGroup();
+    ImGui::TextUnformatted("Status");
+    ImGui::BulletText("STATUS: 0x%02x", STAT_REG.byte);
+    ImGui::BulletText("SPZHIT: %d", STAT_REG.spr_hit);
+    ImGui::BulletText("SPOVFW: %d", STAT_REG.spr_ovf);
+    ImGui::BulletText("VBLANK: %d", STAT_REG.vblank);
+    ImGui::EndGroup();
+    
+
+    // Palette RAM
+    ImGui::Spacing();
+    ImGui::Spacing();
+    ImGui::TextUnformatted("Palette RAM");
     ImVec2 p = ImGui::GetCursorScreenPos();
     float size = 20.0f;
-    int cols = 16;
+    int cols = 8;
 
     for (int i = 0; i < 32; i++) 
     {

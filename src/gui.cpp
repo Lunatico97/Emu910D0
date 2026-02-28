@@ -189,7 +189,7 @@ void GUI::create_menu()
         if(ImGui::BeginMenu("Peeks"))
         {
             if(ImGui::MenuItem("Memory Viewer", NULL, nullptr, _rom_ld)) _mmu_vw = true;
-            if(ImGui::MenuItem("Palette RAM", NULL, nullptr, _rom_ld)) _ppu_vw = true;
+            if(ImGui::MenuItem("PPU Viewer", NULL, nullptr, _rom_ld)) _ppu_vw = true;
             ImGui::EndMenu();
         }
         if(ImGui::BeginMenu("Interrupts"))

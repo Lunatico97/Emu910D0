@@ -17,7 +17,7 @@ class Mapper
         
         // IRQs
         bool fire_irq = false;
-        virtual void clock_irq(u16 ppu_addr);
+        virtual void clock_irq(u16 ppu_addr) = 0;
 };
 
 #endif
