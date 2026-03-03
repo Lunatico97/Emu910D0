@@ -179,7 +179,7 @@ void MMU::store(u16 m_addr, u8 value)
 {
     if(m_addr >= 0x0000 && m_addr < 0x2000) RAM[(m_addr & 0x07FF)] = value;
     else if(m_addr >= 0x2000 && m_addr < 0x4000) ppu->write_from_cpu((m_addr & 0x2007), value);
-    else if(m_addr == CTRL_P1) ctrl->write_state(m_addr & 0x0001);
+    else if(m_addr == CTRL_P1) ctrl->write_state(value);
     else if(m_addr == OAMDMA) this->signal_dma(value);
     else if(m_addr >= 0x4000 && m_addr < 0x4018) apu->write_from_cpu(m_addr, value);
     else if(m_addr >= 0x4018 && m_addr < 0x6000) return;

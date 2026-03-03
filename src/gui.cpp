@@ -101,9 +101,10 @@ void GUI::run_gui()
 
     while(_active)
     {
+        SDL_SetWindowFullscreen(rndr->window, SDL_WINDOW_FULLSCREEN_DESKTOP & _fullscr);
         while(check_ppu_events() && SDL_PollEvent(&event))
         {
-            controller->handleInput(&event);
+            controller->handleInput(&event, _dual_mode);
             ImGui_ImplSDL2_ProcessEvent(&event);
             if(event.type == SDL_EventType::SDL_QUIT) _active = false;
             if(event.type == SDL_EventType::SDL_KEYUP && _rom_ld)
@@ -179,9 +180,11 @@ void GUI::create_menu()
     }
     if(ImGui::BeginMenu("Options"))
     {
-        if(ImGui::MenuItem("Pause/Unpause", "NUM_6", nullptr, _rom_ld)) _pause = !_pause;
+        if(ImGui::MenuItem("Pause/Unpause", "NUM_6", nullptr, _rom_ld)) _pause = !_pause;       
         if(ImGui::MenuItem("Mute/Unmute", "NUM_5", nullptr, _rom_ld)) nes_state->apu->toggle_apu();
         if(ImGui::MenuItem("Reset", "NUM_0", nullptr, _rom_ld)) nes_state->cpu->rst();
+        if(ImGui::MenuItem("Fullscreen", _fullscr ? "ON": "OFF", nullptr)) _fullscr = !_fullscr;
+        if(ImGui::MenuItem("Dual Mode", _dual_mode ? "P2" : "P1", nullptr, controller->gamepad_input)) _dual_mode = !_dual_mode;
         ImGui::EndMenu();
     }
     if(ImGui::BeginMenu("Debug"))

@@ -8,10 +8,7 @@ Controller::Controller()
 	state[1] = 0x00;
 }
 
-Controller::~Controller()
-{
-    SDL_GameControllerClose(gamepad);
-}
+Controller::~Controller() {}
 
 void Controller::configure()
 {
@@ -39,12 +36,16 @@ u8 Controller::read_state(bool strobe)
     return serial_out;
 }
 
-void Controller::write_state(bool strobe)
+void Controller::write_state(u8 value)
 {
-    state[strobe] = inst_state[strobe];
+    if(value & D0)
+    {
+        state[0] = inst_state[0];
+        state[1] = inst_state[1];
+    }
 }
 
-void Controller::handleInput(SDL_Event* event)
+void Controller::handleInput(SDL_Event* event, bool dualmode)
 {
     if(event->type == SDL_EventType::SDL_KEYDOWN)
     {
@@ -81,14 +82,14 @@ void Controller::handleInput(SDL_Event* event)
     {
         switch(event->cbutton.button)
         {
-            case SDL_CONTROLLER_BUTTON_Y: inst_state[0] |= D7; break;
-            case SDL_CONTROLLER_BUTTON_B: inst_state[0] |= D6; break;
-            case SDL_CONTROLLER_BUTTON_BACK: inst_state[0] |= D5; break;
-            case SDL_CONTROLLER_BUTTON_START: inst_state[0] |= D4; break;
-            case SDL_CONTROLLER_BUTTON_DPAD_UP: inst_state[0] |= D3; break;
-            case SDL_CONTROLLER_BUTTON_DPAD_DOWN: inst_state[0] |= D2; break;
-            case SDL_CONTROLLER_BUTTON_DPAD_LEFT: inst_state[0] |= D1; break;
-            case SDL_CONTROLLER_BUTTON_DPAD_RIGHT: inst_state[0] |= D0; break;
+            case SDL_CONTROLLER_BUTTON_Y: inst_state[dualmode] |= D7; break;
+            case SDL_CONTROLLER_BUTTON_B: inst_state[dualmode] |= D6; break;
+            case SDL_CONTROLLER_BUTTON_BACK: inst_state[dualmode] |= D5; break;
+            case SDL_CONTROLLER_BUTTON_START: inst_state[dualmode] |= D4; break;
+            case SDL_CONTROLLER_BUTTON_DPAD_UP: inst_state[dualmode] |= D3; break;
+            case SDL_CONTROLLER_BUTTON_DPAD_DOWN: inst_state[dualmode] |= D2; break;
+            case SDL_CONTROLLER_BUTTON_DPAD_LEFT: inst_state[dualmode] |= D1; break;
+            case SDL_CONTROLLER_BUTTON_DPAD_RIGHT: inst_state[dualmode] |= D0; break;
             default: break;
         }
     }
@@ -97,14 +98,14 @@ void Controller::handleInput(SDL_Event* event)
     {
         switch(event->cbutton.button)
         {
-            case SDL_CONTROLLER_BUTTON_Y: inst_state[0] &= ~D7; break;
-            case SDL_CONTROLLER_BUTTON_B: inst_state[0] &= ~D6; break;
-            case SDL_CONTROLLER_BUTTON_BACK: inst_state[0] &= ~D5; break;
-            case SDL_CONTROLLER_BUTTON_START: inst_state[0] &= ~D4; break;
-            case SDL_CONTROLLER_BUTTON_DPAD_UP: inst_state[0] &= ~D3; break;
-            case SDL_CONTROLLER_BUTTON_DPAD_DOWN: inst_state[0] &= ~D2; break;
-            case SDL_CONTROLLER_BUTTON_DPAD_LEFT: inst_state[0] &= ~D1; break;
-            case SDL_CONTROLLER_BUTTON_DPAD_RIGHT: inst_state[0] &= ~D0; break;
+            case SDL_CONTROLLER_BUTTON_Y: inst_state[dualmode] &= ~D7; break;
+            case SDL_CONTROLLER_BUTTON_B: inst_state[dualmode] &= ~D6; break;
+            case SDL_CONTROLLER_BUTTON_BACK: inst_state[dualmode] &= ~D5; break;
+            case SDL_CONTROLLER_BUTTON_START: inst_state[dualmode] &= ~D4; break;
+            case SDL_CONTROLLER_BUTTON_DPAD_UP: inst_state[dualmode] &= ~D3; break;
+            case SDL_CONTROLLER_BUTTON_DPAD_DOWN: inst_state[dualmode] &= ~D2; break;
+            case SDL_CONTROLLER_BUTTON_DPAD_LEFT: inst_state[dualmode] &= ~D1; break;
+            case SDL_CONTROLLER_BUTTON_DPAD_RIGHT: inst_state[dualmode] &= ~D0; break;
             default: break;
         }
     }
