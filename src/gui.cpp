@@ -137,6 +137,7 @@ void GUI::run_gui()
             if(_rom_vw) this->create_rom_loader(&_rom_vw);
             if(_mmu_vw) nes_state->mmu->peek_mmu(&_mmu_vw);
             if(_ppu_vw) nes_state->ppu->peek_ppu(&_ppu_vw);
+            if(_apu_vw) nes_state->apu->peek_apu(&_apu_vw);
 
             rndr->fit_frame();
             rndr->display();
@@ -193,6 +194,7 @@ void GUI::create_menu()
         {
             if(ImGui::MenuItem("Memory Viewer", NULL, nullptr, _rom_ld)) _mmu_vw = true;
             if(ImGui::MenuItem("PPU Viewer", NULL, nullptr, _rom_ld)) _ppu_vw = true;
+            if(ImGui::MenuItem("APU Viewer", NULL, nullptr, _rom_ld)) _apu_vw = true;
             ImGui::EndMenu();
         }
         if(ImGui::BeginMenu("Interrupts"))

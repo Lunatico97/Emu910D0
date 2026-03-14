@@ -50,7 +50,7 @@ class GUI
         SDL_Event event;
         Controller* controller;
         char *current_rom;
-        bool _mmu_vw, _ppu_vw, _rom_vw;
+        bool _mmu_vw, _ppu_vw, _apu_vw, _rom_vw;
         bool _active, _pause, _fullscr, _dual_mode, _rom_ld;
 };
 
