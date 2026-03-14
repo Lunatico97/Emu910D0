@@ -7,10 +7,10 @@
 
 ## Current Status:
 - Burst-cycle 6502 CPU | PPU | 4-channel interleaving APU (Pulse 1, Pulse 2, Triangular & Noise)
-- Keyboard & Gamepad Support
 - Mapper 0 (NROM), 1 (SxROM), 2 (UxROM), 3 (CNROM) & 4 (TxROM)
 - Minimalistic User Interface using ImGUI v1.92.5
 - Platform Support: Linux & Windows
+- Keyboard & Gamepad Support
 
 ![Emu910D0](rsrc/snip8.png)
 ![Donkey Kong](rsrc/donkey_kong.gif)

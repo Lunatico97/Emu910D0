@@ -1,5 +1,6 @@
 #include <global.hpp>
 #include <SDL2/SDL_audio.h>
+#include <imgui/imgui.h>
 
 #ifndef _APU_H_
 #define _APU_H_
@@ -40,6 +41,7 @@ class APU
         bool frame_irq = false;
         u8 read_from_cpu(u16 cpu_addr);
         void write_from_cpu(u16 cpu_addr, u8 data);
+        void peek_apu(bool* apu_up);
     
     private:
         // Pulse Channel
@@ -77,6 +79,7 @@ class APU
             bool ln_set;
         };
 
+        // Noise Channel
         struct NOISE_CH {
             u16 lfsr = 0x0001; // 15-bit LFSR
             u16 counter;
@@ -138,6 +141,9 @@ class APU
         struct APU_DATA {
             bool half_frame = false;
             bool quarter_frame = false;
+            bool trig_on = true;
+            bool noise_on = true;
+            bool pulse_on[2] = {true, true};
             PULSE_CH pulse_ch[2];
             TRIG_CH trig_ch;
             NOISE_CH noise_ch;

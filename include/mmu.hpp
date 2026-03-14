@@ -91,6 +91,9 @@ class MMU
         // Direct Memory Access for OAM
         u8 oam_data, oam_des = 0x00, dma_off = 0x00;
         u16 dma_src;
+
+        // Flags
+        const char *flags[8] = {"[S]", "[O]", "[X]", "[B]", "[D]", "[I]", "[Z]", "[C]"}; 
 };
 
 #endif

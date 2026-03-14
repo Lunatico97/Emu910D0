@@ -205,16 +205,33 @@ void MMU::peek_mmu(bool *mmu_up)
     // Registers
     ImGui::BeginGroup();
     ImGui::TextUnformatted("Registers");
-    ImGui::BulletText("PC: %04x", fetch_pc());
-    ImGui::BulletText("SP: %02x", fetch_reg(SP));
-    ImGui::BulletText("ST: %02x", fetch_reg(ST));
-    ImGui::BulletText("A: %02x", fetch_reg(A));
-    ImGui::BulletText("X: %02x", fetch_reg(X));
-    ImGui::BulletText("Y: %02x", fetch_reg(Y));
+    ImGui::BulletText("PC: 0x%04x", fetch_pc());
+    ImGui::BulletText("SP: 0x%02x", fetch_reg(SP));
+    ImGui::BulletText("ST: 0x%02x", fetch_reg(ST));
+    ImGui::BulletText("A: 0x%02x", fetch_reg(A));
+    ImGui::BulletText("X: 0x%02x", fetch_reg(X));
+    ImGui::BulletText("Y: 0x%02x", fetch_reg(Y));
+    
+    ImGui::Spacing();
+    ImGui::TextUnformatted("Flags");
+	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(4, 4)); 
+    
+    u8 status = fetch_reg(ST);
+    for(u8 i = 0; i < 8; i++)
+    {
+    	ImGui::TextColored(ImVec4(0.0f, 1.0f*(status & D7), 0.0f, 1.0f), "%s", flags[i]); 
+        if(i < 7) 
+        {
+            ImGui::SameLine();
+            status <<= 1;
+        }
+    }
+
+	ImGui::PopStyleVar();
     ImGui::EndGroup();
 
     // Zero-page RAM
-    ImGui::SameLine(0.0f, 50.0f);
+    ImGui::SameLine(0.0f, 20.0f);
     ImGui::BeginGroup();
     ImGui::TextUnformatted("Zero-page RAM");
     if(ImGui::BeginTable("zero-ram", 16, ImGuiTableFlags_Borders))

@@ -276,6 +276,12 @@ void APU::apu_callback(void* data, u8 *stream, int len)
 		u8 pulse2 = (apu_data->pulse_ch[1].length == 0x00 || apu_data->pulse_ch[1].timer < 0x08 || apu_data->pulse_ch[1].timer > 0x07FF) ? 0x00 : apu_data->pulse_ch[1].env_out*(waveform[apu_data->pulse_ch[1].duty_cycle][apu_data->pulse_ch[1].sequencer]);
 		u8 trig = (apu_data->trig_ch.length == 0x00 || apu_data->trig_ch.linear_cnt == 0x00) ? 0x00 : apu_data->trig_ch.sequencer;
 		u8 noise = apu_data->noise_ch.length == 0x00 ? 0x00 : apu_data->noise_ch.env_out*(apu_data->noise_ch.lfsr & D0);
+		
+		if(!apu_data->pulse_on[0]) pulse1 = 0x00;
+		if(!apu_data->pulse_on[1]) pulse2 = 0x00; 
+		if(!apu_data->trig_on) trig = 0x00; 
+		if(!apu_data->noise_on) noise = 0x00; 
+
 		stream[i] = (pulse1 + pulse2) + 0.00851*trig + noise;
     }
 }
@@ -425,4 +431,44 @@ void APU::clock_apu_fcnt()
 			apu_fcnt.frame_cnt = 0x0000;
 		}
 	}
+}
+
+void APU::peek_apu(bool* apu_up)
+{
+    ImGui::SetNextWindowPos({SCRW-300.0f, 0.0f});
+    ImGui::SetNextWindowSize({300.0f, SCRH-200.0f});
+    ImGui::Begin("APU Viewer", apu_up, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
+
+    // Frame counter
+    ImGui::BeginGroup();
+    ImGui::TextUnformatted("Frame counter");
+    ImGui::BulletText("IRQ Inhibit: %d", apu_fcnt.irq_inb);
+    ImGui::BulletText("Counter: 0x%04x", apu_fcnt.frame_cnt);
+    ImGui::BulletText("Mode: %d-steps", (5-apu_fcnt.step_mode));
+    ImGui::EndGroup();
+
+	// Status
+	ImGui::Spacing();
+	ImGui::BeginGroup();
+    ImGui::TextUnformatted("Status");
+	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(4, 4)); 
+	ImGui::TextColored(ImVec4(0.0f, 1.0f*apu_stat.dmc_en, 0.0f, 1.0f), "[DMC]"); ImGui::SameLine();
+	ImGui::TextColored(ImVec4(0.0f, 1.0f*apu_stat.wno_en, 0.0f, 1.0f), "[NOI]"); ImGui::SameLine();
+	ImGui::TextColored(ImVec4(0.0f, 1.0f*apu_stat.tri_en, 0.0f, 1.0f), "[TRI]"); ImGui::SameLine();
+	ImGui::TextColored(ImVec4(0.0f, 1.0f*apu_stat.pul_en[1], 0.0f, 1.0f), "[PU2]"); ImGui::SameLine();
+	ImGui::TextColored(ImVec4(0.0f, 1.0f*apu_stat.pul_en[0], 0.0f, 1.0f), "[PU1]");
+	ImGui::PopStyleVar();
+    ImGui::EndGroup();
+	
+	// Channels	
+	ImGui::Spacing();
+    ImGui::BeginGroup();
+    ImGui::TextUnformatted("Channels");
+	ImGui::Checkbox("Pulse 1", &apu_data.pulse_on[0]);
+	ImGui::Checkbox("Pulse 2", &apu_data.pulse_on[1]);
+	ImGui::Checkbox("Triangle", &apu_data.trig_on);
+	ImGui::Checkbox("Noise", &apu_data.noise_on);
+    ImGui::EndGroup();
+    
+    ImGui::End();
 }
