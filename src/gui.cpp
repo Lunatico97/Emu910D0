@@ -42,6 +42,7 @@ void GUI::eject_rom()
     if(nes_state != nullptr)
     {
         nes_state->crom->persist_ram(current_rom);
+        _apu_vw = false;
         _mmu_vw = false;
         _ppu_vw = false;
         _rom_vw = false;

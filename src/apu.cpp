@@ -48,6 +48,11 @@ void APU::write_from_cpu(u16 cpu_addr, u8 data)
 		case APUNSEN: set_noise_envl(data); break;
 		case APUNSTM: set_noise_timer(data); break;
 		case APUNSLC: set_noise_lcnt(data); break;
+		// DMC Channel
+		case APUDMTM: set_dmc_timer(data); break;
+		case APUDMDL: set_dmc_outl(data); break;
+		case APUDMSA: set_dmc_smpaddr(data); break;
+		case APUDMSL: set_dmc_smplen(data); break;
 		// APU Common
         case APUSTAT: set_apu_stat(data); break;
         case APUFCNT: set_apu_fcnt(data); break;
@@ -126,7 +131,12 @@ void APU::clock_pwm(PULSE_CH *pulse_ch, bool qtr_frame, bool half_frame)
 		}
 
 		if(half_frame)
-		{
+		{			
+			// Sweep target
+			pulse_ch[index].swp_target = pulse_ch[index].timer;
+			u16 offset = (pulse_ch[index].timer >> pulse_ch[index].shift);
+			if(pulse_ch[index].neg_en) pulse_ch[index].swp_target += (index == 0) ? ~offset : (~offset + 1);
+			else pulse_ch[index].swp_target += offset;
 			// Length counter
 			if(pulse_ch[index].length != 0x00 && !pulse_ch[index].lc_halt)
 			{
@@ -140,12 +150,12 @@ void APU::clock_pwm(PULSE_CH *pulse_ch, bool qtr_frame, bool half_frame)
 			}
 			else if(pulse_ch[index].swp_dvr == 0x00)
 			{
+				pulse_ch[index].swp_set = false;
 				pulse_ch[index].swp_dvr = pulse_ch[index].swp_hfs;
 				if(pulse_ch[index].swp_en && pulse_ch[index].shift > 0x00)
 				{
-					u16 offset = (pulse_ch[index].timer >> pulse_ch[index].shift);
-					if(!pulse_ch[index].neg_en) pulse_ch[index].timer += offset;
-					else pulse_ch[index].timer += (index == 0) ? ~offset : (~offset + 1);
+				  	if(pulse_ch[index].timer >= 0x0008 && pulse_ch[index].swp_target <= 0x07FF) 
+						pulse_ch[index].timer = pulse_ch[index].swp_target;
 				}
 			}
 			else
@@ -253,6 +263,37 @@ void APU::clock_wno(NOISE_CH& noise_ch,  bool qtr_frame, bool half_frame)
 	}
 }
 
+void APU::clock_dmc(DMC_CH& dmc_ch)
+{
+	if(dmc_ch.counter == 0x00)
+	{	
+		if(dmc_ch.bit_cnt == 0x00)
+		{
+			dmc_ch.bit_cnt = 0x08;
+			if(dmc_ch.dmc_trf) dmc_ch.dmc_slc = true;
+			else
+			{
+				dmc_ch.dmc_slc = false;
+				dmc_ch.dmc_rtsr = dmc_ch.buffer;
+			}
+		}
+
+		if(!dmc_ch.dmc_slc && (dmc_ch.dmc_out >= 2 || dmc_ch.dmc_out <= 125))
+		{
+			if(dmc_ch.dmc_rtsr & D0) dmc_ch.dmc_out += 2;
+			else dmc_ch.dmc_out -= 2;
+		}
+
+		dmc_ch.counter = dmc_ch.timer;
+		dmc_ch.dmc_rtsr >>= 1;
+		dmc_ch.bit_cnt--;
+	}
+	else
+	{
+		dmc_ch.counter--;
+	}
+}
+
 void APU::apu_callback(void* data, u8 *stream, int len) 
 {
 	APU_DATA *apu_data = (APU_DATA*) data;
@@ -267,16 +308,18 @@ void APU::apu_callback(void* data, u8 *stream, int len)
 			APU::clock_pwm(apu_data->pulse_ch, apu_data->quarter_frame, apu_data->half_frame);
 			APU::clock_tri(apu_data->trig_ch, apu_data->quarter_frame, apu_data->half_frame);
 			APU::clock_wno(apu_data->noise_ch, apu_data->quarter_frame, apu_data->half_frame);
+			APU::clock_dmc(apu_data->dmc_ch);
 			apu_data->quarter_frame = false;
 			apu_data->half_frame = false;
             cycle_accumulator -= 1.0f;
         }
 
-        u8 pulse1 = (apu_data->pulse_ch[0].length == 0x00 || apu_data->pulse_ch[0].timer < 0x08 || apu_data->pulse_ch[0].timer > 0x07FF) ? 0x00 : apu_data->pulse_ch[0].env_out*(waveform[apu_data->pulse_ch[0].duty_cycle][apu_data->pulse_ch[0].sequencer]);
+		u8 pulse1 = (apu_data->pulse_ch[0].length == 0x00 || apu_data->pulse_ch[0].timer < 0x08 || apu_data->pulse_ch[0].timer > 0x07FF) ? 0x00 : apu_data->pulse_ch[0].env_out*(waveform[apu_data->pulse_ch[0].duty_cycle][apu_data->pulse_ch[0].sequencer]);
 		u8 pulse2 = (apu_data->pulse_ch[1].length == 0x00 || apu_data->pulse_ch[1].timer < 0x08 || apu_data->pulse_ch[1].timer > 0x07FF) ? 0x00 : apu_data->pulse_ch[1].env_out*(waveform[apu_data->pulse_ch[1].duty_cycle][apu_data->pulse_ch[1].sequencer]);
 		u8 trig = (apu_data->trig_ch.length == 0x00 || apu_data->trig_ch.linear_cnt == 0x00) ? 0x00 : apu_data->trig_ch.sequencer;
-		u8 noise = apu_data->noise_ch.length == 0x00 ? 0x00 : apu_data->noise_ch.env_out*(apu_data->noise_ch.lfsr & D0);
-		
+		u8 noise = (apu_data->noise_ch.length == 0x00 || (apu_data->noise_ch.lfsr & D0)) ? 0x00 : apu_data->noise_ch.env_out;
+		u8 dmc = apu_data->dmc_ch.dmc_out;
+
 		if(!apu_data->pulse_on[0]) pulse1 = 0x00;
 		if(!apu_data->pulse_on[1]) pulse2 = 0x00; 
 		if(!apu_data->trig_on) trig = 0x00; 
@@ -352,11 +395,34 @@ void APU::set_noise_timer(u8 data)
 	apu_data.noise_ch.timer = APU_TM[(data & 0x0F)]; 
 }
 
+void APU::set_dmc_timer(u8 data)
+{
+	apu_data.dmc_ch.dmc_int = (data & D7);
+	apu_data.dmc_ch.loop_en = (data & D6);
+	apu_data.dmc_ch.timer = APU_RI[(data & 0x0F)];
+}
+
+void APU::set_dmc_outl(u8 data)
+{
+	apu_data.dmc_ch.dmc_out = (data & 0x7F);
+}
+
+void APU::set_dmc_smpaddr(u8 data)
+{
+	apu_data.dmc_ch.smp_addr = (0xC000 | (data << 6));
+}
+
+void APU::set_dmc_smplen(u8 data)
+{
+	apu_data.dmc_ch.smp_len = (data << 4) | 0x01;
+}
+
 u8 APU::get_apu_stat()
 {
 	bool prev_irq = frame_irq;
 	frame_irq = false;
-	return (prev_irq ? D6: 0x00) | (apu_data.noise_ch.length > 0 ? D3: 0x00) | (apu_data.trig_ch.length > 0 ? D2: 0x00) |
+	return (prev_irq ? D6: 0x00) | (apu_data.dmc_ch.byte_rem > 0 ? D4: 0x00) |
+	       (apu_data.noise_ch.length > 0 ? D3: 0x00) | (apu_data.trig_ch.length > 0 ? D2: 0x00) |
 	       (apu_data.pulse_ch[1].length > 0 ? D1: 0x00) | (apu_data.pulse_ch[0].length > 0 ? D0: 0x00);
 }
 
@@ -367,8 +433,19 @@ void APU::set_apu_stat(u8 data)
 	apu_stat.tri_en = (data & D2);
 	apu_stat.pul_en[1] = (data & D1);
 	apu_stat.pul_en[0] = (data & D0);
-	apu_data.pulse_ch[1].lc_halt = !apu_stat.pul_en[1];
-	apu_data.pulse_ch[0].lc_halt = !apu_stat.pul_en[0];
+
+	if(!apu_stat.tri_en) apu_data.trig_ch.length = 0x00;
+	if(!apu_stat.wno_en) apu_data.noise_ch.length = 0x00;
+	if(!apu_stat.pul_en[1]) apu_data.pulse_ch[1].length = 0x00;
+	if(!apu_stat.pul_en[0]) apu_data.pulse_ch[0].length = 0x00;
+
+	apu_data.dmc_ch.dmc_int = false;
+	if(apu_stat.dmc_en && apu_data.dmc_ch.byte_rem == 0x00 && apu_data.dmc_ch.loop_en)
+	{
+		apu_data.dmc_ch.byte_rem = apu_data.dmc_ch.smp_len;
+		apu_data.dmc_ch.cur_addr = apu_data.dmc_ch.smp_addr;
+	}
+	else apu_data.dmc_ch.byte_rem = 0x00;
 }
 
 void APU::set_apu_fcnt(u8 data)
@@ -382,7 +459,7 @@ void APU::set_apu_fcnt(u8 data)
 void APU::clock_apu_fcnt()
 {
 	apu_fcnt.frame_cnt += 0x0001;
-	if(apu_fcnt.step_mode)
+	if(!apu_fcnt.step_mode)
 	{
 		// 4-step frame mode
 		if(apu_fcnt.frame_cnt == QUARTER_FRAME)
@@ -444,7 +521,7 @@ void APU::peek_apu(bool* apu_up)
     ImGui::TextUnformatted("Frame counter");
     ImGui::BulletText("IRQ Inhibit: %d", apu_fcnt.irq_inb);
     ImGui::BulletText("Counter: 0x%04x", apu_fcnt.frame_cnt);
-    ImGui::BulletText("Mode: %d-steps", (5-apu_fcnt.step_mode));
+    ImGui::BulletText("Mode: %d-steps", (apu_fcnt.step_mode + 4));
     ImGui::EndGroup();
 
 	// Status

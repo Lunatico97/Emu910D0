@@ -23,6 +23,11 @@
 #define APUNSTM 0x400E
 #define APUNSLC 0x400F
 
+#define APUDMTM 0x4010
+#define APUDMDL 0x4011
+#define APUDMSA 0x4012
+#define APUDMSL 0x4013
+
 #define APUSTAT 0x4015
 #define APUFCNT 0x4017
 
@@ -42,12 +47,14 @@ class APU
         u8 read_from_cpu(u16 cpu_addr);
         void write_from_cpu(u16 cpu_addr, u8 data);
         void peek_apu(bool* apu_up);
+        void perform_dma();
     
     private:
         // Pulse Channel
         struct PULSE_CH {
             u16 timer; // 11-bit timer
             u16 counter;
+            u16 swp_target;
             u8 duty_cycle;
             u8 sequencer;
             u8 length;
@@ -95,11 +102,33 @@ class APU
             bool const_vol;
         };
 
+        // DMC Channel
+        struct DMC_CH {
+            u16 cur_addr;
+            u16 smp_addr;
+            u16 smp_len;
+            u16 timer;
+            u8 buffer;
+            u8 counter;
+            u8 bit_cnt;
+            u8 dmc_buf;
+            u8 dmc_out;
+            u8 dmc_rem;
+            u8 dmc_bcnt;
+            u8 dmc_rtsr;
+            u8 byte_rem;
+            bool dmc_int;
+            bool dmc_slc;
+            bool dmc_trf;
+            bool loop_en;
+        };
+
         // Callbacks
         static void apu_callback(void *data, u8* stream, int len);
         static void clock_pwm(PULSE_CH* pulse_ch, bool qtr_frame, bool half_frame);
         static void clock_tri(TRIG_CH& trig_ch,  bool qtr_frame, bool half_frame);
-        static void clock_wno(NOISE_CH& trig_ch,  bool qtr_frame, bool half_frame);
+        static void clock_wno(NOISE_CH& noise_ch,  bool qtr_frame, bool half_frame);
+        static void clock_dmc(DMC_CH& dmc_ch);
 
         // Pulse Channel
         void set_pulse_duty(u8 index, u8 data); 
@@ -116,6 +145,12 @@ class APU
         void set_noise_envl(u8 data);
         void set_noise_lcnt(u8 data);
         void set_noise_timer(u8 data);
+
+         // DMC Channel
+        void set_dmc_timer(u8 data);
+        void set_dmc_outl(u8 data);
+        void set_dmc_smpaddr(u8 data);
+        void set_dmc_smplen(u8 data);
 
         // APU Common Internals
         u8 get_apu_stat();
@@ -147,6 +182,7 @@ class APU
             PULSE_CH pulse_ch[2];
             TRIG_CH trig_ch;
             NOISE_CH noise_ch;
+            DMC_CH dmc_ch;
         } apu_data;
         
         SDL_AudioDeviceID device_id;
