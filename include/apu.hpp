@@ -47,17 +47,16 @@ class APU
         u8 read_from_cpu(u16 cpu_addr);
         void write_from_cpu(u16 cpu_addr, u8 data);
         void peek_apu(bool* apu_up);
-        void perform_dma();
     
     private:
         // Pulse Channel
         struct PULSE_CH {
-            u16 timer; // 11-bit timer
+            u16 timer = 0x07FF; // 11-bit timer
             u16 counter;
-            u16 swp_target;
+            u16 swp_target = 0x0000;
             u8 duty_cycle;
             u8 sequencer;
-            u8 length;
+            u8 length = 0x00;
             u8 shift;
             u8 env_out;
             u8 env_dcy;
@@ -67,7 +66,7 @@ class APU
             u8 swp_hfs;
             bool env_set;
             bool swp_set;
-            bool swp_en;
+            bool swp_en = 0;
             bool lc_halt;
             bool const_vol;
             bool neg_en;
@@ -111,16 +110,15 @@ class APU
             u8 buffer;
             u8 counter;
             u8 bit_cnt;
-            u8 dmc_buf;
             u8 dmc_out;
             u8 dmc_rem;
-            u8 dmc_bcnt;
             u8 dmc_rtsr;
             u8 byte_rem;
-            bool dmc_int;
-            bool dmc_slc;
-            bool dmc_trf;
-            bool loop_en;
+            bool dmc_en = 0;
+            bool dmc_int = 0;
+            bool dmc_slc = 1;
+            bool dmc_trf = 0;
+            bool loop_en = 0;
         };
 
         // Callbacks
@@ -167,15 +165,16 @@ class APU
 
         // Frame counter
         struct {
-            u16 frame_cnt;
-            bool step_mode;
-            bool irq_inb;
+            u16 frame_cnt = 0x0000;
+            bool step_mode = 0;
+            bool irq_inb = 0;
         } apu_fcnt;
 
         // Audio Thread Data
         struct APU_DATA {
             bool half_frame = false;
             bool quarter_frame = false;
+            bool dmc_on = false;
             bool trig_on = true;
             bool noise_on = true;
             bool pulse_on[2] = {true, true};
@@ -188,6 +187,10 @@ class APU
         SDL_AudioDeviceID device_id;
         SDL_AudioSpec spec;
         bool mute_apu = true;
+
+    public:
+        // DMA Reference
+        DMC_CH *refDMC = &apu_data.dmc_ch;
 };
 
 #endif
