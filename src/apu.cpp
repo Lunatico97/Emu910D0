@@ -172,7 +172,7 @@ void APU::clock_tri(TRIG_CH& trig_ch,  bool qtr_frame, bool half_frame)
 	{
 		trig_ch.counter = trig_ch.timer;
 
-		if(trig_ch.linear_cnt != 0x00 && trig_ch.length != 0x00)
+		if(trig_ch.linear_cnt != 0x00 && trig_ch.length != 0x00 && trig_ch.timer > 0x0002)
 		{
 			if(trig_ch.step <= 0x0F) trig_ch.sequencer--;
 			else trig_ch.sequencer++;
@@ -273,15 +273,23 @@ void APU::clock_dmc(DMC_CH& dmc_ch)
 			if(dmc_ch.dmc_trf) dmc_ch.dmc_slc = true;
 			else
 			{
-				dmc_ch.dmc_slc = false;
 				dmc_ch.dmc_rtsr = dmc_ch.buffer;
+				dmc_ch.dmc_trf = true;
+				dmc_ch.dmc_slc = false;
 			}
 		}
 
-		if(!dmc_ch.dmc_slc && (dmc_ch.dmc_out >= 2 || dmc_ch.dmc_out <= 125))
+		if(!dmc_ch.dmc_slc)
 		{
-			if(dmc_ch.dmc_rtsr & D0) dmc_ch.dmc_out += 2;
-			else dmc_ch.dmc_out -= 2;
+			if(dmc_ch.dmc_rtsr & D0)
+			{
+				if(dmc_ch.dmc_out <= 125) dmc_ch.dmc_out += 2;
+
+			} 
+			else 
+			{
+				if(dmc_ch.dmc_out >= 2) dmc_ch.dmc_out -= 2;
+			}
 		}
 
 		dmc_ch.counter = dmc_ch.timer;
@@ -324,8 +332,9 @@ void APU::apu_callback(void* data, u8 *stream, int len)
 		if(!apu_data->pulse_on[1]) pulse2 = 0x00; 
 		if(!apu_data->trig_on) trig = 0x00; 
 		if(!apu_data->noise_on) noise = 0x00; 
+		if(!apu_data->dmc_on) dmc = 0x00; 
 
-		stream[i] = (pulse1 + pulse2) + 0.00851*trig + noise;
+		stream[i] = (pulse1 + pulse2) + 0.0275f*trig + 0.875f*noise + dmc;
     }
 }
 
@@ -421,7 +430,7 @@ u8 APU::get_apu_stat()
 {
 	bool prev_irq = frame_irq;
 	frame_irq = false;
-	return (prev_irq ? D6: 0x00) | (apu_data.dmc_ch.byte_rem > 0 ? D4: 0x00) |
+	return (apu_data.dmc_ch.dmc_int ? D7: 0x00) | (prev_irq ? D6: 0x00) | (apu_data.dmc_ch.byte_rem > 0 ? D4: 0x00) |
 	       (apu_data.noise_ch.length > 0 ? D3: 0x00) | (apu_data.trig_ch.length > 0 ? D2: 0x00) |
 	       (apu_data.pulse_ch[1].length > 0 ? D1: 0x00) | (apu_data.pulse_ch[0].length > 0 ? D0: 0x00);
 }
@@ -433,19 +442,21 @@ void APU::set_apu_stat(u8 data)
 	apu_stat.tri_en = (data & D2);
 	apu_stat.pul_en[1] = (data & D1);
 	apu_stat.pul_en[0] = (data & D0);
+	apu_data.dmc_ch.dmc_int = false;
 
 	if(!apu_stat.tri_en) apu_data.trig_ch.length = 0x00;
 	if(!apu_stat.wno_en) apu_data.noise_ch.length = 0x00;
 	if(!apu_stat.pul_en[1]) apu_data.pulse_ch[1].length = 0x00;
 	if(!apu_stat.pul_en[0]) apu_data.pulse_ch[0].length = 0x00;
 
-	apu_data.dmc_ch.dmc_int = false;
-	if(apu_stat.dmc_en && apu_data.dmc_ch.byte_rem == 0x00 && apu_data.dmc_ch.loop_en)
+	if(apu_stat.dmc_en && apu_data.dmc_ch.byte_rem == 0x00)
 	{
+		apu_data.dmc_ch.dmc_en = true;
+		apu_data.dmc_ch.dmc_trf = apu_data.dmc_on;
 		apu_data.dmc_ch.byte_rem = apu_data.dmc_ch.smp_len;
 		apu_data.dmc_ch.cur_addr = apu_data.dmc_ch.smp_addr;
 	}
-	else apu_data.dmc_ch.byte_rem = 0x00;
+	else if(!apu_stat.dmc_en) apu_data.dmc_ch.byte_rem = 0x00;
 }
 
 void APU::set_apu_fcnt(u8 data)
@@ -545,6 +556,7 @@ void APU::peek_apu(bool* apu_up)
 	ImGui::Checkbox("Pulse 2", &apu_data.pulse_on[1]);
 	ImGui::Checkbox("Triangle", &apu_data.trig_on);
 	ImGui::Checkbox("Noise", &apu_data.noise_on);
+	ImGui::Checkbox("DMC", &apu_data.dmc_on);
     ImGui::EndGroup();
     
     ImGui::End();

@@ -67,6 +67,7 @@ void GUI::run_nes()
         if((nes_state->system_clock % 3) == 0)
         {
             if(nes_state->mmu->dma_rqst) nes_state->mmu->perform_dma(nes_state->system_clock % 2);
+            else if(nes_state->apu->refDMC->dmc_trf) nes_state->mmu->perform_audio_dma(nes_state->system_clock % 2);
             else
             {
                 nes_state->cpu->clock();
@@ -84,6 +85,12 @@ void GUI::run_nes()
         {
         	nes_state->cpu->irq();
         	nes_state->crom->map_irq = false;
+		}
+
+        if(nes_state->mmu->dma_irq)
+        {
+        	nes_state->cpu->irq();
+        	nes_state->mmu->dma_irq = false;
 		}
 
         nes_state->system_clock++;
