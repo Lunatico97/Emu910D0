@@ -60,7 +60,7 @@ class APU
             u8 shift;
             u8 env_out;
             u8 env_dcy;
-            u8 env_vol;
+            u8 env_vol = 0x00;
             u8 env_dvr;
             u8 swp_dvr;
             u8 swp_hfs;
@@ -93,7 +93,7 @@ class APU
             u8 length;
             u8 env_out;
             u8 env_dcy;
-            u8 env_vol;
+            u8 env_vol = 0x00;
             u8 env_dvr;
             bool mode;
             bool env_set;
@@ -107,13 +107,12 @@ class APU
             u16 smp_addr;
             u16 smp_len;
             u16 timer;
-            u8 buffer;
+            u8 buffer = 0x00;
             u8 counter;
-            u8 bit_cnt;
-            u8 dmc_out;
-            u8 dmc_rem;
-            u8 dmc_rtsr;
-            u8 byte_rem;
+            u8 bit_cnt = 8;
+            u8 dmc_out = 0x00;
+            u8 dmc_rtsr = 0x00;
+            u16 byte_rem = 0x00;
             bool dmc_en = 0;
             bool dmc_int = 0;
             bool dmc_slc = 1;

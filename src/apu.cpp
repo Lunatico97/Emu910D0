@@ -274,7 +274,7 @@ void APU::clock_dmc(DMC_CH& dmc_ch)
 			else
 			{
 				dmc_ch.dmc_rtsr = dmc_ch.buffer;
-				dmc_ch.dmc_trf = true;
+				dmc_ch.dmc_trf = dmc_ch.dmc_en;
 				dmc_ch.dmc_slc = false;
 			}
 		}
@@ -558,6 +558,21 @@ void APU::peek_apu(bool* apu_up)
 	ImGui::Checkbox("Noise", &apu_data.noise_on);
 	ImGui::Checkbox("DMC", &apu_data.dmc_on);
     ImGui::EndGroup();
+
+	// DMC
+	if(apu_data.dmc_on)
+	{
+		ImGui::Spacing();
+		ImGui::BeginGroup();
+		ImGui::TextUnformatted("DMC");
+		ImGui::BulletText("SMP_ADDR: 0x%04x", apu_data.dmc_ch.smp_addr);
+		ImGui::BulletText("SMP_LEN: 0x%04x", apu_data.dmc_ch.smp_len);
+		ImGui::BulletText("CUR_ADDR: 0x%04x", apu_data.dmc_ch.cur_addr);
+		ImGui::BulletText("BYTES_REM: 0x%04x", apu_data.dmc_ch.byte_rem);
+		ImGui::BulletText("BUFFER: 0x%02x", apu_data.dmc_ch.buffer);
+		ImGui::BulletText("LOOP: %d", apu_data.dmc_ch.loop_en);
+		ImGui::EndGroup();
+	}
     
     ImGui::End();
 }
