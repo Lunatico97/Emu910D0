@@ -80,6 +80,7 @@ u8 PPU::fetch_vram(u16 addr)
 
 u8 PPU::fetch_palette(u16 addr)
 {
+    if(addr < 0x3F00 || addr >= 0x4000) printf("Address: 0x%04x\n", addr);
     assert(addr >= 0x3F00 && addr < 0x4000);
     addr &= 0x1F;
     if ((addr & 0x03) == 0) addr &= 0x0F; 
@@ -381,7 +382,7 @@ void PPU::run_ppu()
                     if(spr_cnt < 8)
                     {
                         for(u8 j = 0; j < 4; j++)
-                        {
+                        { 
                             SPAM[4*spr_cnt+j] = OAM[4*i+j];
                         }
 
@@ -416,7 +417,7 @@ void PPU::run_ppu()
                     tile_addr = (SPAM[4*spr_cnt+1] & D0) ? 0x1000: 0x0000;
                     tile_index = (SPAM[4*spr_cnt+1] & 0xFE);           
                     tile_off = (lines - SPAM[4*spr_cnt]);
-                    
+                      
                     // Vertical flip
                     if(SPAM[4*spr_cnt+2] & D7)
                     {
@@ -517,7 +518,7 @@ void PPU::run_ppu()
         }
         
         // Left-most contention
-        if(cycles >= 0 && cycles < 9)
+        if(cycles >= 0 && cycles < 8)
         {
             bg_index = MASK_REG.bg_left ? bg_index : 0x00;
             spr_index = MASK_REG.spr_left ? spr_index : 0x00;       
@@ -546,7 +547,7 @@ void PPU::run_ppu()
 
             if (spr_zero_loaded && spr_zero_opaque)
             {
-                STAT_REG.spr_hit = (cycles >= ((MASK_REG.bg_left | MASK_REG.spr_left) ? 8 : 0) && cycles < 256);
+                STAT_REG.spr_hit = (cycles >= 0 && cycles < 256);
             }
         }
 

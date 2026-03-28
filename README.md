@@ -6,8 +6,8 @@
 
 
 ## Current Status:
-- Burst-cycle 6502 CPU | PPU | 4-channel interleaving APU (Pulse 1, Pulse 2, Triangular & Noise)
-- Mapper 0 (NROM), 1 (SxROM), 2 (UxROM), 3 (CNROM) & 4 (TxROM)
+- Burst-cycle 6502 CPU | PPU | 4-channel interleaving APU (Pulse 1, Pulse 2, Triangle, Noise, Delta Modulation)
+- Mapper 0 (NROM), 1 (SxROM), 2 (UxROM), 3 (CNROM), 4 (TxROM) & 7 (AxROM)
 - Minimalistic User Interface using ImGUI v1.92.5
 - Platform Support: Linux & Windows
 - Keyboard & Gamepad Support
@@ -103,6 +103,19 @@
     <tr>
         <td> <img src="rsrc/felix_the_cat.png" alt="Felix The Cat"> </td>
         <td> <img src="rsrc/jackie_chan.png" alt="Jackie Chan's Action Kung Fu"> </td>
+    </tr>
+</table>
+
+- Mapper 7 (R.C. Pro Am, Battletoads, WWF - Wrestlemania, Wizards & Warriors)
+
+<table>
+    <tr>
+        <td> <img src="rsrc/rc_pro_am.png" alt="R.C. Pro Am"> </td>
+        <td> <img src="rsrc/battletoads.png" alt="Battletoads"> </td>
+    </tr>
+    <tr>
+        <td> <img src="rsrc/wwf.png" alt="WWF - Wrestlemania"> </td>
+        <td> <img src="rsrc/wizards_and_warriors.png" alt="Wizards & Warriors"> </td>
     </tr>
 </table>
 
