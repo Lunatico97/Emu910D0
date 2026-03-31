@@ -56,7 +56,11 @@ u8 PPU::read_from_cpu(u16 addr)
 u8 PPU::fetch_vram(u16 addr)
 {
     addr &= 0x3FFF;
-    if(addr >= 0x0000 && addr < 0x2000) return crom->read_from_ppu(addr);
+    if(addr >= 0x0000 && addr < 0x2000) 
+    {
+        ppu_addr_bus = addr;
+        return crom->read_from_ppu(addr);
+    }
     else if(addr >= 0x2000 && addr < 0x3000)
     {
         addr &= 0x0FFF;
@@ -73,6 +77,7 @@ u8 PPU::fetch_vram(u16 addr)
             // Default
             default: break;
         }
+        ppu_addr_bus = addr;
         return NAME[addr];
     }
     else return fetch_vram(addr-0x1000);
@@ -251,13 +256,13 @@ void PPU::update_vertv()
 
 void PPU::run_ppu()
 {
-    bool visible_element = (lines > 0 && lines < 240) && (cycles >= 0 && cycles < 255);
+    bool visible_element = (lines >= 0 && lines < 240) && (cycles >= 0 && cycles < 255);
 
     // Frame timing for background 
     // [Based on NesWiki diagram: https://www.nesdev.org/w/images/default/4/4f/Ppu.svg]
     if((lines >= 0 && lines < 240) || lines == 261)
     {
-        if((cycles >= 1 && cycles <= 257) || (cycles >= 321 && cycles <= 337))
+        if((cycles >= 1 && cycles < 257) || (cycles >= 321 && cycles < 337))
         {
             // Shift plane data for tiles
             if(MASK_REG.bg_enabled)
@@ -269,7 +274,7 @@ void PPU::run_ppu()
             }
 
             // Shift plane data for sprites
-            if(MASK_REG.spr_enabled && (cycles >= 1 && cycles <= 257))
+            if(MASK_REG.spr_enabled && (cycles >= 1 && cycles < 257))
             {
                 for(u8 i=0; i<8; i++)
                 {
@@ -287,16 +292,16 @@ void PPU::run_ppu()
             switch (cycle_num)
             {
                 case 0x00:
-                    // Update V register horizontal
-                    if(MASK_REG.bg_enabled || MASK_REG.spr_enabled) update_horzv();
-                    break;
-
-                case 0x01:
                     // Load latched data to shift registers
                     P0SHF = (P0SHF & 0xFF00) | P0L; 
                     P1SHF = (P1SHF & 0xFF00) | P1L;
                     LASHF = (LASHF & 0xFF00) | ((palette_bits & D0) ? 0xFF : 0x00);
                     HASHF = (HASHF & 0xFF00) | ((palette_bits & D1) ? 0xFF : 0x00);
+                    // Update V register horizontal
+                    if(MASK_REG.bg_enabled || MASK_REG.spr_enabled) update_horzv();
+                    break;
+
+                case 0x01:          
                     // Fetch name table byte
                     name_byte = fetch_vram(NAME_INDEX | (V.addr & 0x0FFF));
                     break;
@@ -315,7 +320,7 @@ void PPU::run_ppu()
 
                 case 0x07:
                     // Latch plane-1 data
-                    P1L = fetch_vram(CVALS.bg_addr+ (name_byte << 4) + V.fine_y + 0x08);
+                    P1L = fetch_vram(CVALS.bg_addr + (name_byte << 4) + V.fine_y + 0x08);
                     break;
                 
                 default:
@@ -474,11 +479,6 @@ void PPU::run_ppu()
         STAT_REG.vblank = 0;
         W = 0;
     }
-    
-    if(lines < 240 && cycles == 260)
-    {
-    	crom->clock_irq(V.addr);
-	}
 
     // Formulate pixels to render the frame
     if(visible_element)
@@ -556,6 +556,10 @@ void PPU::run_ppu()
         color_select &= (MASK_REG.greyscale ? 0x30 : 0x3F);
         frame_buf[lines*FRAME_W+cycles] = RGB_PAL[color_select];
     }
+
+    // Clock mappers for scanline IRQs
+    if(MASK_REG.bg_enabled || MASK_REG.spr_enabled) crom->clock_irq(ppu_addr_bus);
+    else crom->clock_irq(V.addr);
 
     // Reset cycles and lines
     cycles += 0x0001;

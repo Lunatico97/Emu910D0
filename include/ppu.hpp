@@ -67,6 +67,7 @@ class PPU
         // PPU Memory
         u8 NAME[2048], OAM[256], SPAM[32], PAL[32]; 
         u8 ppu_data_buffer, oam_addr;
+        u16 ppu_addr_bus = 0x0000;
 
         // OAM Counters
         u8 spr_cnt = 0x00, oam_buffer = 0xFF;

@@ -81,17 +81,10 @@ void GUI::run_nes()
             nes_state->ppu->trigger_nmi = false;
         }
 
-        if(nes_state->apu->frame_irq || nes_state->crom->map_irq)
+        if(nes_state->apu->frame_irq || nes_state->crom->map_irq || nes_state->mmu->dma_irq) 
         {
-        	nes_state->cpu->irq();
-        	nes_state->crom->map_irq = false;
-		}
-
-        if(nes_state->mmu->dma_irq)
-        {
-        	nes_state->cpu->irq();
-        	nes_state->mmu->dma_irq = false;
-		}
+            nes_state->cpu->irq(); 
+        }
 
         nes_state->system_clock++;
     }
