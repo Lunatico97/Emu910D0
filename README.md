@@ -106,15 +106,15 @@
     </tr>
 </table>
 
-- Mapper 7 (R.C. Pro Am, Battletoads, WWF - Wrestlemania, Wizards & Warriors)
+- Mapper 7 (Battletoads, R.C. Pro-Am, Solar Jetman, Wizards & Warriors, WWF - Wrestlemania)
 
 <table>
     <tr>
-        <td> <img src="rsrc/rc_pro_am.png" alt="R.C. Pro Am"> </td>
         <td> <img src="rsrc/battletoads.png" alt="Battletoads"> </td>
+        <td> <img src="rsrc/rc_pro_am.png" alt="R.C. Pro-Am"> </td>
     </tr>
     <tr>
-        <td> <img src="rsrc/wwf.png" alt="WWF - Wrestlemania"> </td>
+        <td> <img src="rsrc/solar_jetman.png" alt="Solar Jetman"> </td>
         <td> <img src="rsrc/wizards_and_warriors.png" alt="Wizards & Warriors"> </td>
     </tr>
 </table>

@@ -81,11 +81,10 @@ class Mapper004: public Mapper
         
         void clock_irq(u16 ppu_addr)
         {			
-//        	bool a12_high = (ppu_addr & 0x1000) > 0;
-//        	if(!asic_vals.irq_a12 && a12_high && asic_vals.a12_lcnt >= 3)
-//        	{
-        		// rising edge
-        		fire_irq = asic_vals.irq_en && asic_vals.irq_counter == 0x00;
+        	// A12 rising edge clocking
+            bool a12_high = (ppu_addr & 0x1000) > 0;
+            if(!asic_vals.irq_a12 && a12_high && asic_vals.a12_lcnt >= 9)
+            {
 				if(asic_vals.irq_counter == 0x00 || asic_vals.irq_reload) 
 				{
 					asic_vals.irq_counter = asic_vals.irq_latch;
@@ -95,12 +94,14 @@ class Mapper004: public Mapper
 				{
 					asic_vals.irq_counter--;
 				}
-//			}
+
+        		fire_irq = asic_vals.irq_en && asic_vals.irq_counter == 0x00;
+			}
 			
-//			if(a12_high) asic_vals.a12_lcnt = 0;
-//			else asic_vals.a12_lcnt++;
-//			
-//			asic_vals.irq_a12 = a12_high;
+			if(a12_high) asic_vals.a12_lcnt = 0;
+			else asic_vals.a12_lcnt++;
+			
+			asic_vals.irq_a12 = a12_high;
 		}
     
     private:
@@ -167,5 +168,4 @@ class Mapper004: public Mapper
         u8 prg_units, chr_units;
         u16 prg_offset, chr_offset;
         u32 prg_addr, chr_addr;
-        u8 edges = 0;
 };
