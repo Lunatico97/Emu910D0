@@ -270,15 +270,15 @@ void APU::clock_dmc(DMC_CH& dmc_ch)
 		if(dmc_ch.bit_cnt == 0x00)
 		{
 			dmc_ch.bit_cnt = 0x08;
-			if(dmc_ch.dmc_trf) dmc_ch.dmc_slc = true;
+			if(dmc_ch.buf_empty) dmc_ch.dmc_slc = true;
 			else
 			{
 				dmc_ch.dmc_rtsr = dmc_ch.buffer;
-				dmc_ch.dmc_trf = dmc_ch.dmc_en;
+				dmc_ch.buf_empty = true;
 				dmc_ch.dmc_slc = false;
 			}
 		}
-
+		
 		if(!dmc_ch.dmc_slc)
 		{
 			if(dmc_ch.dmc_rtsr & D0)
@@ -452,7 +452,7 @@ void APU::set_apu_stat(u8 data)
 	if(apu_stat.dmc_en && apu_data.dmc_ch.byte_rem == 0x00)
 	{
 		apu_data.dmc_ch.dmc_en = true;
-		apu_data.dmc_ch.dmc_trf = apu_data.dmc_on;
+		apu_data.dmc_ch.buf_empty = true;
 		apu_data.dmc_ch.byte_rem = apu_data.dmc_ch.smp_len;
 		apu_data.dmc_ch.cur_addr = apu_data.dmc_ch.smp_addr;
 	}
@@ -465,6 +465,12 @@ void APU::set_apu_fcnt(u8 data)
 	apu_fcnt.irq_inb = (data & D6);
 	apu_fcnt.frame_cnt = 0x0000;
 	frame_irq = apu_fcnt.irq_inb ? false : frame_irq;
+	if(apu_fcnt.step_mode)
+	{
+		APU::clock_pwm(apu_data.pulse_ch, true, true);
+		APU::clock_wno(apu_data.noise_ch, true, true);
+		APU::clock_tri(apu_data.trig_ch, true, true);
+	}
 }
 
 void APU::clock_apu_fcnt()

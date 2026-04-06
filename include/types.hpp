@@ -95,6 +95,18 @@ constexpr u32 RGB_PAL[] = {
     0x96E8E8FF, 0x000000FF, 0x000000FF, 0x000000FF
 };
 
+// RGB Approximation for color emphasis
+const float RGB_EMP[8][3]={
+	{1.00, 1.00, 1.00},
+	{1.00, 0.80, 0.81},
+	{0.78, 0.94, 0.66},
+	{0.79, 0.77, 0.63},
+	{0.82, 0.83, 1.12},
+	{0.81, 0.71, 0.87},
+	{0.68, 0.79, 0.79},
+	{0.70, 0.70, 0.70}
+};
+
 // APU Length Counter Lookup
 constexpr u16 APU_LC[] = {
     // Index 0x00 - 0x0F

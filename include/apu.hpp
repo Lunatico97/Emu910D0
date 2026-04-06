@@ -113,10 +113,10 @@ class APU
             u8 dmc_out = 0x00;
             u8 dmc_rtsr = 0x00;
             u16 byte_rem = 0x00;
+            bool buf_empty = 1;
             bool dmc_en = 0;
             bool dmc_int = 0;
             bool dmc_slc = 1;
-            bool dmc_trf = 0;
             bool loop_en = 0;
         };
 
@@ -165,6 +165,7 @@ class APU
         // Frame counter
         struct {
             u16 frame_cnt = 0x0000;
+            u8 irq_latency = 0x03;
             bool step_mode = 0;
             bool irq_inb = 0;
         } apu_fcnt;
@@ -173,7 +174,7 @@ class APU
         struct APU_DATA {
             bool half_frame = false;
             bool quarter_frame = false;
-            bool dmc_on = false;
+            bool dmc_on = true;
             bool trig_on = true;
             bool noise_on = true;
             bool pulse_on[2] = {true, true};
