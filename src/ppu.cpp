@@ -89,13 +89,18 @@ u8 PPU::fetch_palette(u16 addr)
     assert(addr >= 0x3F00 && addr < 0x4000);
     addr &= 0x1F;
     if ((addr & 0x03) == 0) addr &= 0x0F; 
+    ppu_addr_bus = addr;
     return PAL[addr];
 }
 
 void PPU::store_vram(u16 addr, u8 value)
 {
     addr &= 0x3FFF;
-    if(addr >= 0x0000 && addr < 0x2000) crom->write_from_ppu(addr, value);
+    if(addr >= 0x0000 && addr < 0x2000) 
+    {
+        crom->write_from_ppu(addr, value);
+        ppu_addr_bus = addr;
+    }
     else if(addr >= 0x2000 && addr < 0x3000)
     {
         addr &= 0x0FFF;
@@ -112,6 +117,7 @@ void PPU::store_vram(u16 addr, u8 value)
             // Default
             default: break;
         }
+        ppu_addr_bus = addr;
         NAME[addr] = value;
     }
     else store_vram(addr-0x1000, value);
@@ -122,6 +128,7 @@ void PPU::store_palette(u16 addr, u8 value)
     assert(addr >= 0x3F00 && addr < 0x4000);
     addr = addr & 0x1F;
     if ((addr & 0x03) == 0) addr &= 0x0F; 
+    ppu_addr_bus = addr;
     PAL[addr] = value;
 }
 
@@ -256,7 +263,7 @@ void PPU::update_vertv()
 
 void PPU::run_ppu()
 {
-    bool visible_element = (lines >= 0 && lines < 240) && (cycles >= 0 && cycles < 255);
+    bool visible_element = (lines > 0 && lines < 240) && (cycles >= 0 && cycles < 255);
 
     // Frame timing for background 
     // [Based on NesWiki diagram: https://www.nesdev.org/w/images/default/4/4f/Ppu.svg]
@@ -554,7 +561,17 @@ void PPU::run_ppu()
         // Populate pixel to frame buffer
         u8 color_select = fetch_palette(PAL_INDEX | (final_palette_index << 2) | final_index);
         color_select &= (MASK_REG.greyscale ? 0x30 : 0x3F);
-        frame_buf[lines*FRAME_W+cycles] = RGB_PAL[color_select];
+        u32 color_value = RGB_PAL[color_select];
+        u8 emp_select = (MASK_REG.byte & 0xE0) >> 5;
+        if(emp_select > 0x00)
+        {
+            // Color emphasis tinting
+            u8 b_value = ((color_value & 0x0000FF00) >> 8)*RGB_EMP[emp_select][0];
+            u8 g_value = ((color_value & 0x00FF0000) >> 16)*RGB_EMP[emp_select][1];
+            u8 r_value = ((color_value & 0xFF000000) >> 24)*RGB_EMP[emp_select][2];
+            color_value = (r_value << 24) | (g_value << 16) | (b_value << 8) | 0xFF;
+        }
+        frame_buf[lines*FRAME_W+cycles] = color_value;
     }
 
     // Clock mappers for scanline IRQs

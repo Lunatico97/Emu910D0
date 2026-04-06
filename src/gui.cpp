@@ -66,13 +66,12 @@ void GUI::run_nes()
 
         if((nes_state->system_clock % 3) == 0)
         {
-            if(nes_state->mmu->dma_rqst) nes_state->mmu->perform_dma(nes_state->system_clock % 2);
-            else if(nes_state->apu->refDMC->dmc_trf) nes_state->mmu->perform_audio_dma(nes_state->system_clock % 2);
-            else
-            {
-                nes_state->cpu->clock();
-                nes_state->apu->clock_apu_fcnt(); 
-            }
+            if(nes_state->mmu->dma_rqst) 
+                nes_state->mmu->perform_dma(nes_state->system_clock % 2);
+            else if(nes_state->apu->refDMC->buf_empty && nes_state->apu->refDMC->byte_rem > 0x00)
+                nes_state->mmu->perform_audio_dma(nes_state->system_clock % 2);
+            else nes_state->cpu->clock();
+            nes_state->apu->clock_apu_fcnt();
         }
 
         if(nes_state->ppu->trigger_nmi)
