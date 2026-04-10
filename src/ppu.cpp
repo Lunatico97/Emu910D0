@@ -566,9 +566,9 @@ void PPU::run_ppu()
         if(emp_select > 0x00)
         {
             // Color emphasis tinting
-            u8 b_value = ((color_value & 0x0000FF00) >> 8)*RGB_EMP[emp_select][0];
+            u8 b_value = ((color_value & 0x0000FF00) >> 8)*RGB_EMP[emp_select][2];
             u8 g_value = ((color_value & 0x00FF0000) >> 16)*RGB_EMP[emp_select][1];
-            u8 r_value = ((color_value & 0xFF000000) >> 24)*RGB_EMP[emp_select][2];
+            u8 r_value = ((color_value & 0xFF000000) >> 24)*RGB_EMP[emp_select][0];
             color_value = (r_value << 24) | (g_value << 16) | (b_value << 8) | 0xFF;
         }
         frame_buf[lines*FRAME_W+cycles] = color_value;

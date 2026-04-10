@@ -465,12 +465,6 @@ void APU::set_apu_fcnt(u8 data)
 	apu_fcnt.irq_inb = (data & D6);
 	apu_fcnt.frame_cnt = 0x0000;
 	frame_irq = apu_fcnt.irq_inb ? false : frame_irq;
-	if(apu_fcnt.step_mode)
-	{
-		APU::clock_pwm(apu_data.pulse_ch, true, true);
-		APU::clock_wno(apu_data.noise_ch, true, true);
-		APU::clock_tri(apu_data.trig_ch, true, true);
-	}
 }
 
 void APU::clock_apu_fcnt()
