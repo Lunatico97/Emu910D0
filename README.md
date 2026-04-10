@@ -7,7 +7,7 @@
 
 ## Current Status:
 - Burst-cycle 6502 CPU | PPU | 4-channel interleaving APU (Pulse 1, Pulse 2, Triangle, Noise, Delta Modulation)
-- Mapper 0 (NROM), 1 (SxROM), 2 (UxROM), 3 (CNROM), 4 (TxROM) & 7 (AxROM)
+- Mapper 0 (NROM), 1 (SxROM), 2 (UxROM), 3 (CNROM), 4 (TxROM), 7 (AxROM) & 9 (PxROM)
 - Minimalistic User Interface using ImGUI v1.92.5
 - Platform Support: Linux & Windows
 - Keyboard & Gamepad Support
@@ -116,6 +116,15 @@
     <tr>
         <td> <img src="rsrc/solar_jetman.png" alt="Solar Jetman"> </td>
         <td> <img src="rsrc/wizards_and_warriors.png" alt="Wizards & Warriors"> </td>
+    </tr>
+</table>
+
+- Mapper 9 (Mike Tyson's Punch Out !!, Punch Out !!) [MMC2 - ASIC]
+
+<table>
+    <tr>
+        <td> <img src="rsrc/mike_tyson_punch_out.png" alt="Mike Tyson's Punch Out !!"> </td>
+        <td> <img src="rsrc/punch_out.png" alt="Punch Out !!"> </td>
     </tr>
 </table>
 
