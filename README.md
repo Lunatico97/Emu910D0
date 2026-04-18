@@ -55,7 +55,7 @@
     </tr>
 </table>
 
-- Mapper 1 (Metroid, The Legend of Zelda, Megaman 2, Snow Bros., Tetris, Castlevania II - Simon's Quest, Zelda II: The Adventure  of Link, Dr. Mario, Snake: Rattle n' Roll, Ninja Gaiden) [MMC1 - ASIC]
+- Mapper 1 (Metroid, The Legend of Zelda, Megaman 2, Snow Bros., Tetris, Castlevania II - Simon's Quest, Zelda II: The Adventure  of Link, Dr. Mario, Snake: Rattle n' Roll, Ninja Gaiden, Final Fantasy, Faxanadu) [MMC1 - ASIC]
 
 <table>
     <tr>
@@ -93,7 +93,7 @@
     </tr>
 </table>
 
-- Mapper 4 (Super Mario Bros. 2, Super Mario Bros. 3, Felix The Cat, Jackie Chan's Action Kung Fu, Megaman 3, Kirby's Adventure) [MMC3 - ASIC]
+- Mapper 4 (Super Mario Bros. 2, Super Mario Bros. 3, Felix The Cat, Jackie Chan's Action Kung Fu, Megaman 3, Kirby's Adventure, Megaman 3, Megaman 4) [MMC3 - ASIC]
 
 <table>
     <tr>

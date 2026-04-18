@@ -100,6 +100,18 @@ namespace Global
         }
         return files;
     }
+
+    static u8* generate_sliver(u8 p1, u8 p0)
+    {
+        static u8 sliver[8];
+        for(u8 i=0; i<8; i++)
+        {
+            sliver[i] = (p1 & D7) >> 6 | (p0 & D7) >> 7; 
+            p1 <<= 1;
+            p0 <<= 1;
+        }
+        return sliver;
+    }
 };
 
 #endif
