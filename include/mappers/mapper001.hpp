@@ -9,6 +9,7 @@ class Mapper001: public Mapper
             chr_units = chr;
             shift_reg = 0x10;
             memset(asic_reg, 0x00, 4);
+            asic_vals.prg_mode = 0x03;
         }
 
         u32 map_cpu(u16 cpu_addr)
@@ -21,7 +22,7 @@ class Mapper001: public Mapper
             else
             {
                 // PRG              
-                switch((asic_reg[0] & 0x0C) >> 2)
+                switch(asic_vals.prg_mode)
                 {
                     case 0x00:
                     case 0x01:
@@ -42,6 +43,9 @@ class Mapper001: public Mapper
                         break;
 
                     default: 
+                        prg_offset = cpu_addr & 0x3FFF;
+                        if(cpu_addr >= 0x8000 && cpu_addr <= 0xBFFF) prg_addr = asic_vals.prg_select*PRG_BANK; 
+                        else prg_addr = (prg_units-1)*PRG_BANK;
                         break;
                 }
                 return prg_addr + prg_offset;
@@ -91,6 +95,7 @@ class Mapper001: public Mapper
             {
                 case 0x00: 
                     mirror_mode = asic_reg[0] & 0x03;
+                    asic_vals.prg_mode = (asic_reg[0] & 0x0C) >> 2;
                     asic_vals.chr_mode = (asic_reg[0] & D4) > 0;
                     break;
 
@@ -130,7 +135,7 @@ class Mapper001: public Mapper
         struct
         {
             bool chr_mode, prg_disabled;
-            u8 prg_select, chr_select1, chr_select2;
+            u8 prg_mode, prg_select, chr_select1, chr_select2;
         } asic_vals;
 
         u8 prg_units, chr_units;

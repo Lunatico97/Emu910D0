@@ -34,6 +34,7 @@ class PPU
         // PPU Cycle
         void run_ppu();
         void peek_ppu(bool* ppu_up);
+        void peek_pattern(u8 index);
 
         // PPU Counters
         u16 cycles, lines;
@@ -141,6 +142,9 @@ class PPU
         // Frame buffer
         u32* frame_buf;
         SDL_Texture* frame;
+
+        // Patter table
+        SDL_Texture *pattern_table[2];
 
         // CROM
         Renderer* rndr;

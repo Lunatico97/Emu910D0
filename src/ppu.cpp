@@ -11,11 +11,15 @@ PPU::PPU(CardROM *crom, Renderer *rndr) : W(0), crom(crom), cycles(0), lines(0),
     ppu_data_buffer = 0x00;
     frame_buf = (u32*)calloc(FRAME_W*FRAME_H, sizeof(u32));
     frame = rndr->loadTexture(FRAME_W, FRAME_H);
+    pattern_table[0] = rndr->loadTexture(128, 128);
+    pattern_table[1] = rndr->loadTexture(128, 128);
 }
 
 PPU::~PPU()
 {
     rndr->freeTex(frame);
+    rndr->freeTex(pattern_table[0]);
+    rndr->freeTex(pattern_table[1]);
     free(frame_buf);
 }
 
@@ -56,11 +60,8 @@ u8 PPU::read_from_cpu(u16 addr)
 u8 PPU::fetch_vram(u16 addr)
 {
     addr &= 0x3FFF;
-    if(addr >= 0x0000 && addr < 0x2000) 
-    {
-        ppu_addr_bus = addr;
-        return crom->read_from_ppu(addr);
-    }
+    ppu_addr_bus = addr;
+    if(addr >= 0x0000 && addr < 0x2000) return crom->read_from_ppu(addr);
     else if(addr >= 0x2000 && addr < 0x3000)
     {
         addr &= 0x0FFF;
@@ -77,7 +78,6 @@ u8 PPU::fetch_vram(u16 addr)
             // Default
             default: break;
         }
-        ppu_addr_bus = addr;
         return NAME[addr];
     }
     else return fetch_vram(addr-0x1000);
@@ -85,22 +85,18 @@ u8 PPU::fetch_vram(u16 addr)
 
 u8 PPU::fetch_palette(u16 addr)
 {
-    if(addr < 0x3F00 || addr >= 0x4000) printf("Address: 0x%04x\n", addr);
     assert(addr >= 0x3F00 && addr < 0x4000);
+    ppu_addr_bus = addr;
     addr &= 0x1F;
     if ((addr & 0x03) == 0) addr &= 0x0F; 
-    ppu_addr_bus = addr;
     return PAL[addr];
 }
 
 void PPU::store_vram(u16 addr, u8 value)
 {
     addr &= 0x3FFF;
-    if(addr >= 0x0000 && addr < 0x2000) 
-    {
-        crom->write_from_ppu(addr, value);
-        ppu_addr_bus = addr;
-    }
+    ppu_addr_bus = addr;
+    if(addr >= 0x0000 && addr < 0x2000) crom->write_from_ppu(addr, value);
     else if(addr >= 0x2000 && addr < 0x3000)
     {
         addr &= 0x0FFF;
@@ -117,7 +113,6 @@ void PPU::store_vram(u16 addr, u8 value)
             // Default
             default: break;
         }
-        ppu_addr_bus = addr;
         NAME[addr] = value;
     }
     else store_vram(addr-0x1000, value);
@@ -126,9 +121,9 @@ void PPU::store_vram(u16 addr, u8 value)
 void PPU::store_palette(u16 addr, u8 value)
 {
     assert(addr >= 0x3F00 && addr < 0x4000);
+    ppu_addr_bus = addr;
     addr = addr & 0x1F;
     if ((addr & 0x03) == 0) addr &= 0x0F; 
-    ppu_addr_bus = addr;
     PAL[addr] = value;
 }
 
@@ -193,6 +188,7 @@ void PPU::set_ppu_addr(u8 addr)
         V.addr = T.addr;
     }
     // Toggle latch
+    ppu_addr_bus = V.addr;
     W = !W;
 }
  
@@ -622,35 +618,23 @@ void PPU::peek_ppu(bool* ppu_up)
     ImGui::BulletText("Fine: (%d,%d)", X, V.fine_y);
     ImGui::EndGroup();
 
-    // Status
+    // Mask & Status
     ImGui::Spacing();
     ImGui::BeginGroup();
-    ImGui::TextUnformatted("Mask");
+    ImGui::TextUnformatted("Mask & Status");
     ImGui::BulletText("MASK: 0x%02x", MASK_REG.byte);
-    ImGui::BulletText("BGENAB: %d", MASK_REG.bg_enabled);
-    ImGui::BulletText("SPENAB: %d", MASK_REG.spr_enabled);
-    ImGui::BulletText("BGLEFT: %d", MASK_REG.bg_left);
-    ImGui::BulletText("SPLEFT: %d", MASK_REG.spr_left);
+    ImGui::BulletText("STATUS: 0x%02x", STAT_REG.byte);
+    ImGui::BulletText("ENAB: (%d, %d)", MASK_REG.bg_enabled, MASK_REG.spr_enabled);
+    ImGui::BulletText("LEFT: (%d, %d)", MASK_REG.bg_left, MASK_REG.spr_left);
     ImGui::EndGroup();
     
-    // Mask
+    // Palette RAM
     ImGui::SameLine(150.0f, 0.0f);
     ImGui::BeginGroup();
-    ImGui::TextUnformatted("Status");
-    ImGui::BulletText("STATUS: 0x%02x", STAT_REG.byte);
-    ImGui::BulletText("SPZHIT: %d", STAT_REG.spr_hit);
-    ImGui::BulletText("SPOVFW: %d", STAT_REG.spr_ovf);
-    ImGui::BulletText("VBLANK: %d", STAT_REG.vblank);
-    ImGui::EndGroup();
-    
-
-    // Palette RAM
-    ImGui::Spacing();
-    ImGui::Spacing();
     ImGui::TextUnformatted("Palette RAM");
     ImVec2 p = ImGui::GetCursorScreenPos();
-    float size = 20.0f;
-    int cols = 8;
+    float size = 6.0f;
+    int cols = 4;
 
     for (int i = 0; i < 32; i++) 
     {
@@ -663,5 +647,46 @@ void PPU::peek_ppu(bool* ppu_up)
         ImGui::GetWindowDrawList()->AddRectFilled(p_min, p_max, color);
     }    
 
+    ImGui::EndGroup();
+
+    // Pattern Tables
+    peek_pattern(0);
+    peek_pattern(1);
+    ImGui::Spacing();
+    ImGui::BeginGroup();
+    ImGui::TextUnformatted("Pattern Tables");
+    ImGui::Image(pattern_table[0], {128.0f, 128.0f});
+    ImGui::SameLine(0.0f, 20.0f); 
+    ImGui::Image(pattern_table[1], {128.0f, 128.0f}); 
+    ImGui::EndGroup();
+
     ImGui::End();
+}
+
+void PPU::peek_pattern(u8 index)
+{
+    int pitch;
+    void *pixels;
+
+    if(SDL_LockTexture(pattern_table[index], NULL, &pixels, &pitch) == 0)
+    {
+        u32 *data = (u32*)pixels;
+       
+        int pitch_in_pixels = pitch / sizeof(u32);
+
+        for(int tile_idx = 0; tile_idx < 256; tile_idx++) {
+            int tile_x = (tile_idx % 16) * 8; 
+            int tile_y = (tile_idx / 16) * 8;
+
+            for(u8 row = 0; row < 8; row++) {
+                u8 *sliver = Global::generate_sliver(crom->read_from_ppu(0x1000*index + tile_idx*16 + row + 0x0008), crom->read_from_ppu(0x1000*index + tile_idx*16 + row));
+                for(u8 col = 0; col < 8; col++) {
+                    int final_x = tile_x + col;
+                    int final_y = tile_y + row;
+                    data[final_y * pitch_in_pixels + final_x] = RGB_PAL[PAL[sliver[col]]];
+                }
+            }
+        }
+        SDL_UnlockTexture(pattern_table[index]);
+    }
 }
