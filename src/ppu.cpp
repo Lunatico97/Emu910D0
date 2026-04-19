@@ -7,6 +7,7 @@ PPU::PPU(CardROM *crom, Renderer *rndr) : W(0), crom(crom), cycles(0), lines(0),
     T.addr = 0x0000;
     oam_addr = 0x00;
     frame_toggle = false;
+    suppress_nmi = false;
     trigger_events = false;
     ppu_data_buffer = 0x00;
     frame_buf = (u32*)calloc(FRAME_W*FRAME_H, sizeof(u32));
@@ -220,6 +221,20 @@ u8 PPU::get_ppu_stat()
 {
     W = 0;
     u8 out_stat = (STAT_REG.byte & 0xE0) | (ppu_data_buffer & 0x1F);
+
+    if(lines == 241) 
+    {
+        if(cycles == 0) 
+        {
+            out_stat &= ~D7; 
+            suppress_nmi = true;
+        }
+        else if (cycles == 1) {
+            out_stat |= D7;
+            suppress_nmi = true;
+        }
+    }
+
     STAT_REG.vblank = 0;
     return out_stat;
 }
@@ -470,8 +485,13 @@ void PPU::run_ppu()
 
     if(lines == 241 && cycles == 1)
     {
-        STAT_REG.vblank = 1; 
-        if(CVALS.nmi_enabled) trigger_nmi = true; // Trigger NMI if enabled
+        if(!suppress_nmi)
+        {
+            STAT_REG.vblank = 1; 
+            if(CVALS.nmi_enabled) trigger_nmi = true; // Trigger NMI if enabled
+        }
+
+        suppress_nmi = false;
     }
 
     if(lines == 261 && cycles == 1)
