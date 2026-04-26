@@ -101,6 +101,13 @@ namespace Global
         return files;
     }
 
+    static u8 lateral_invert(u8 byte_in)
+    {
+        return ((byte_in & D0) << 7) | ((byte_in & D1) << 5) | ((byte_in & D2) << 3) |
+            ((byte_in & D3) << 1) | ((byte_in & D4) >> 1) | ((byte_in & D5) >> 3) |
+            ((byte_in & D6) >> 5) | ((byte_in & D7) >> 7);
+    }
+
     static u8* generate_sliver(u8 p1, u8 p0)
     {
         static u8 sliver[8];

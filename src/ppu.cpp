@@ -14,6 +14,8 @@ PPU::PPU(CardROM *crom, Renderer *rndr) : W(0), crom(crom), cycles(0), lines(0),
     frame = rndr->loadTexture(FRAME_W, FRAME_H);
     pattern_table[0] = rndr->loadTexture(128, 128);
     pattern_table[1] = rndr->loadTexture(128, 128);
+    name_table[0] = rndr->loadTexture(256, 240);
+    name_table[1] = rndr->loadTexture(256, 240);
 }
 
 PPU::~PPU()
@@ -21,6 +23,8 @@ PPU::~PPU()
     rndr->freeTex(frame);
     rndr->freeTex(pattern_table[0]);
     rndr->freeTex(pattern_table[1]);
+    rndr->freeTex(name_table[0]);
+    rndr->freeTex(name_table[1]);
     free(frame_buf);
 }
 
@@ -58,6 +62,25 @@ u8 PPU::read_from_cpu(u16 addr)
     return 0x00; 
 }
 
+u16 PPU::map_vram(u16 addr)
+{
+    addr &= 0x0FFF;
+    switch(crom->get_mirror_mode())
+    {
+        // Single screen - 0
+        case 0x00: addr &= 0x03FF; break;
+        // Single screen - 1
+        case 0x01: addr = 0x0400 | (addr & 0x03FF); break;
+        // Vertical mirror mode (Horizontal arrangement)
+        case 0x02: addr &= 0x07FF; break;
+        // Horizontal mirror mode (Vertical arrangement)
+        case 0x03: addr = (addr & 0x03FF) | ((addr & 0x0800) >> 1); break;
+        // Default
+        default: break;
+    }
+    return addr;
+}
+
 u8 PPU::fetch_vram(u16 addr)
 {
     addr &= 0x3FFF;
@@ -65,20 +88,7 @@ u8 PPU::fetch_vram(u16 addr)
     if(addr >= 0x0000 && addr < 0x2000) return crom->read_from_ppu(addr);
     else if(addr >= 0x2000 && addr < 0x3000)
     {
-        addr &= 0x0FFF;
-        switch(crom->get_mirror_mode())
-        {
-            // Single screen - 0
-            case 0x00: addr &= 0x03FF; break;
-            // Single screen - 1
-            case 0x01: addr = 0x0400 | (addr & 0x03FF); break;
-            // Vertical mirror mode (Horizontal arrangement)
-            case 0x02: addr &= 0x07FF; break;
-            // Horizontal mirror mode (Vertical arrangement)
-            case 0x03: addr = (addr & 0x03FF) | ((addr & 0x0800) >> 1); break;
-            // Default
-            default: break;
-        }
+        addr = map_vram(addr);
         return NAME[addr];
     }
     else return fetch_vram(addr-0x1000);
@@ -100,20 +110,7 @@ void PPU::store_vram(u16 addr, u8 value)
     if(addr >= 0x0000 && addr < 0x2000) crom->write_from_ppu(addr, value);
     else if(addr >= 0x2000 && addr < 0x3000)
     {
-        addr &= 0x0FFF;
-        switch(crom->get_mirror_mode())
-        {
-            // Single screen - 0
-            case 0x00: addr &= 0x03FF; break;
-            // Single screen - 1
-            case 0x01: addr = 0x0400 | (addr & 0x03FF); break;
-            // Vertical mirror mode (Horizontal arrangement)
-            case 0x02: addr &= 0x07FF; break;
-            // Horizontal mirror mode (Vertical arrangement)
-            case 0x03: addr = (addr & 0x03FF) | ((addr & 0x0800) >> 1); break;
-            // Default
-            default: break;
-        }
+        addr = map_vram(addr);
         NAME[addr] = value;
     }
     else store_vram(addr-0x1000, value);
@@ -408,9 +405,9 @@ void PPU::run_ppu()
                         { 
                             SPAM[4*spr_cnt+j] = OAM[4*i+j];
                         }
-
-                        spr_cnt++;
-                    }               
+                    }  
+                    
+                    spr_cnt++;
                 }
             } 
 
@@ -467,12 +464,8 @@ void PPU::run_ppu()
                 // Horizontal flip
                 if(SPAM[4*spr_cnt+2] & D6)
                 {
-                    S0SHF[spr_cnt] = ((S0SHF[spr_cnt] & D0) << 7) | ((S0SHF[spr_cnt] & D1) << 5) | ((S0SHF[spr_cnt] & D2) << 3) |
-                                     ((S0SHF[spr_cnt] & D3) << 1) | ((S0SHF[spr_cnt] & D4) >> 1) | ((S0SHF[spr_cnt] & D5) >> 3) |
-                                     ((S0SHF[spr_cnt] & D6) >> 5) | ((S0SHF[spr_cnt] & D7) >> 7);
-                    S1SHF[spr_cnt] = ((S1SHF[spr_cnt] & D0) << 7) | ((S1SHF[spr_cnt] & D1) << 5) | ((S1SHF[spr_cnt] & D2) << 3) |
-                                     ((S1SHF[spr_cnt] & D3) << 1) | ((S1SHF[spr_cnt] & D4) >> 1) | ((S1SHF[spr_cnt] & D5) >> 3) |
-                                     ((S1SHF[spr_cnt] & D6) >> 5) | ((S1SHF[spr_cnt] & D7) >> 7);
+                    S0SHF[spr_cnt] = Global::lateral_invert(S0SHF[spr_cnt]);
+                    S1SHF[spr_cnt] = Global::lateral_invert(S1SHF[spr_cnt]);
                 }
             }
         }
@@ -567,11 +560,13 @@ void PPU::run_ppu()
         {
             final_index = spr_priority ? spr_index : bg_index;
             final_palette_index = spr_priority ? spr_palette_index : bg_palette_index;
+            STAT_REG.spr_hit = (spr_zero_loaded && spr_zero_opaque);
+        }
 
-            if (spr_zero_loaded && spr_zero_opaque)
-            {
-                STAT_REG.spr_hit = (cycles >= 0 && cycles < 256);
-            }
+        // Force SPZH (Experimental)
+        if(spr_zero_force)
+        {
+            if(lines == OAM[0] && cycles == OAM[3]) STAT_REG.spr_hit = 1;
         }
 
         // Populate pixel to frame buffer
@@ -617,6 +612,32 @@ void PPU::peek_ppu(bool* ppu_up)
     ImGui::SetNextWindowSize({300.0f, SCRH-200.0f});
     ImGui::Begin("PPU Viewer", ppu_up, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
 
+    // Viewers
+    ImGui::BeginGroup();
+    ImGui::BeginTabBar("Viewers");
+    if(ImGui::BeginTabItem("PATTERN")) {
+        // Pattern Tables
+        peek_pattern(0);
+        peek_pattern(1);
+        ImGui::Image(pattern_table[0], {128.0f, 128.0f});
+        ImGui::SameLine(0.0f, 10.0f); 
+        ImGui::Image(pattern_table[1], {128.0f, 128.0f}); 
+        ImGui::EndTabItem();
+    }
+    if (ImGui::BeginTabItem("VRAM")) 
+    {
+        // VRAM
+        peek_name(0);
+        peek_name(1);
+        ImGui::Image(name_table[0], {128.0f, 128.0f});
+        ImGui::SameLine(0.0f, 10.0f);
+        ImGui::Image(name_table[1], {128.0f, 128.0f});
+        ImGui::EndTabItem();
+    }    
+
+    ImGui::EndTabBar();
+    ImGui::EndGroup();
+
     // Control
     ImGui::BeginGroup();
     ImGui::TextUnformatted("Control");
@@ -642,6 +663,7 @@ void PPU::peek_ppu(bool* ppu_up)
     ImGui::Spacing();
     ImGui::BeginGroup();
     ImGui::TextUnformatted("Mask & Status");
+    ImGui::Checkbox("Force SPZH", &spr_zero_force);
     ImGui::BulletText("MASK: 0x%02x", MASK_REG.byte);
     ImGui::BulletText("STATUS: 0x%02x", STAT_REG.byte);
     ImGui::BulletText("ENAB: (%d, %d)", MASK_REG.bg_enabled, MASK_REG.spr_enabled);
@@ -667,17 +689,6 @@ void PPU::peek_ppu(bool* ppu_up)
         ImGui::GetWindowDrawList()->AddRectFilled(p_min, p_max, color);
     }    
 
-    ImGui::EndGroup();
-
-    // Pattern Tables
-    peek_pattern(0);
-    peek_pattern(1);
-    ImGui::Spacing();
-    ImGui::BeginGroup();
-    ImGui::TextUnformatted("Pattern Tables");
-    ImGui::Image(pattern_table[0], {128.0f, 128.0f});
-    ImGui::SameLine(0.0f, 20.0f); 
-    ImGui::Image(pattern_table[1], {128.0f, 128.0f}); 
     ImGui::EndGroup();
 
     ImGui::End();
@@ -709,4 +720,35 @@ void PPU::peek_pattern(u8 index)
         }
         SDL_UnlockTexture(pattern_table[index]);
     }
+}
+
+void PPU::peek_name(u8 index)
+{
+    // VRAM Viewer
+    int pitch;
+    void *pixels;
+    u16 start_addr = index*0x0400;
+
+    if(SDL_LockTexture(name_table[index], NULL, &pixels, &pitch) == 0)
+    {
+        u32 *data = (u32*)pixels;
+       
+        int pitch_in_pixels = pitch / sizeof(u32);
+
+        for(int tile_idx = 0x0000; tile_idx < 0x03C0; tile_idx++) {
+            int tile_x = (tile_idx % 32) * 8; 
+            int tile_y = (tile_idx / 32) * 8;
+
+            for(u8 row = 0; row < 8; row++) {
+                u8 *sliver = Global::generate_sliver(crom->read_from_ppu(CVALS.bg_addr + NAME[start_addr + tile_idx]*16 + row + 0x0008), crom->read_from_ppu(CVALS.bg_addr + NAME[start_addr + tile_idx]*16 + row));
+                for(u8 col = 0; col < 8; col++) {
+                    int final_x = tile_x + col;
+                    int final_y = tile_y + row;
+                    data[final_y * pitch_in_pixels + final_x] = RGB_PAL[PAL[sliver[col]]];
+                }
+            }
+        }
+        SDL_UnlockTexture(name_table[index]);
+    }
+
 }
