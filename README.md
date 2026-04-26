@@ -93,7 +93,7 @@
     </tr>
 </table>
 
-- Mapper 4 (Super Mario Bros. 2, Super Mario Bros. 3, Felix The Cat, Jackie Chan's Action Kung Fu, Megaman 3, Kirby's Adventure, Megaman 3, Megaman 4) [MMC3 - ASIC]
+- Mapper 4 (Super Mario Bros. 2, Super Mario Bros. 3, Felix The Cat, Jackie Chan's Action Kung Fu, Megaman 3, Kirby's Adventure, Crystalis, Megaman 4) [MMC3 - ASIC]
 
 <table>
     <tr>

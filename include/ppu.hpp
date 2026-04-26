@@ -35,6 +35,7 @@ class PPU
         void run_ppu();
         void peek_ppu(bool* ppu_up);
         void peek_pattern(u8 index);
+        void peek_name(u8 index);
 
         // PPU Counters
         u16 cycles, lines;
@@ -62,6 +63,7 @@ class PPU
         // PPU Interactions
         u8 fetch_vram(u16 addr);
         u8 fetch_palette(u16 addr);
+        u16 map_vram(u16 ppu_addr);
         void store_vram(u16 addr, u8 value);
         void store_palette(u16 addr, u8 value);
         
@@ -72,7 +74,7 @@ class PPU
 
         // OAM Counters
         u8 spr_cnt = 0x00, oam_buffer = 0xFF;
-        bool spr_zero_loaded, spr_zero_opaque;
+        bool spr_zero_loaded, spr_zero_opaque, spr_zero_force = 0;
 
         // Shift & Latch Registers
         u8 P0L, P1L;
@@ -145,6 +147,7 @@ class PPU
 
         // Patter table
         SDL_Texture *pattern_table[2];
+        SDL_Texture *name_table[2];
 
         // CROM
         Renderer* rndr;
