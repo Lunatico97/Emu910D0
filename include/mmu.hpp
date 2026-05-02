@@ -70,7 +70,7 @@ class MMU
         u8 cycle_penalty = 0x00;
 
         // DMA signals
-        bool dma_rqst = 0, dma_sync = 0, dma_irq = 0;
+        bool dma_rqst = 0, dma_sync = 0, dma_irq = 0, dmc_sync = 0;
 
         // Peek
         void peek_mmu(bool *mmu_up);
@@ -90,7 +90,7 @@ class MMU
         u8 RAM[RAM_SIZE];
 
         // Direct Memory Access for OAM
-        u8 oam_data, dmc_data, oam_des = 0x00, dma_off = 0x00;
+        u8 oam_data, oam_des = 0x00, dma_off = 0x00;
         u16 dma_src;
 
         // Flags
