@@ -177,13 +177,17 @@ void MMU::perform_dma(bool sync_rw)
 
 void MMU::perform_audio_dma(bool sync_rw)
 {
-    if(apu->refDMC->byte_rem == 0x00 || !apu->refDMC->buf_empty) return;
-
-    if(!sync_rw) dmc_data = retreive(apu->refDMC->cur_addr);
-    else
+    if(!dmc_sync)
     {
-        apu->refDMC->buffer = dmc_data;
+        if(sync_rw) dmc_sync = true;
+        return;
+    }
+    
+    if(!sync_rw)
+    { 
+        apu->refDMC->buffer = retreive(apu->refDMC->cur_addr);
         apu->refDMC->buf_empty = false;
+        dmc_sync = false;
 
         if(++apu->refDMC->cur_addr == 0x0000)
         {

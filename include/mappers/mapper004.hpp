@@ -1,5 +1,8 @@
 #include <mappers/mapper.hpp>
-
+/*
+    Mapper 004 [MMC3/MMC6]
+    Author: Diwas Adhikari
+*/
 class Mapper004: public Mapper
 {
     public:
@@ -119,7 +122,7 @@ class Mapper004: public Mapper
                     else
                     {
                         if(asic_vals.bank_select == 0x00 || asic_vals.bank_select == 0x01) data &= 0xFE;
-                        // else if(asic_vals.bank_select == 0x06 || asic_vals.bank_select == 0x07) data &= 0x3F;
+                        else if(asic_vals.bank_select == 0x06 || asic_vals.bank_select == 0x07) data &= (prg_units-1);
                         bank_reg[asic_vals.bank_select] = data;
                     }
                     break;

@@ -423,7 +423,7 @@ void APU::set_dmc_smpaddr(u8 data)
 
 void APU::set_dmc_smplen(u8 data)
 {
-	apu_data.dmc_ch.smp_len = (data << 4) | 0x01;
+	apu_data.dmc_ch.smp_len = (data << 4) + 0x01;
 }
 
 u8 APU::get_apu_stat()

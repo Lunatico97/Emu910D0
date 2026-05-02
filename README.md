@@ -7,7 +7,7 @@
 
 ## Current Status:
 - Burst-cycle 6502 CPU | PPU | 4-channel interleaving APU (Pulse 1, Pulse 2, Triangle, Noise, Delta Modulation)
-- Mapper 0 (NROM), 1 (SxROM), 2 (UxROM), 3 (CNROM), 4 (TxROM), 7 (AxROM) & 9 (PxROM)
+- Mapper 0 (NROM), 1 (SxROM), 2 (UxROM), 3 (CNROM), 4 (TxROM), 7 (AxROM), 9 (PxROM) & 69 (JxROM)
 - Minimalistic User Interface using ImGUI v1.92.5
 - Platform Support: Linux & Windows
 - Keyboard & Gamepad Support
@@ -93,7 +93,7 @@
     </tr>
 </table>
 
-- Mapper 4 (Super Mario Bros. 2, Super Mario Bros. 3, Felix The Cat, Jackie Chan's Action Kung Fu, Megaman 3, Kirby's Adventure, Crystalis, Megaman 4) [MMC3 - ASIC]
+- Mapper 4 (Super Mario Bros. 2, Super Mario Bros. 3, Felix The Cat, Jackie Chan's Action Kung Fu, Megaman 3, Kirby's Adventure, Crystalis, Megaman 4, Super C, Batman, Startropics) [MMC3/MMC6 - ASIC]
 
 <table>
     <tr>
@@ -106,7 +106,7 @@
     </tr>
 </table>
 
-- Mapper 7 (Battletoads, R.C. Pro-Am, Solar Jetman, Wizards & Warriors, WWF - Wrestlemania)
+- Mapper 7 (Battletoads, R.C. Pro-Am, Solar Jetman, Wizards & Warriors, WWF - Wrestlemania, Marble Madness)
 
 <table>
     <tr>
@@ -125,6 +125,14 @@
     <tr>
         <td> <img src="rsrc/mike_tyson_punch_out.png" alt="Mike Tyson's Punch Out !!"> </td>
         <td> <img src="rsrc/punch_out.png" alt="Punch Out !!"> </td>
+    </tr>
+</table>
+
+- Mapper 69 (Batman - The Return of Joker) [FME-7 - ASIC]
+
+<table>
+    <tr>
+        <td> <img src="rsrc/batman_rotj.png" alt="Batman - The Return of Joker"> </td>
     </tr>
 </table>
 
