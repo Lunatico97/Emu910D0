@@ -1,5 +1,9 @@
 #include <mappers/mapper.hpp>
 
+/*
+    Mapper 000 [NROM]
+    Author: Diwas Adhikari
+*/
 class Mapper000: public Mapper
 {
     public:
@@ -24,7 +28,8 @@ class Mapper000: public Mapper
 
         void map_cpu_wr(u16 cpu_addr, u8 data) { return; }
         void map_ppu_wr(u16 ppu_addr, u8 data) { return; }
-        void clock_irq(u16 ppu_addr) { return; }
+        void clock_ppu_irq(u16 ppu_addr) { return; }
+        void clock_cpu_irq() { return; }
     
     private:
         u8 prg_units, chr_units;

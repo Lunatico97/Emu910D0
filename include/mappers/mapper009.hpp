@@ -1,5 +1,9 @@
 #include <mappers/mapper.hpp>
 
+/*
+    Mapper 009 [MMC2 - PxROM]
+    Author: Diwas Adhikari
+*/
 class Mapper009: public Mapper
 {
     public:
@@ -60,7 +64,8 @@ class Mapper009: public Mapper
             assert(ppu_addr >= 0x0000 && ppu_addr < 0x2000);
         }
         
-        void clock_irq(u16 ppu_addr) { return; }
+        void clock_ppu_irq(u16 ppu_addr) { return; }
+        void clock_cpu_irq() { return; }
     
     private:
         void configure(u8 asic_index, u8 data)

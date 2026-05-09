@@ -1,5 +1,9 @@
 #include <mappers/mapper.hpp>
 
+/*
+    Mapper 003 [CNROM]
+    Author: Diwas Adhikari
+*/
 class Mapper003: public Mapper
 {
     public:
@@ -34,7 +38,8 @@ class Mapper003: public Mapper
             assert(ppu_addr >= 0x0000 && ppu_addr < 0x2000);
         }
         
-        void clock_irq(u16 ppu_addr) { return; }
+        void clock_ppu_irq(u16 ppu_addr) { return; }
+        void clock_cpu_irq() { return; }
     
     private:
         u8 prg_units, chr_units;

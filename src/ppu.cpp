@@ -586,8 +586,8 @@ void PPU::run_ppu()
     }
 
     // Clock mappers for scanline IRQs
-    if(MASK_REG.bg_enabled || MASK_REG.spr_enabled) crom->clock_irq(ppu_addr_bus);
-    else crom->clock_irq(V.addr);
+    if(MASK_REG.bg_enabled || MASK_REG.spr_enabled) crom->clock_ppu_irq(ppu_addr_bus);
+    else crom->clock_ppu_irq(V.addr);
 
     // Reset cycles and lines
     cycles += 0x0001;

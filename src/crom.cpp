@@ -74,7 +74,11 @@ void CardROM::load_rom(const char *filename)
 
 u8 CardROM::read_from_cpu(u16 cpu_addr)
 {
-    if(cpu_addr >= 0x6000 && cpu_addr <= 0x7FFF) return *(PRGRAM + mapper->map_cpu(cpu_addr));
+    if(cpu_addr >= 0x6000 && cpu_addr <= 0x7FFF)
+    {
+        u32 mapped_addr = mapper->map_cpu(cpu_addr);
+        return mapper->override_ram ? *(PRGROM + mapped_addr): *(PRGRAM + mapped_addr);
+    }
     else return *(PRGROM + mapper->map_cpu(cpu_addr));
 }
 
@@ -86,7 +90,11 @@ u8 CardROM::read_from_ppu(u16 ppu_addr)
 
 void CardROM::write_from_cpu(u16 cpu_addr, u8 data)
 {
-    if(cpu_addr >= 0x6000 && cpu_addr <= 0x7FFF) *(PRGRAM + mapper->map_cpu(cpu_addr)) = data;
+    if(cpu_addr >= 0x6000 && cpu_addr <= 0x7FFF)
+    {
+        if(mapper->override_ram) *(PRGROM + mapper->map_cpu(cpu_addr)) = data;
+        else *(PRGRAM + mapper->map_cpu(cpu_addr)) = data;
+    }
     else mapper->map_cpu_wr(cpu_addr, data); 
 }
 
@@ -114,8 +122,14 @@ u8 CardROM::get_mirror_mode()
     else return !mirror_mode + 0x02;
 }
 
-void CardROM::clock_irq(u16 ppu_addr)
+void CardROM::clock_cpu_irq()
 {
-	mapper->clock_irq(ppu_addr);
+	mapper->clock_cpu_irq();
+	map_irq = mapper->fire_irq;
+}
+
+void CardROM::clock_ppu_irq(u16 ppu_addr)
+{
+	mapper->clock_ppu_irq(ppu_addr);
 	map_irq = mapper->fire_irq;
 }

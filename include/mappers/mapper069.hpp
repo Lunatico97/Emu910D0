@@ -1,6 +1,6 @@
 #include <mappers/mapper.hpp>
 /*
-    Mapper 069 [FME-7]
+    Mapper 069 [FME-7 - JxROM]
     Author: Diwas Adhikari
 */
 class Mapper069: public Mapper
@@ -10,6 +10,7 @@ class Mapper069: public Mapper
         {
             prg_units = prg*2;
             chr_units = chr;
+            override_ram = 1;
             memset(bank_reg, 0x00, 12);
         }
 
@@ -18,7 +19,12 @@ class Mapper069: public Mapper
             assert(cpu_addr >= 0x6000 && cpu_addr <= 0xFFFF);
             if(cpu_addr >= 0x6000 && cpu_addr <= 0x7FFF)
             {
-                return (cpu_addr & 0x1FFF);
+                if(override_ram)
+                {
+                    prg_addr =  (bank_reg[8]*8192);
+                    return prg_addr + (cpu_addr & 0x1FFF);
+                } 
+                else return (cpu_addr & 0x1FFF);
             }
             else
             {
@@ -55,7 +61,15 @@ class Mapper069: public Mapper
             assert(ppu_addr >= 0x0000 && ppu_addr < 0x2000);
         }
         
-        void clock_irq(u16 ppu_addr) { return; }
+        void clock_cpu_irq() 
+        {
+            if(asic_vals.irq_cen)
+            {
+                fire_irq = (--asic_vals.irq_counter == 0xFFFF && asic_vals.irq_en);
+            }
+        }
+
+        void clock_ppu_irq(u16 ppu_addr) { return; }
     
     private:
         void configure(u8 asic_index, u8 data)
@@ -73,7 +87,7 @@ class Mapper069: public Mapper
                 
                 if(asic_vals.cmd_reg == 0x08)
                 {
-                    asic_vals.rom_toggle = (param_reg & D6);
+                    override_ram = (param_reg & D6) == 0;
                     asic_vals.ram_enable = (param_reg & D7);
                 }
             }
@@ -88,6 +102,7 @@ class Mapper069: public Mapper
                     case 0x0D: 
                         asic_vals.irq_en = (param_reg & D0); 
                         asic_vals.irq_cen = (param_reg & D7);
+                        fire_irq = false;
                         break;
 
                     case 0x0E:
@@ -95,7 +110,7 @@ class Mapper069: public Mapper
                         break;
 
                     case 0x0F:
-                        asic_vals.irq_counter = static_cast<u16>(param_reg) << 8;
+                        asic_vals.irq_counter = (asic_vals.irq_counter & 0x00FF) | static_cast<u16>(param_reg) << 8;
                         break;
 
                     default: break;
@@ -105,9 +120,9 @@ class Mapper069: public Mapper
 
         struct
         {
-            bool chr_mode, rom_toggle, ram_enable, irq_en, irq_cen;
+            bool chr_mode, ram_enable, irq_en, irq_cen;
             u8 cmd_reg, param_reg, chr_select, prg_select;
-            u16 irq_counter;
+            u16 irq_counter = 0x0000;
         } asic_vals;
 
         u8 bank_reg[12];
