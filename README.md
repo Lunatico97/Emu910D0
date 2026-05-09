@@ -128,11 +128,12 @@
     </tr>
 </table>
 
-- Mapper 69 (Batman - The Return of Joker) [FME-7 - ASIC]
+- Mapper 69 (Batman - The Return of Joker, Hebereke) [FME-7 - ASIC]
 
 <table>
     <tr>
         <td> <img src="rsrc/batman_rotj.png" alt="Batman - The Return of Joker"> </td>
+        <td> <img src="rsrc/hebereke.png" alt="Hebereke"> </td>
     </tr>
 </table>
 

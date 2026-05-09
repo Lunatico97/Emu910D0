@@ -74,6 +74,7 @@ void GUI::run_nes()
             else
             {
                 nes_state->cpu->clock();
+                nes_state->crom->clock_cpu_irq();
 
                 if(nes_state->ppu->trigger_nmi)
                 {

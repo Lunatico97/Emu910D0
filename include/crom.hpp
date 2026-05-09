@@ -17,7 +17,8 @@ class CardROM
         void write_from_ppu(u16 ppu_addr, u8 data);
         void load_rom(const char *filename);
         void persist_ram(const char *rom, bool on_load = false);
-        void clock_irq(u16 ppu_addr);
+        void clock_ppu_irq(u16 ppu_addr);
+        void clock_cpu_irq();
 
     private:
         void decode(u8 header[]);

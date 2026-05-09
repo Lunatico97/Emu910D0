@@ -1,6 +1,6 @@
 #include <mappers/mapper.hpp>
 /*
-    Mapper 004 [MMC3/MMC6]
+    Mapper 004 [MMC3/MMC6 - TxROM]
     Author: Diwas Adhikari
 */
 class Mapper004: public Mapper
@@ -82,7 +82,7 @@ class Mapper004: public Mapper
             assert(ppu_addr >= 0x0000 && ppu_addr < 0x2000);
         }
         
-        void clock_irq(u16 ppu_addr)
+        void clock_ppu_irq(u16 ppu_addr)
         {			
         	// A12 rising edge clocking
             bool a12_high = (ppu_addr & 0x1000) > 0;
@@ -106,6 +106,8 @@ class Mapper004: public Mapper
 			
 			asic_vals.irq_a12 = a12_high;
 		}
+
+        void clock_cpu_irq() { return; }
     
     private:
         void configure(u8 asic_index, u8 data, bool even)
