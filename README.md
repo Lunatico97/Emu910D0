@@ -7,16 +7,12 @@
 
 ## Current Status:
 - Burst-cycle 6502 CPU | PPU | 4-channel interleaving APU (Pulse 1, Pulse 2, Triangle, Noise, Delta Modulation)
-- Mapper 0 (NROM), 1 (SxROM), 2 (UxROM), 3 (CNROM), 4 (TxROM), 7 (AxROM), 9 (PxROM) & 69 (JxROM)
+- Mapper 0 (NROM), 1 (SxROM), 2 (UxROM), 3 (CNROM), 4 (TxROM), 7 (AxROM), 9 (PxROM), 10 (FxROM) & 69 (JxROM)
 - Minimalistic User Interface using ImGUI v1.92.5
 - Platform Support: Linux & Windows
 - Keyboard & Gamepad Support
 
-![Emu910D0](rsrc/snip8.png)
-![Donkey Kong](rsrc/donkey_kong.gif)
-
 ## Controls:
-
 <table>
     <tr> <th> Keyboard Controls </th> <th> NES Equivalent / Gamepad Buttons </th> </tr>
     <tr> <td> W/A/S/D </td> <td> D-PAD </td> <tr>
@@ -37,13 +33,20 @@
     <tr> <td> NUM_0 </td> <td> RST (Reset) </td> <tr>
 </table>
 
+
 ## Tests:
-![NES Test Menu](rsrc/nestest.gif)
 - Passes all tests for kevtris's `nestest.nes` ROM in video mode at reset vector: 0xC004.
 - Passes most of blargg's CPU branch, timing and sync tests with PPU. 
 - Matches first 5000 lines of `nestest.log` (upto official instruction tests) in automation mode with PC force-set at 0xC000.
 - CPU tests for every 6502 instruction are available in `tests/e910D0Tests.cpp`.
 - Replace the file with `e910D0.cpp` to run test suite.
+
+<table>
+    <tr>
+        <td> <img src="rsrc/nestest.gif" alt="Kevtris's Tests"> </td>
+        <td> <img src="rsrc/donkey_kong.gif" alt="Donkey Kong"> </td>
+    </tr>
+</table>
 
 ## Tested NES Games:
 - Mapper 0 (Donkey Kong, Ice Climber, Super Mario Bros. 1, Excite Bike, Kung Fu, Wrecking Crew)
