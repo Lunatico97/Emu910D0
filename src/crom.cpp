@@ -6,6 +6,7 @@
 #include <mappers/mapper004.hpp>
 #include <mappers/mapper007.hpp>
 #include <mappers/mapper009.hpp>
+#include <mappers/mapper010.hpp>
 #include <mappers/mapper069.hpp>
 
 CardROM::CardROM(){}
@@ -43,6 +44,7 @@ void CardROM::decode(u8 header[])
         case 0x04: mapper = new Mapper004(prg_units, chr_units); break;
         case 0x07: mapper = new Mapper007(prg_units, chr_units); break;
         case 0x09: mapper = new Mapper009(prg_units, chr_units); break;
+        case 0x0A: mapper = new Mapper010(prg_units, chr_units); break;
         case 0x45: mapper = new Mapper069(prg_units, chr_units); break;
         default: break;
     }
