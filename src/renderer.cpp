@@ -4,12 +4,10 @@
 Renderer::Renderer(const char *title, int width, int height)
 {
 	SDL_Init(SDL_INIT_EVERYTHING) ;
-	window = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, 0) ;
+	window = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_RESIZABLE) ;
 	if(window == nullptr) std::cout << SDL_GetError() << std::endl ;
 	ren = SDL_CreateRenderer(window, -1, SDL_RENDERER_PRESENTVSYNC) ;
 	if(ren == nullptr) std::cout << SDL_GetError() << std::endl ;
-	scrW = width ;
-	scrH = height ;
 	std::cout << "!!! SDL 2.0 Initialized Successfully !!!" << std::endl ;
 }
 

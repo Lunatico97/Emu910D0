@@ -18,8 +18,6 @@
 class Renderer
 {
     public:
-	    SDL_Window* window;
-        SDL_Renderer *ren;
         Renderer(const char *title, int width, int height);
 		SDL_Texture *loadTexture(const int width, const int height);
 		void freeTex(SDL_Texture *t);
@@ -42,8 +40,10 @@ class Renderer
 		void fit_frame();
 		void cleanup();
 
-    private:
-		int scrW, scrH;
+	public:
+		// SDL Constructs 
+		SDL_Window* window;
+        SDL_Renderer *ren;
 };
 
 #endif

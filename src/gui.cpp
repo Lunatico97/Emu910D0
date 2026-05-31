@@ -5,6 +5,8 @@ GUI::GUI(): _active(true)
     if(Global::debug) logger.init("bin/e910D0.log");
     controller = new Controller();
     rndr = new Renderer("E910D0", SCRW, SCRH);
+    Global::scr_w = SCRW;
+    Global::scr_h = SCRH;
     rndr->init_wxs();
 }
 
@@ -99,33 +101,46 @@ bool GUI::check_ppu_events()
     else return true;
 }
 
+void GUI::handle_events()
+{
+    controller->handleInput(&event, _dual_mode);
+    ImGui_ImplSDL2_ProcessEvent(&event);
+    if(event.type == SDL_EventType::SDL_QUIT) _active = false;
+    if(event.type == SDL_EventType::SDL_WINDOWEVENT)
+    {
+        if(event.window.event == SDL_WINDOWEVENT_MAXIMIZED) SDL_GetWindowSize(rndr->window, &Global::scr_w, &Global::scr_h);
+        else if(event.window.event == SDL_WINDOWEVENT_RESTORED) 
+        { 
+            SDL_SetWindowSize(rndr->window, SCRW, SCRH);
+            Global::scr_w = SCRW; Global::scr_h = SCRH; 
+        }
+    }
+    if(event.type == SDL_EventType::SDL_KEYUP && _rom_ld)
+    {
+        nes_state->ppu->trigger_events = true;
+        switch(event.key.keysym.sym)
+        {
+            case SDLK_ESCAPE: _active = false; break;
+            case SDLK_5: nes_state->apu->toggle_apu(); break;
+            case SDLK_6: _pause = !_pause; break;
+            case SDLK_7: nes_state->cpu->step(); break;
+            case SDLK_8: nes_state->cpu->irq(); break;
+            case SDLK_9: nes_state->cpu->nmi(); break;
+            case SDLK_0: nes_state->cpu->rst(); break;            
+            default: break;
+        }
+    }
+}
+
 void GUI::run_gui()
 {
     controller->configure();
 
     while(_active)
     {
-        SDL_SetWindowFullscreen(rndr->window, SDL_WINDOW_FULLSCREEN_DESKTOP & _fullscr);
         while(check_ppu_events() && SDL_PollEvent(&event))
         {
-            controller->handleInput(&event, _dual_mode);
-            ImGui_ImplSDL2_ProcessEvent(&event);
-            if(event.type == SDL_EventType::SDL_QUIT) _active = false;
-            if(event.type == SDL_EventType::SDL_KEYUP && _rom_ld)
-            {
-                nes_state->ppu->trigger_events = true;
-                switch(event.key.keysym.sym)
-                {
-                    case SDLK_ESCAPE: _active = false; break;
-                    case SDLK_5: nes_state->apu->toggle_apu(); break;
-                    case SDLK_6: _pause = !_pause; break;
-                    case SDLK_7: nes_state->cpu->step(); break;
-                    case SDLK_8: nes_state->cpu->irq(); break;
-                    case SDLK_9: nes_state->cpu->nmi(); break;
-                    case SDLK_0: nes_state->cpu->rst(); break;            
-                    default: break;
-                }
-            }
+            this->handle_events();
         }
 
         if(_rom_ld)
@@ -135,6 +150,7 @@ void GUI::run_gui()
 
         if(check_ppu_events())
         {
+            rndr->clear();
             rndr->set_frame();
             
             this->create_menu();
@@ -142,10 +158,10 @@ void GUI::run_gui()
             if(_mmu_vw) nes_state->mmu->peek_mmu(&_mmu_vw);
             if(_ppu_vw) nes_state->ppu->peek_ppu(&_ppu_vw);
             if(_apu_vw) nes_state->apu->peek_apu(&_apu_vw);
+            if(_rom_ld) rndr->renderFrame({PPFX, PPFY, Global::scr_w, Global::scr_h}, nes_state->ppu->frame, nes_state->ppu->frame_buf, FRAME_W);
 
             rndr->fit_frame();
             rndr->display();
-            rndr->clear();
         }
     }
 
@@ -188,7 +204,11 @@ void GUI::create_menu()
         if(ImGui::MenuItem("Pause/Unpause", "NUM_6", nullptr, _rom_ld)) _pause = !_pause;       
         if(ImGui::MenuItem("Mute/Unmute", "NUM_5", nullptr, _rom_ld)) nes_state->apu->toggle_apu();
         if(ImGui::MenuItem("Reset", "NUM_0", nullptr, _rom_ld)) nes_state->cpu->rst();
-        if(ImGui::MenuItem("Fullscreen", _fullscr ? "ON": "OFF", nullptr)) _fullscr = !_fullscr;
+        if(ImGui::MenuItem("Fullscreen", _fullscr ? "ON": "OFF", nullptr))
+        {
+            SDL_SetWindowFullscreen(rndr->window, SDL_WINDOW_FULLSCREEN_DESKTOP & _fullscr);
+            _fullscr = !_fullscr;
+        }
         if(ImGui::MenuItem("Dual Mode", _dual_mode ? "P2" : "P1", nullptr, controller->gamepad_input)) _dual_mode = !_dual_mode;
         ImGui::EndMenu();
     }
@@ -214,7 +234,7 @@ void GUI::create_menu()
     {
         if(ImGui::BeginMenu("About"))
         {
-            ImGui::TextDisabled("EMU910D0 v1.0.0");
+            ImGui::TextDisabled("EMU910D0 v1.1.0");
             ImGui::TextDisabled("Author: Diwas Adhikari");
             ImGui::TextLinkOpenURL("Github", "https://github.com/Lunatico97/Emu910D0");
             ImGui::EndMenu();

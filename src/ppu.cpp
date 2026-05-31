@@ -601,15 +601,14 @@ void PPU::run_ppu()
             lines = 0x0000;
             trigger_events = true;
             frame_toggle = !frame_toggle;
-            rndr->renderFrame({PPFX, PPFY, PPFW, PPFH}, frame, frame_buf, FRAME_W);
         }
     }
 }
 
 void PPU::peek_ppu(bool* ppu_up)
 {
-    ImGui::SetNextWindowPos({SCRW-300.0f, 0.0f});
-    ImGui::SetNextWindowSize({300.0f, SCRH-200.0f});
+    ImGui::SetNextWindowPos({Global::scr_w-300.0f, 0.0f});
+    ImGui::SetNextWindowSize({300.0f, Global::scr_h-200.0f});
     ImGui::Begin("PPU Viewer", ppu_up, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
 
     // Viewers

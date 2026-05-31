@@ -16,6 +16,8 @@
 
 namespace Global
 {
+    inline int scr_w;
+    inline int scr_h;
     static bool debug = false;
     static const char* rom_path = "roms/";
 
