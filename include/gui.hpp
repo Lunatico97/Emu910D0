@@ -38,6 +38,7 @@ class GUI
 
         // Checks
         bool check_ppu_events();
+        void handle_events();
 
         // UX Widgets
         void create_rom_loader(bool *rom_up);

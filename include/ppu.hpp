@@ -41,6 +41,10 @@ class PPU
         u16 cycles, lines;
         bool trigger_nmi, trigger_events;
 
+        // Frame buffer
+        u32* frame_buf;
+        SDL_Texture* frame;
+
     private:
         // Setter routines
         void set_ppu_ctrl(u8 ctrl);
@@ -141,11 +145,7 @@ class PPU
             };
         } STAT_REG;
 
-        // Frame buffer
-        u32* frame_buf;
-        SDL_Texture* frame;
-
-        // Patter table
+        // Pattern tables
         SDL_Texture *pattern_table[2];
         SDL_Texture *name_table[2];
 

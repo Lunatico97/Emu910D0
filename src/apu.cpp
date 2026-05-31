@@ -523,8 +523,8 @@ void APU::clock_apu_fcnt()
 
 void APU::peek_apu(bool* apu_up)
 {
-    ImGui::SetNextWindowPos({SCRW-300.0f, 0.0f});
-    ImGui::SetNextWindowSize({300.0f, SCRH-200.0f});
+    ImGui::SetNextWindowPos({Global::scr_w-300.0f, 0.0f});
+    ImGui::SetNextWindowSize({300.0f, Global::scr_h-200.0f});
     ImGui::Begin("APU Viewer", apu_up, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
 
     // Frame counter

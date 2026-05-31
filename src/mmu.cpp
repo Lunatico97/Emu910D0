@@ -232,8 +232,8 @@ u8 MMU::retreive(u16 m_addr)
 
 void MMU::peek_mmu(bool *mmu_up)
 {
-    ImGui::SetNextWindowPos({0.0f, SCRH-200.0f});
-    ImGui::SetNextWindowSize({SCRW, 200.0f});
+    ImGui::SetNextWindowPos({0.0f, Global::scr_h-200.0f});
+    ImGui::SetNextWindowSize({Global::scr_w-0.0f, 200.0f});
     ImGui::Begin("Memory Viewer", mmu_up, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse); 
 
     // Registers

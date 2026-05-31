@@ -12,8 +12,6 @@
 
 #define SCRW 800
 #define SCRH 600
-#define PPFW 800
-#define PPFH 580
 #define PPFX 0
 #define PPFY 20
 
